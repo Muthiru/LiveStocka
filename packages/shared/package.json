@@ -1,0 +1,7 @@
+{
+  "name": "@livestocka/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities for LiveStocka",
+  "main": "index.js",
+  "type": "module"
+}

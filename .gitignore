@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Nuxt dev/build outputs
+.nuxt/
+.output/
+dist/
+
+# Capacitor
+.capacitor/
+android/
+ios/
+
+# Logs
+logs/
+*.log
+
+# OS files
+Thumbs.db
+
+# Testing
+coverage/
+.nyc_output/
