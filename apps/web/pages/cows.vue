@@ -30,36 +30,34 @@
                 </svg>
               </div>
               <input
+                id="search"
                 v-model="searchQuery"
                 type="text"
-                id="search"
                 placeholder="Search by name, tag ID, or breed..."
                 class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
+              >
             </div>
           </div>
           <div>
             <label for="status" class="sr-only">Status</label>
             <select
-              v-model="statusFilter"
               id="status"
+              v-model="statusFilter"
               class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
             >
               <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="sold">Sold</option>
-              <option value="deceased">Deceased</option>
+              <option v-for="status in cowStatuses" :key="status.value" :value="status.value">{{ status.label }}</option>
             </select>
           </div>
           <div>
             <label for="breed" class="sr-only">Breed</label>
             <select
-              v-model="breedFilter"
               id="breed"
+              v-model="breedFilter"
               class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
             >
               <option value="">All Breeds</option>
-              <option v-for="breed in uniqueBreeds" :key="breed" :value="breed">{{ breed }}</option>
+              <option v-for="breed in allBreeds" :key="breed" :value="breed">{{ breed }}</option>
             </select>
           </div>
         </div>
@@ -67,12 +65,12 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"/>
         <p class="mt-2 text-sm text-gray-500">Loading cows...</p>
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="filteredCows.length === 0" class="text-center py-12 bg-white shadow rounded-lg">
+      <div v-else-if="cows.length === 0" class="text-center py-12 bg-white shadow rounded-lg">
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
         </svg>
@@ -91,61 +89,154 @@
         </div>
       </div>
 
-      <!-- Cows Grid -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="cow in filteredCows"
-          :key="cow.id"
-          class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow cursor-pointer"
-          @click="navigateTo(`/cow/${cow.id}`)"
-        >
-          <div class="p-5">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center">
-                  <span class="text-2xl font-medium text-indigo-600">{{ cow.name.charAt(0) }}</span>
-                </div>
-              </div>
-              <div class="ml-5 flex-1 min-w-0">
-                <h3 class="text-lg font-medium text-gray-900 truncate">{{ cow.name }}</h3>
-                <p class="text-sm text-gray-500">{{ cow.breed || 'Unknown breed' }}</p>
-                <p class="text-xs text-gray-400 mt-1">Tag: {{ cow.tag_id || 'N/A' }}</p>
-              </div>
-              <div class="ml-4 flex-shrink-0">
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  :class="getStatusClass(cow.status)"
-                >
-                  {{ cow.status || 'active' }}
-                </span>
-              </div>
-            </div>
-            <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p class="text-gray-500">Age</p>
-                <p class="font-medium text-gray-900">{{ cow.age || 'N/A' }} years</p>
-              </div>
-              <div>
-                <p class="text-gray-500">Weight</p>
-                <p class="font-medium text-gray-900">{{ cow.weight || 'N/A' }} kg</p>
-              </div>
-            </div>
-            <div class="mt-4 flex items-center justify-between">
-              <NuxtLink
-                :to="`/cow/${cow.id}`"
-                class="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
-                @click.stop
+      <!-- Cows Table -->
+      <div v-else class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tag ID
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Breed
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Age
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Weight
+                </th>
+                <th scope="col" class="relative px-6 py-3">
+                  <span class="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr 
+                v-for="cow in cows" 
+                :key="cow.id" 
+                class="hover:bg-gray-50 cursor-pointer"
+                @click="navigateTo(`/cow/${cow.id}`)"
               >
-                View Details →
-              </NuxtLink>
-              <NuxtLink
-                :to="`/cow/${cow.id}/health`"
-                class="text-gray-600 hover:text-gray-900 text-sm font-medium"
-                @click.stop
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-10 w-10">
+                      <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                        <span class="text-lg font-medium text-indigo-600">{{ cow.name.charAt(0) }}</span>
+                      </div>
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">{{ cow.name }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ cow.tag_id || 'N/A' }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ cow.breed || 'Unknown' }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    :class="getStatusClass(cow.status)"
+                  >
+                    {{ cow.status || 'active' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ cow.age || 'N/A' }} yrs
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ cow.weight || 'N/A' }} kg
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <NuxtLink
+                    :to="`/cow/${cow.id}`"
+                    class="text-indigo-600 hover:text-indigo-900"
+                    @click.stop
+                  >
+                    Details
+                  </NuxtLink>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Pagination -->
+      <div v-if="totalCount > 0" class="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg shadow">
+        <div class="flex flex-1 justify-between sm:hidden">
+          <button
+            :disabled="currentPage === 1"
+            class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            @click="prevPage"
+          >
+            Previous
+          </button>
+          <button
+            :disabled="currentPage === totalPages"
+            class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            @click="nextPage"
+          >
+            Next
+          </button>
+        </div>
+        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Showing
+              <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
+              to
+              <span class="font-medium">{{ Math.min(currentPage * pageSize, totalCount) }}</span>
+              of
+              <span class="font-medium">{{ totalCount }}</span>
+              results
+            </p>
+          </div>
+          <div>
+            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+              <button
+                :disabled="currentPage === 1"
+                class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                @click="prevPage"
               >
-                Health Records →
-              </NuxtLink>
-            </div>
+                <span class="sr-only">Previous</span>
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              
+              <button
+                v-for="page in displayedPages"
+                :key="page"
+                :class="[
+                  page === currentPage ? 'z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600' : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0',
+                  'relative inline-flex items-center px-4 py-2 text-sm font-semibold'
+                ]"
+                @click="goToPage(page)"
+              >
+                {{ page }}
+              </button>
+
+              <button
+                :disabled="currentPage === totalPages"
+                class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                @click="nextPage"
+              >
+                <span class="sr-only">Next</span>
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </nav>
           </div>
         </div>
       </div>
@@ -154,59 +245,96 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 
-const { $supabase } = useNuxtApp()
+const { fetchCowsPaginated, getStatusClass, fetchCows, cowStatuses } = useCows()
+
+// State
 const cows = ref([])
 const loading = ref(true)
-const searchQuery = ref('')
-const statusFilter = ref('')
-const breedFilter = ref('')
-
-const uniqueBreeds = computed(() => {
-  const breeds = [...new Set(cows.value.map(cow => cow.breed).filter(Boolean))]
-  return breeds.sort()
+const state = ref({
+  searchQuery: '',
+  statusFilter: '',
+  breedFilter: '',
+  currentPage: 1,
+  pageSize: 10
 })
 
-const filteredCows = computed(() => {
-  let filtered = cows.value
+const { searchQuery, statusFilter, breedFilter, currentPage, pageSize } = toRefs(state.value)
+const totalCount = ref(0)
+const allBreeds = ref([]) // For filter dropdown
 
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(cow =>
-      cow.name?.toLowerCase().includes(query) ||
-      cow.tag_id?.toLowerCase().includes(query) ||
-      cow.breed?.toLowerCase().includes(query)
-    )
+const totalPages = computed(() => Math.ceil(totalCount.value / pageSize.value))
+
+const displayedPages = computed(() => {
+  const diff = 2
+  const start = Math.max(1, currentPage.value - diff)
+  const end = Math.min(totalPages.value, currentPage.value + diff)
+  
+  const pages = []
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
   }
-
-  if (statusFilter.value) {
-    filtered = filtered.filter(cow => cow.status === statusFilter.value)
-  }
-
-  if (breedFilter.value) {
-    filtered = filtered.filter(cow => cow.breed === breedFilter.value)
-  }
-
-  return filtered
+  return pages
 })
 
-const getStatusClass = (status) => {
-  const classes = {
-    active: 'bg-green-100 text-green-800',
-    sold: 'bg-yellow-100 text-yellow-800',
-    deceased: 'bg-red-100 text-red-800'
+// Use watcher for debounced search and filters
+let searchTimeout
+watch([searchQuery, statusFilter, breedFilter], () => {
+  currentPage.value = 1 // Reset to first page
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    loadCows()
+  }, 300)
+})
+
+watch(currentPage, () => {
+  loadCows()
+})
+
+async function loadCows() {
+  loading.value = true
+  try {
+    const { data, count } = await fetchCowsPaginated({
+      page: currentPage.value,
+      pageSize: pageSize.value,
+      search: searchQuery.value,
+      status: statusFilter.value,
+      breed: breedFilter.value
+    })
+    cows.value = data
+    totalCount.value = count
+  } catch (err) {
+    console.error('Error loading cows:', err)
+  } finally {
+    loading.value = false
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
+}
+
+async function loadBreeds() {
+  // Quick fetch to get all breeds for the filter
+  // We use the normal fetch but just for distinct values logic (simulating distinct)
+  const allData = await fetchCows() // This fetches everything by default, which is okay for just getting breeds initially or we could optimize
+  // Or better, just get breeds column if possible, but fetchCows gets all.
+  // With 500 rows, it's fine to fetch once for filter options.
+  const breeds = [...new Set(allData.map(cow => cow.breed).filter(Boolean))]
+  allBreeds.value = breeds.sort()
+}
+
+function prevPage() {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+function goToPage(page) {
+  currentPage.value = page
 }
 
 onMounted(async () => {
-  const { data, error } = await $supabase.from('cows').select('*').order('created_at', { ascending: false })
-  if (error) {
-    console.error(error)
-  } else {
-    cows.value = data || []
-  }
-  loading.value = false
+  await loadBreeds()
+  await loadCows()
 })
 </script>

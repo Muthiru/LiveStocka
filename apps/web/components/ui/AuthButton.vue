@@ -37,7 +37,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['click'])
+defineEmits(['click'])
 
 const buttonClasses = computed(() => {
   const baseClasses = 'font-medium rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed'

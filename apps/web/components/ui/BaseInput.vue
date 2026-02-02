@@ -11,7 +11,6 @@
     <input
       :id="id"
       :value="modelValue"
-      @input="$emit('update:modelValue', $event.target.value)"
       :type="type"
       :placeholder="placeholder"
       :required="required"
@@ -20,7 +19,8 @@
       :max="max"
       :step="step"
       :class="inputClasses"
-    />
+      @input="$emit('update:modelValue', $event.target.value)"
+    >
     <p v-if="error" class="mt-1 text-sm text-red-600">{{ error }}</p>
     <p v-else-if="hint" class="mt-1 text-sm text-gray-500">{{ hint }}</p>
   </div>

@@ -13,7 +13,7 @@
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                 </svg>
               </div>
@@ -27,7 +27,7 @@
           </div>
           <div class="bg-gray-50 px-5 py-3">
             <div class="text-sm">
-              <NuxtLink to="/cows" class="font-medium text-indigo-700 hover:text-indigo-900">View all →</NuxtLink>
+              <NuxtLink to="/cows" class="font-medium text-gray-700 hover:text-gray-900">View all →</NuxtLink>
             </div>
           </div>
         </div>
@@ -36,7 +36,7 @@
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -57,7 +57,7 @@
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
@@ -71,7 +71,7 @@
           </div>
           <div class="bg-gray-50 px-5 py-3">
             <div class="text-sm">
-              <NuxtLink to="/health" class="font-medium text-indigo-700 hover:text-indigo-900">View alerts →</NuxtLink>
+              <NuxtLink to="/health" class="font-medium text-gray-700 hover:text-gray-900">View alerts →</NuxtLink>
             </div>
           </div>
         </div>
@@ -80,7 +80,7 @@
           <div class="p-5">
             <div class="flex items-center">
               <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
@@ -94,7 +94,7 @@
           </div>
           <div class="bg-gray-50 px-5 py-3">
             <div class="text-sm">
-              <NuxtLink to="/milk-production" class="font-medium text-indigo-700 hover:text-indigo-900">View details →</NuxtLink>
+              <NuxtLink to="/milk-production" class="font-medium text-gray-700 hover:text-gray-900">View details →</NuxtLink>
             </div>
           </div>
         </div>
@@ -234,6 +234,8 @@ import { ref, onMounted } from 'vue'
 import { formatDate } from '~/utils/formatDate.js'
 
 const { $supabase } = useNuxtApp()
+const { fetchCows } = useCows()
+
 const cowsCount = ref(0)
 const activeCowsCount = ref(0)
 const healthAlertsCount = ref(0)
@@ -276,13 +278,8 @@ onMounted(async () => {
     .eq('status', 'active')
   activeCowsCount.value = activeCount || 0
 
-  // Fetch recent cows for display
-  const { data: cows } = await $supabase
-    .from('cows')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(5)
-  recentCows.value = cows || []
+  // Fetch recent cows
+  recentCows.value = await fetchCows({ limit: 5 })
 
   // Fetch health records for alerts (records from last 30 days)
   const thirtyDaysAgo = new Date()
@@ -294,9 +291,18 @@ onMounted(async () => {
     .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
   healthAlertsCount.value = healthCount || 0
 
-  // Milk production tracking will be implemented in Phase 2
-  // Requires milk_production table with columns: cow_id, production_date, quantity_liters
-  totalMilkProduction.value = 0
+  // Fetch today's milk production
+  const today = new Date().toISOString().split('T')[0]
+  const { data: milkData } = await $supabase
+    .from('milk_production')
+    .select('total_yield')
+    .eq('production_date', today)
+  
+  if (milkData && milkData.length > 0) {
+    totalMilkProduction.value = milkData
+      .reduce((sum, record) => sum + Number.parseFloat(record.total_yield || 0), 0)
+      .toFixed(1)
+  }
 
   // Mock upcoming events (replace with actual reproduction/health tracking data)
   upcomingEvents.value = []

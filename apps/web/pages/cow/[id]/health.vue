@@ -4,7 +4,7 @@
       <div class="mb-6 flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">Health Records</h1>
-          <p class="mt-2 text-sm text-gray-600" v-if="cow">for {{ cow.name }}</p>
+          <p v-if="cow" class="mt-2 text-sm text-gray-600">for {{ cow.name }}</p>
         </div>
         <div class="flex space-x-3">
           <NuxtLink
@@ -17,8 +17,8 @@
             Back to Cow
           </NuxtLink>
           <button
-            @click="showAddForm = !showAddForm"
             class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+            @click="showAddForm = !showAddForm"
           >
             <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -33,13 +33,13 @@
         <div class="px-5 py-4 border-b border-gray-200">
           <h3 class="text-lg font-medium text-gray-900">Add Health Record</h3>
         </div>
-        <form @submit.prevent="handleAddRecord" class="px-5 py-5">
+        <form class="px-5 py-5" @submit.prevent="handleAddRecord">
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
               <label for="type" class="block text-sm font-medium text-gray-700">Type *</label>
               <select
-                v-model="newRecord.type"
                 id="type"
+                v-model="newRecord.type"
                 required
                 class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               >
@@ -53,29 +53,29 @@
             <div>
               <label for="date" class="block text-sm font-medium text-gray-700">Date *</label>
               <input
+                id="date"
                 v-model="newRecord.date"
                 type="date"
-                id="date"
                 required
                 class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-              />
+              >
             </div>
             <div class="sm:col-span-2">
               <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
               <textarea
-                v-model="newRecord.description"
                 id="description"
+                v-model="newRecord.description"
                 rows="3"
                 class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                 placeholder="Enter details about the health record..."
-              ></textarea>
+              />
             </div>
           </div>
           <div class="mt-6 flex justify-end space-x-3">
             <button
               type="button"
-              @click="showAddForm = false"
               class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+              @click="showAddForm = false"
             >
               Cancel
             </button>
@@ -85,8 +85,8 @@
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
             >
               <svg v-if="adding" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
               </svg>
               {{ adding ? 'Adding...' : 'Add Record' }}
             </button>
@@ -100,7 +100,7 @@
           <h3 class="text-lg font-medium text-gray-900">Health History</h3>
         </div>
         <div v-if="loading" class="text-center py-8">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"/>
           <p class="mt-2 text-sm text-gray-500">Loading records...</p>
         </div>
         <div v-else-if="healthRecords.length === 0" class="text-center py-12">

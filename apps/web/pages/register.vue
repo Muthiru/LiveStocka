@@ -23,10 +23,10 @@
           <button
             type="button"
             :disabled="loading"
-            @click="handleGoogleSignup"
             class="w-full inline-flex items-center justify-center px-4 py-3 text-base font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-indigo-500 disabled:opacity-50"
+            @click="handleGoogleSignup"
           >
-            <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></span>
+            <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"/>
             <Icon v-else name="logos:google-icon" class="h-5 w-5 mr-3" />
             {{ loading ? 'Signing up...' : 'Continue with Google' }}
           </button>
@@ -34,7 +34,7 @@
           <!-- Divider -->
           <div class="relative">
             <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-300"></div>
+              <div class="w-full border-t border-gray-300"/>
             </div>
             <div class="relative flex justify-center text-sm">
               <span class="px-2 bg-gray-50 text-gray-500">Or sign up with email</span>
@@ -54,7 +54,7 @@
                   required
                   placeholder="you@example.com"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
+                >
               </div>
 
               <!-- Password Input -->
@@ -68,7 +68,7 @@
                   minlength="6"
                   placeholder="At least 6 characters"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
+                >
                 <p class="mt-1 text-xs text-gray-500">Password must be at least 6 characters</p>
               </div>
             </div>
@@ -80,7 +80,7 @@
                 type="checkbox"
                 required
                 class="h-4 w-4 mt-0.5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
+              >
               <label for="terms" class="ml-2 block text-sm text-gray-700">
                 I agree to the <a href="#" class="text-indigo-600 hover:text-indigo-500">Terms of Service</a> and <a href="#" class="text-indigo-600 hover:text-indigo-500">Privacy Policy</a>
               </label>
@@ -92,7 +92,7 @@
               :disabled="loading"
               class="w-full inline-flex items-center justify-center px-4 py-3 text-base font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 disabled:opacity-50"
             >
-              <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></span>
+              <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"/>
               {{ loading ? 'Creating account...' : 'Create account' }}
             </button>
           </form>
@@ -118,6 +118,7 @@ definePageMeta({
 })
 
 const { $supabase } = useNuxtApp()
+const toast = useToast()
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
@@ -130,11 +131,11 @@ const handleRegister = async () => {
       password: password.value,
     })
     if (error) throw error
-    alert('Check your email for the confirmation link!')
+    toast.success('Check your email for the confirmation link!')
     await navigateTo('/login')
   } catch (error) {
     console.error('Registration error:', error)
-    alert(error.message)
+    toast.error(error.message)
   } finally {
     loading.value = false
   }
@@ -152,7 +153,7 @@ const handleGoogleSignup = async () => {
     if (error) throw error
   } catch (error) {
     console.error('Google signup error:', error)
-    alert(error.message)
+    toast.error(error.message)
     loading.value = false
   }
 }

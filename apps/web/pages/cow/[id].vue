@@ -2,7 +2,7 @@
   <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
       <div v-if="loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"/>
         <p class="mt-2 text-sm text-gray-500">Loading cow details...</p>
       </div>
 
@@ -15,18 +15,18 @@
               <p class="mt-2 text-sm text-gray-600">Tag ID: {{ cow.tag_id || 'N/A' }}</p>
             </div>
             <div class="flex space-x-3">
-              <NuxtLink
-                :to="`/cow/${cow.id}/health`"
-                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              <button
+                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+                @click="exportProfile"
               >
                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Health Records
-              </NuxtLink>
+                Export Profile
+              </button>
               <button
+                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-700 hover:bg-gray-800"
                 @click="handleEdit"
-                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
               >
                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -41,30 +41,30 @@
         <div class="mb-6 border-b border-gray-200">
           <nav class="-mb-px flex space-x-8">
             <button
-              @click="activeTab = 'overview'"
-              :class="activeTab === 'overview' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              :class="activeTab === 'overview' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+              @click="activeTab = 'overview'"
             >
               Overview
             </button>
             <button
-              @click="activeTab = 'health'"
-              :class="activeTab === 'health' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              :class="activeTab === 'health' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+              @click="activeTab = 'health'"
             >
               Health
             </button>
             <button
-              @click="activeTab = 'reproduction'"
-              :class="activeTab === 'reproduction' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              :class="activeTab === 'reproduction' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+              @click="activeTab = 'reproduction'"
             >
               Reproduction
             </button>
             <button
-              @click="activeTab = 'milk'"
-              :class="activeTab === 'milk' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              :class="activeTab === 'milk' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+              @click="activeTab = 'milk'"
             >
               Milk Production
             </button>
@@ -149,7 +149,7 @@
               <p class="text-sm text-gray-500">No health records yet.</p>
               <NuxtLink
                 :to="`/cow/${cow.id}/health`"
-                class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-700 hover:bg-gray-800"
               >
                 Add Health Record
               </NuxtLink>
@@ -184,19 +184,102 @@
         </div>
 
         <!-- Milk Production Tab -->
-        <div v-if="activeTab === 'milk'" class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Milk Production</h3>
+        <div v-if="activeTab === 'milk'">
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white shadow rounded-lg p-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600">Last 7 Days</p>
+                  <p class="text-2xl font-bold text-gray-900">{{ milkStats.last7Days }} L</p>
+                </div>
+                <Icon name="lucide:calendar-days" class="w-10 h-10 text-gray-600" />
+              </div>
+            </div>
+
+            <div class="bg-white shadow rounded-lg p-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600">Last 30 Days</p>
+                  <p class="text-2xl font-bold text-gray-900">{{ milkStats.last30Days }} L</p>
+                </div>
+                <Icon name="lucide:calendar" class="w-10 h-10 text-gray-600" />
+              </div>
+            </div>
+
+            <div class="bg-white shadow rounded-lg p-5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600">Daily Average</p>
+                  <p class="text-2xl font-bold text-gray-900">{{ milkStats.average }} L</p>
+                </div>
+                <Icon name="lucide:trending-up" class="w-10 h-10 text-gray-600" />
+              </div>
+            </div>
           </div>
-          <div class="px-5 py-5">
-            <div class="text-center py-8">
-              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              <p class="mt-2 text-sm text-gray-500">Milk production tracking coming soon</p>
+
+          <!-- Production History -->
+          <div class="bg-white shadow rounded-lg">
+            <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 class="text-lg font-medium text-gray-900">Production Records</h3>
+              <NuxtLink
+                to="/milk-production"
+                class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-700 hover:bg-gray-800"
+              >
+                Add Record
+              </NuxtLink>
+            </div>
+            <div class="px-5 py-5">
+              <div v-if="loadingMilk" class="text-center py-8">
+                <p class="text-sm text-gray-500">Loading production records...</p>
+              </div>
+              <div v-else-if="milkRecords.length === 0" class="text-center py-8">
+                <Icon name="lucide:milk-off" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p class="text-sm text-gray-500">No production records yet</p>
+                <NuxtLink
+                  to="/milk-production"
+                  class="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-700 hover:bg-gray-800"
+                >
+                  Add First Record
+                </NuxtLink>
+              </div>
+              <div v-else>
+                <div class="mb-8 h-80 bg-white p-4 rounded-lg border border-gray-200">
+                  <ProductionChart v-if="milkRecords.length > 0" :data="cowChartData" :options="chartOptions" type="line" />
+                </div>
+                <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Morning</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Evening</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-for="record in milkRecords" :key="record.id" class="hover:bg-gray-50">
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        {{ formatDate(record.production_date) }}
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                        {{ record.morning_yield }} L
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                        {{ record.evening_yield }} L
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {{ record.total_yield }} L
+                      </td>
+
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
+      </div>
       </div>
 
       <div v-else class="text-center py-12 bg-white shadow rounded-lg">
@@ -208,7 +291,7 @@
         <div class="mt-6">
           <NuxtLink
             to="/cows"
-            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-700 hover:bg-gray-800"
           >
             Back to Cows
           </NuxtLink>
@@ -219,42 +302,178 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { formatDate } from '~/utils/formatDate.js'
+import ProductionChart from '~/components/ProductionChart.vue'
 
 const { $supabase } = useNuxtApp()
+const { getCowById, getStatusClass } = useCows()
 const route = useRoute()
 const cow = ref(null)
 const healthRecords = ref([])
+const milkRecords = ref([])
 const loading = ref(true)
+const loadingMilk = ref(false)
 const activeTab = ref('overview')
+
+const milkStats = ref({
+  last7Days: 0,
+  last30Days: 0,
+  average: 0
+})
+
+const cowChartData = computed(() => {
+  const sorted = [...milkRecords.value].sort((a, b) => new Date(a.production_date) - new Date(b.production_date))
+  return {
+    labels: sorted.map(r => formatDate(r.production_date)),
+    datasets: [
+      {
+        label: 'Total Yield (L)',
+        data: sorted.map(r => r.total_yield),
+        borderColor: '#059669',
+        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+        fill: true,
+        tension: 0.1
+      }
+    ]
+  }
+})
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top',
+    },
+    title: {
+      display: true,
+      text: 'Production History'
+    }
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      title: {
+        display: true,
+        text: 'Yield (Liters)'
+      }
+    }
+  }
+}
+
+async function exportProfile() {
+  if (!cow.value) return
+
+  try {
+    const { data: allHealth } = await $supabase
+      .from('health_records')
+      .select('*')
+      .eq('cow_id', cow.value.id)
+      .order('date', { ascending: false })
+
+    const { data: allMilk } = await $supabase
+      .from('milk_production')
+      .select('*')
+      .eq('cow_id', cow.value.id)
+      .order('production_date', { ascending: false })
+
+    let report = `COW PROFILE: ${cow.value.name.toUpperCase()}\n`
+    report += `==========================================\n\n`
+
+    report += `DETAILS\n`
+    report += `-------\n`
+    report += `Name: ${cow.value.name}\n`
+    report += `Tag ID: ${cow.value.tag_id}\n`
+    report += `Breed: ${cow.value.breed || 'N/A'}\n`
+    report += `Status: ${cow.value.status}\n`
+    report += `Birth Date: ${formatDate(cow.value.birth_date)}\n`
+    report += `Age: ${cow.value.age} years\n\n`
+
+    report += `HEALTH RECORDS (${allHealth?.length || 0})\n`
+    report += `-----------------\n`
+    if (allHealth?.length) {
+      allHealth.forEach(r => {
+        report += `[${formatDate(r.date)}] Type: ${r.record_type} | Condition: ${r.condition || 'N/A'} | Cost: $${r.cost || 0}\n`
+        report += `  Notes: ${r.notes || 'None'}\n`
+        report += `  Treatment: ${r.treatment || 'N/A'}\n`
+        report += `-----------------\n`
+      })
+    } else {
+      report += `No health records found.\n`
+    }
+    report += `\n`
+
+    report += `MILK PRODUCTION (${allMilk?.length || 0})\n`
+    report += `-------------------\n`
+    if (allMilk?.length) {
+      allMilk.forEach(m => {
+        report += `[${formatDate(m.production_date)}] Total: ${m.total_yield}L (M: ${m.morning_yield}L, E: ${m.evening_yield}L)\n`
+      })
+    } else {
+      report += `No milk production records found.\n`
+    }
+
+    const blob = new Blob([report], { type: 'text/plain' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `${cow.value.name}_profile.txt`
+    link.click()
+    URL.revokeObjectURL(link.href)
+  } catch (err) {
+    console.error('Error exporting profile:', err)
+    alert('Failed to export profile')
+  }
+}
 
 const handleEdit = () => {
   navigateTo(`/edit-cow/${route.params.id}`)
 }
 
-const getStatusClass = (status) => {
-  const classes = {
-    active: 'bg-green-100 text-green-800',
-    sold: 'bg-yellow-100 text-yellow-800',
-    deceased: 'bg-red-100 text-red-800'
+
+async function loadMilkProduction() {
+  loadingMilk.value = true
+  
+  try {
+    // Fetch milk production records
+    const { data: records } = await $supabase
+      .from('milk_production')
+      .select('*')
+      .eq('cow_id', route.params.id)
+      .order('production_date', { ascending: false })
+      .limit(30)
+
+    milkRecords.value = records || []
+
+    // Calculate stats
+    const now = new Date()
+    const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+
+    const records7Days = records?.filter(r => new Date(r.production_date) >= last7Days) || []
+    const records30Days = records?.filter(r => new Date(r.production_date) >= last30Days) || []
+
+    milkStats.value.last7Days = records7Days
+      .reduce((sum, r) => sum + Number.parseFloat(r.total_yield || 0), 0)
+      .toFixed(1)
+
+    milkStats.value.last30Days = records30Days
+      .reduce((sum, r) => sum + Number.parseFloat(r.total_yield || 0), 0)
+      .toFixed(1)
+
+    milkStats.value.average = records30Days.length > 0
+      ? (Number.parseFloat(milkStats.value.last30Days) / records30Days.length).toFixed(1)
+      : 0
+  } catch (err) {
+    console.error('Error loading milk production:', err)
+  } finally {
+    loadingMilk.value = false
   }
-  return classes[status] || 'bg-gray-100 text-gray-800'
 }
 
 onMounted(async () => {
   // Fetch cow details
-  const { data, error } = await $supabase
-    .from('cows')
-    .select('*')
-    .eq('id', route.params.id)
-    .single()
-
-  if (error) {
-    console.error(error)
-  } else {
-    cow.value = data
-  }
+  cow.value = await getCowById(route.params.id)
 
   // Fetch recent health records
   const { data: records } = await $supabase
@@ -265,6 +484,10 @@ onMounted(async () => {
     .limit(5)
 
   healthRecords.value = records || []
+  
+  // Load milk production data
+  await loadMilkProduction()
+  
   loading.value = false
 })
 </script>

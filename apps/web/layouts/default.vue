@@ -5,7 +5,9 @@
       <div class="flex-1 flex flex-col min-h-0 bg-white border-r border-gray-200">
         <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
           <div class="flex items-center flex-shrink-0 px-4">
-            <h1 class="text-2xl font-bold text-indigo-600">LiveStocka</h1>
+            <NuxtLink to="/dashboard" class="text-2xl font-bold text-gray-900 hover:text-gray-700">
+              LiveStocka
+            </NuxtLink>
           </div>
           <nav class="mt-5 flex-1 px-2 space-y-1">
             <NuxtLink
@@ -85,8 +87,8 @@
               <p class="text-sm font-medium text-gray-700">{{ userEmail }}</p>
             </div>
             <button
-              @click="handleLogout"
               class="ml-3 flex-shrink-0 bg-white p-1 text-gray-400 rounded-full hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              @click="handleLogout"
             >
               <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -102,7 +104,7 @@
       <div class="bg-white shadow">
         <div class="flex items-center justify-between px-4 py-3">
           <h1 class="text-xl font-bold text-indigo-600">LiveStocka</h1>
-          <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-gray-500">
+          <button class="text-gray-500" @click="mobileMenuOpen = !mobileMenuOpen">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>

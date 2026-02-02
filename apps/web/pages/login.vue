@@ -57,10 +57,10 @@
           <button
             type="button"
             :disabled="loading"
-            @click="handleGoogleLogin"
             class="w-full inline-flex items-center justify-center px-4 py-3 text-base font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-indigo-500 disabled:opacity-50"
+            @click="handleGoogleLogin"
           >
-            <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></span>
+            <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"/>
             <Icon v-else name="logos:google-icon" class="h-5 w-5 mr-3" />
             {{ loading ? 'Signing in...' : 'Continue with Google' }}
           </button>
@@ -68,7 +68,7 @@
           <!-- Divider -->
           <div class="relative">
             <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-300"></div>
+              <div class="w-full border-t border-gray-300"/>
             </div>
             <div class="relative flex justify-center text-sm">
               <span class="px-2 bg-white text-gray-500">Or continue with email</span>
@@ -87,7 +87,7 @@
                 required
                 placeholder="you@example.com"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
+              >
             </div>
 
             <!-- Password Input -->
@@ -100,13 +100,13 @@
                 required
                 placeholder="Enter your password"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
+              >
             </div>
 
             <!-- Remember & Forgot -->
             <div class="flex items-center justify-between">
               <label class="flex items-center gap-2">
-                <input type="checkbox" class="rounded" />
+                <input type="checkbox" class="rounded" >
                 <span class="text-sm text-gray-700">Remember me</span>
               </label>
               <a href="#" class="text-sm text-indigo-600 hover:text-indigo-500">Forgot password?</a>
@@ -118,7 +118,7 @@
               :disabled="loading"
               class="w-full inline-flex items-center justify-center px-4 py-3 text-base font-medium rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 disabled:opacity-50"
             >
-              <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></span>
+              <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"/>
               {{ loading ? 'Signing in...' : 'Sign in' }}
             </button>
           </form>
@@ -146,6 +146,7 @@ definePageMeta({
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
+const toast = useToast()
 
 const handleLogin = async () => {
   loading.value = true
@@ -157,13 +158,14 @@ const handleLogin = async () => {
     })
     
     if (error) {
-      alert(error.message)
+      toast.error(error.message)
     } else {
+      toast.success('Signed in successfully')
       navigateTo('/dashboard')
     }
   } catch (err) {
     console.error('Sign in error:', err)
-    alert('An error occurred during sign in')
+    toast.error('An error occurred during sign in')
   } finally {
     loading.value = false
   }
@@ -181,12 +183,12 @@ const handleGoogleLogin = async () => {
     })
     
     if (error) {
-      alert(error.message)
+      toast.error(error.message)
       loading.value = false
     }
   } catch (err) {
     console.error('Google sign in error:', err)
-    alert('An error occurred during Google sign in')
+    toast.error('An error occurred during Google sign in')
     loading.value = false
   }
 }

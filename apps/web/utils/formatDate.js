@@ -1,6 +1,11 @@
-export const formatDate = (date) => {
+export const formatDate = (date, options = {}) => {
   if (!date) return 'N/A'
-  return new Date(date).toLocaleDateString()
+  const defaultOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }
+  return new Date(date).toLocaleDateString('en-US', { ...defaultOptions, ...options })
 }
 
 export const getRelativeDate = (date) => {

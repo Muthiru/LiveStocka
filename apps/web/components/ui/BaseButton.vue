@@ -5,7 +5,7 @@
     :class="buttonClasses"
     @click="$emit('click', $event)"
   >
-    <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></span>
+    <span v-if="loading" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"/>
     <slot />
   </button>
 </template>
