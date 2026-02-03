@@ -155,6 +155,19 @@ export const useCows = () => {
     { value: 'deceased', label: 'Deceased' }
   ]
 
+  /**
+   * Check if a cow can produce milk
+   * Bulls, calves, and dry cows cannot produce milk
+   * @param {string} status - The cow's status
+   * @returns {boolean} - True if the cow can produce milk
+   */
+  const isMilkable = (status) => {
+    const normalizedStatus = (status || 'active').toLowerCase()
+    return normalizedStatus !== 'bull' && 
+           normalizedStatus !== 'calf' && 
+           normalizedStatus !== 'dry'
+  }
+
   return {
     cows,
     loading,
@@ -164,6 +177,7 @@ export const useCows = () => {
     getCowById,
     addCow,
     getStatusClass,
-    cowStatuses
+    cowStatuses,
+    isMilkable
   }
 }
