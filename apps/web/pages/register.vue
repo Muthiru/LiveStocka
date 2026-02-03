@@ -117,44 +117,30 @@ definePageMeta({
   layout: false
 })
 
-const { $supabase } = useNuxtApp()
 const toast = useToast()
+const { loading, signUpWithPassword, signInWithOAuth } = useAuth()
+
 const email = ref('')
 const password = ref('')
-const loading = ref(false)
 
 const handleRegister = async () => {
-  loading.value = true
-  try {
-    const { error } = await $supabase.auth.signUp({
-      email: email.value,
-      password: password.value,
-    })
-    if (error) throw error
-    toast.success('Check your email for the confirmation link!')
-    await navigateTo('/login')
-  } catch (error) {
-    console.error('Registration error:', error)
-    toast.error(error.message)
-  } finally {
-    loading.value = false
+  const { success, error } = await signUpWithPassword(email.value, password.value)
+
+  if (!success) {
+    toast.error(error)
+    return
   }
+
+  // Keep UX consistent with email confirmation flow
+  toast.success('Check your email for the confirmation link!')
+  await navigateTo('/login')
 }
 
 const handleGoogleSignup = async () => {
-  loading.value = true
-  try {
-    const { error } = await $supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: import.meta.client ? `${globalThis.location.origin}/dashboard` : '/dashboard'
-      }
-    })
-    if (error) throw error
-  } catch (error) {
-    console.error('Google signup error:', error)
-    toast.error(error.message)
-    loading.value = false
+  const { success, error } = await signInWithOAuth('google')
+
+  if (!success) {
+    toast.error(error)
   }
 }
 </script>

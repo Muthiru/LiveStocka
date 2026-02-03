@@ -143,53 +143,29 @@ definePageMeta({
   layout: false
 })
 
+// Local state for form fields
 const email = ref('')
 const password = ref('')
-const loading = ref(false)
+
 const toast = useToast()
+// Centralised auth logic (Supabase + redirects) lives in useAuth
+const { loading, signInWithPassword, signInWithOAuth } = useAuth()
 
 const handleLogin = async () => {
-  loading.value = true
-  try {
-    const { $supabase } = useNuxtApp()
-    const { error } = await $supabase.auth.signInWithPassword({
-      email: email.value,
-      password: password.value
-    })
-    
-    if (error) {
-      toast.error(error.message)
-    } else {
-      toast.success('Signed in successfully')
-      navigateTo('/dashboard')
-    }
-  } catch (err) {
-    console.error('Sign in error:', err)
-    toast.error('An error occurred during sign in')
-  } finally {
-    loading.value = false
+  const { success, error } = await signInWithPassword(email.value, password.value)
+
+  if (success) {
+    toast.success('Signed in successfully')
+  } else if (error) {
+    toast.error(error)
   }
 }
 
 const handleGoogleLogin = async () => {
-  loading.value = true
-  try {
-    const { $supabase } = useNuxtApp()
-    const { error } = await $supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${globalThis.location.origin}/dashboard`
-      }
-    })
-    
-    if (error) {
-      toast.error(error.message)
-      loading.value = false
-    }
-  } catch (err) {
-    console.error('Google sign in error:', err)
-    toast.error('An error occurred during Google sign in')
-    loading.value = false
+  const { success, error } = await signInWithOAuth('google')
+
+  if (!success && error) {
+    toast.error(error)
   }
 }
 </script>

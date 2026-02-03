@@ -247,6 +247,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 
+const toast = useToast()
 const { fetchCowsPaginated, getStatusClass, fetchCows, cowStatuses } = useCows()
 
 // State
@@ -306,6 +307,7 @@ async function loadCows() {
     totalCount.value = count
   } catch (err) {
     console.error('Error loading cows:', err)
+    toast.error('Failed to load cows. Please try again.')
   } finally {
     loading.value = false
   }

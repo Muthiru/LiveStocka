@@ -33,7 +33,8 @@ export const useAuth = () => {
         password,
       })
       if (authError) throw authError
-      await navigateTo('/dashboard')
+      
+      // (e.g. show “check your email” message, stay on page, or redirect)
       return { success: true }
     } catch (err) {
       error.value = err.message

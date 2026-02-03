@@ -422,7 +422,7 @@ async function exportProfile() {
     URL.revokeObjectURL(link.href)
   } catch (err) {
     console.error('Error exporting profile:', err)
-    alert('Failed to export profile')
+    useToast().error('Failed to export profile')
   }
 }
 

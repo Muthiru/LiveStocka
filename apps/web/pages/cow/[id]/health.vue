@@ -141,6 +141,7 @@ import { ref, onMounted } from 'vue'
 import { formatDate, getRelativeDate } from '~/utils/formatDate.js'
 
 const { $supabase } = useNuxtApp()
+const toast = useToast()
 const route = useRoute()
 const cow = ref(null)
 const healthRecords = ref([])
@@ -217,7 +218,7 @@ const handleAddRecord = async () => {
       date: new Date().toISOString().split('T')[0]
     }
   } catch (error) {
-    alert(error.message)
+    toast.error(error.message)
   } finally {
     adding.value = false
   }
