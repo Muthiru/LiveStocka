@@ -245,8 +245,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
-
 const toast = useToast()
 const { fetchCowsPaginated, getStatusClass, fetchCows, cowStatuses } = useCows()
 

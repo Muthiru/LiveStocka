@@ -1,11 +1,23 @@
 import { ref } from 'vue'
+import type { Ref } from 'vue'
+
+const getErrorMessage = (err: unknown): string => {
+  if (err instanceof Error) return err.message
+  if (typeof err === 'string') return err
+  return JSON.stringify(err)
+}
+
+interface AuthResponse {
+  success: boolean
+  error?: string
+}
 
 export const useAuth = () => {
   const { $supabase } = useNuxtApp()
-  const loading = ref(false)
-  const error = ref(null)
+  const loading: Ref<boolean> = ref(false)
+  const error: Ref<string | null> = ref(null)
 
-  const signInWithPassword = async (email, password) => {
+  const signInWithPassword = async (email: string, password: string): Promise<AuthResponse> => {
     loading.value = true
     error.value = null
     try {
@@ -16,15 +28,16 @@ export const useAuth = () => {
       if (authError) throw authError
       await navigateTo('/dashboard')
       return { success: true }
-    } catch (err) {
-      error.value = err.message
-      return { success: false, error: err.message }
+    } catch (err: unknown) {
+      const message = getErrorMessage(err)
+      error.value = message
+      return { success: false, error: message }
     } finally {
       loading.value = false
     }
   }
 
-  const signUpWithPassword = async (email, password) => {
+  const signUpWithPassword = async (email: string, password: string): Promise<AuthResponse> => {
     loading.value = true
     error.value = null
     try {
@@ -34,17 +47,18 @@ export const useAuth = () => {
       })
       if (authError) throw authError
       
-      // (e.g. show “check your email” message, stay on page, or redirect)
+      // (e.g. show "check your email" message, stay on page, or redirect)
       return { success: true }
-    } catch (err) {
-      error.value = err.message
-      return { success: false, error: err.message }
+    } catch (err: unknown) {
+      const message = getErrorMessage(err)
+      error.value = message
+      return { success: false, error: message }
     } finally {
       loading.value = false
     }
   }
 
-  const signInWithOAuth = async (provider = 'google') => {
+  const signInWithOAuth = async (provider: 'google' | 'github' | 'apple' = 'google'): Promise<AuthResponse> => {
     loading.value = true
     error.value = null
     try {
@@ -56,14 +70,15 @@ export const useAuth = () => {
       })
       if (authError) throw authError
       return { success: true }
-    } catch (err) {
-      error.value = err.message
+    } catch (err: unknown) {
+      const message = getErrorMessage(err)
+      error.value = message
       loading.value = false
-      return { success: false, error: err.message }
+      return { success: false, error: message }
     }
   }
 
-  const signOut = async () => {
+  const signOut = async (): Promise<AuthResponse> => {
     loading.value = true
     error.value = null
     try {
@@ -71,9 +86,10 @@ export const useAuth = () => {
       if (authError) throw authError
       await navigateTo('/login')
       return { success: true }
-    } catch (err) {
-      error.value = err.message
-      return { success: false, error: err.message }
+    } catch (err: unknown) {
+      const message = getErrorMessage(err)
+      error.value = message
+      return { success: false, error: message }
     } finally {
       loading.value = false
     }
