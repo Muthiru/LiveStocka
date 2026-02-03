@@ -271,12 +271,15 @@ onMounted(async () => {
     .select('*', { count: 'exact', head: true })
   cowsCount.value = totalCount || 0
 
-  // Fetch active cows count
-  const { count: activeCount } = await $supabase
+  // Fetch active cows count (milkable cows - excludes bulls, calves, and dry)
+  const { data: allCowsData } = await $supabase
     .from('cows')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'active')
-  activeCowsCount.value = activeCount || 0
+    .select('status')
+  
+  if (allCowsData) {
+    const { isMilkable } = useCows()
+    activeCowsCount.value = allCowsData.filter(cow => isMilkable(cow.status)).length
+  }
 
   // Fetch recent cows
   recentCows.value = await fetchCows({ limit: 5 })
