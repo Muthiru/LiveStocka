@@ -2,197 +2,36 @@
   <div class="py-6">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
       <!-- Header -->
-      <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Add New Cow</h1>
-        <p class="mt-2 text-sm text-gray-600">Enter the details for your new cattle</p>
+      <div class="page-header">
+        <h1 class="page-title">Add New Cow</h1>
+        <p class="page-subtitle">Enter the details for your new cattle</p>
       </div>
 
-      <form class="space-y-6" @submit.prevent="handleSubmit">
-        <!-- Basic Information -->
-        <div class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+      <CowForm v-model:form="form" @submit="handleSubmit">
+        <template #actions>
+          <div class="flex justify-end space-x-3">
+            <NuxtLink to="/cows" class="btn-secondary">
+              Cancel
+            </NuxtLink>
+            <button type="submit" :disabled="loading" class="btn-primary">
+              <LoadingSpinner v-if="loading" size="sm" :use-icon="true" class="-ml-1 mr-3" />
+              {{ loading ? 'Saving...' : 'Save Cow' }}
+            </button>
           </div>
-          <div class="px-5 py-5">
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label for="name" class="block text-sm font-medium text-gray-700">Name *</label>
-                <input
-                  id="name"
-                  v-model="form.name"
-                  type="text"
-                  required
-                  class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                  placeholder="e.g., Bella"
-                >
-              </div>
-
-              <div>
-                <label for="tag_id" class="block text-sm font-medium text-gray-700">Tag ID / RFID *</label>
-                <input
-                  id="tag_id"
-                  v-model="form.tag_id"
-                  type="text"
-                  required
-                  class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                  placeholder="e.g., TAG-001"
-                >
-              </div>
-
-              <div>
-                <label for="breed" class="block text-sm font-medium text-gray-700">Breed</label>
-                <input
-                  id="breed"
-                  v-model="form.breed"
-                  type="text"
-                  class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                  placeholder="e.g., Holstein, Angus"
-                >
-              </div>
-
-              <div>
-                <label for="color" class="block text-sm font-medium text-gray-700">Color</label>
-                <input
-                  id="color"
-                  v-model="form.color"
-                  type="text"
-                  class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                  placeholder="e.g., Black, Brown"
-                >
-              </div>
-
-              <div>
-                <label for="age" class="block text-sm font-medium text-gray-700">Age (years)</label>
-                <input
-                  id="age"
-                  v-model="form.age"
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                  placeholder="e.g., 3.5"
-                >
-              </div>
-
-              <div>
-                <label for="weight" class="block text-sm font-medium text-gray-700">Weight (kg)</label>
-                <input
-                  id="weight"
-                  v-model="form.weight"
-                  type="number"
-                  min="0"
-                  class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                  placeholder="e.g., 450"
-                >
-              </div>
-
-              <div>
-                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                <select
-                  id="status"
-                  v-model="form.status"
-                  class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                >
-                  <option v-for="status in cowStatuses" :key="status.value" :value="status.value">{{ status.label }}</option>
-                </select>
-              </div>
-
-              <div>
-                <label for="birth_date" class="block text-sm font-medium text-gray-700">Birth Date</label>
-                <input
-                  id="birth_date"
-                  v-model="form.birth_date"
-                  type="date"
-                  class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Parentage Information -->
-        <div class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Parentage (Optional)</h3>
-          </div>
-          <div class="px-5 py-5">
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label for="sire" class="block text-sm font-medium text-gray-700">Sire (Father)</label>
-                <input
-                  id="sire"
-                  v-model="form.sire"
-                  type="text"
-                  class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                  placeholder="Sire name or ID"
-                >
-              </div>
-
-              <div>
-                <label for="dam" class="block text-sm font-medium text-gray-700">Dam (Mother)</label>
-                <input
-                  id="dam"
-                  v-model="form.dam"
-                  type="text"
-                  class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                  placeholder="Dam name or ID"
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Notes -->
-        <div class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Additional Notes</h3>
-          </div>
-          <div class="px-5 py-5">
-            <div>
-              <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
-              <textarea
-                id="notes"
-                v-model="form.notes"
-                rows="4"
-                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                placeholder="Any additional information about this cow..."
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex justify-end space-x-3">
-          <NuxtLink
-            to="/cows"
-            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Cancel
-          </NuxtLink>
-          <button
-            type="submit"
-            :disabled="loading"
-            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-            </svg>
-            {{ loading ? 'Saving...' : 'Save Cow' }}
-          </button>
-        </div>
-      </form>
+        </template>
+      </CowForm>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
+import type { CowFormData } from '~/types'
 
 const toast = useToast()
-const { addCow, loading, cowStatuses } = useCows()
+const { addCow, loading } = useCows()
 
-const form = ref({
+const form = ref<CowFormData>({
   name: '',
   breed: '',
   tag_id: '',
@@ -211,11 +50,8 @@ watch(() => form.value.birth_date, (newDate) => {
   if (newDate) {
     const birth = new Date(newDate)
     const now = new Date()
-    // Calculate difference in milliseconds
-    const diff = now - birth
-    // Convert to years (approximate)
+    const diff = now.getTime() - birth.getTime()
     const ageInYears = diff / (1000 * 60 * 60 * 24 * 365.25)
-    // Round to 1 decimal place
     form.value.age = Math.max(0, ageInYears).toFixed(1)
   }
 })
@@ -226,7 +62,7 @@ const handleSubmit = async () => {
     toast.success('Cow added successfully')
     await navigateTo('/cows')
   } catch (error) {
-    toast.error(error.message)
+    toast.error((error as Error).message)
   }
 }
 </script>

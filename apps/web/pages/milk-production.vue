@@ -1,13 +1,13 @@
 <template>
-  <div class="container mx-auto p-6">
-    <div class="mb-8 flex justify-between items-start">
+  <div class="container mx-auto p-4 md:p-6">
+    <div class="mb-6 md:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
       <div>
-        <h1 class="text-3xl font-bold mb-2">Milk Production Tracking</h1>
-        <p class="text-gray-600">Record and monitor daily milk yields for your herd</p>
+        <h1 class="text-2xl md:text-3xl font-bold mb-2">Milk Production Tracking</h1>
+        <p class="text-gray-600 text-sm md:text-base">Record and monitor daily milk yields for your herd</p>
       </div>
       <NuxtLink
         to="/bulk-milk-entry"
-        class="inline-flex items-center px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition font-medium"
+        class="inline-flex items-center justify-center px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition font-medium text-sm md:text-base"
       >
         <Icon name="lucide:clipboard-list" class="w-5 h-5 mr-2" />
         Bulk Entry
@@ -65,7 +65,20 @@
               step="0.01"
               min="0"
               placeholder="e.g., 12.50"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+          </div>
+
+          <!-- Morning Time -->
+          <div>
+            <label for="morning_time" class="block text-sm font-medium text-gray-700 mb-2">
+              Morning Time
+            </label>
+            <input
+              id="morning_time"
+              v-model="formData.morning_time"
+              type="time"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
           </div>
 
@@ -81,7 +94,50 @@
               step="0.01"
               min="0"
               placeholder="e.g., 11.80"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+          </div>
+
+          <!-- Evening Time -->
+          <div>
+            <label for="evening_time" class="block text-sm font-medium text-gray-700 mb-2">
+              Evening Time
+            </label>
+            <input
+              id="evening_time"
+              v-model="formData.evening_time"
+              type="time"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+          </div>
+
+          <!-- Midday Yield (for 3x daily milking) -->
+          <div>
+            <label for="midday_yield" class="block text-sm font-medium text-gray-700 mb-2">
+              Midday Yield (liters)
+              <span class="text-gray-400 font-normal text-xs ml-1">(optional - for 3x milking)</span>
+            </label>
+            <input
+              id="midday_yield"
+              v-model="formData.midday_yield"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="e.g., 8.00"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+          </div>
+
+          <!-- Midday Time -->
+          <div>
+            <label for="midday_time" class="block text-sm font-medium text-gray-700 mb-2">
+              Midday Time
+            </label>
+            <input
+              id="midday_time"
+              v-model="formData.midday_time"
+              type="time"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
           </div>
 
@@ -106,7 +162,7 @@
             v-model="formData.notes"
             rows="3"
             placeholder="Any observations about milk quality, cow health, etc."
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
         </div>
 
@@ -125,7 +181,7 @@
           <button
             type="submit"
             :disabled="loading"
-            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+            class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
           >
             {{ loading ? 'Saving...' : 'Record Production' }}
           </button>
@@ -172,6 +228,37 @@
             <p class="text-2xl font-bold text-gray-900">{{ stats.avgPerCow }} L</p>
           </div>
           <Icon name="lucide:trending-up" class="w-10 h-10 text-gray-600" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Totals Summary (All Cows) -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 class="text-xl font-semibold mb-4">Today's Herd Production Summary</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+          <Icon name="lucide:sunrise" class="w-8 h-8 text-amber-600 mx-auto mb-2" />
+          <p class="text-sm text-gray-600 mb-1">Morning Total</p>
+          <p class="text-xl font-bold text-amber-700">{{ dailyTotals.morning }} L</p>
+          <p class="text-xs text-gray-500 mt-1">{{ dailyTotals.morningCount }} cows</p>
+        </div>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+          <Icon name="lucide:sun" class="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+          <p class="text-sm text-gray-600 mb-1">Midday Total</p>
+          <p class="text-xl font-bold text-yellow-700">{{ dailyTotals.midday }} L</p>
+          <p class="text-xs text-gray-500 mt-1">{{ dailyTotals.middayCount }} cows</p>
+        </div>
+        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
+          <Icon name="lucide:sunset" class="w-8 h-8 text-orange-600 mx-auto mb-2" />
+          <p class="text-sm text-gray-600 mb-1">Evening Total</p>
+          <p class="text-xl font-bold text-orange-700">{{ dailyTotals.evening }} L</p>
+          <p class="text-xs text-gray-500 mt-1">{{ dailyTotals.eveningCount }} cows</p>
+        </div>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+          <Icon name="lucide:milk" class="w-8 h-8 text-green-600 mx-auto mb-2" />
+          <p class="text-sm text-gray-600 mb-1">Grand Total</p>
+          <p class="text-xl font-bold text-green-700">{{ dailyTotals.total }} L</p>
+          <p class="text-xs text-gray-500 mt-1">All sessions</p>
         </div>
       </div>
     </div>
@@ -244,7 +331,20 @@
                   step="0.01"
                   min="0"
                   placeholder="e.g., 12.50"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+              </div>
+
+              <!-- Morning Time -->
+              <div>
+                <label for="edit_morning_time" class="block text-sm font-medium text-gray-700 mb-2">
+                  Morning Time
+                </label>
+                <input
+                  id="edit_morning_time"
+                  v-model="editData.morning_time"
+                  type="time"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
               </div>
 
@@ -260,7 +360,50 @@
                   step="0.01"
                   min="0"
                   placeholder="e.g., 11.80"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+              </div>
+
+              <!-- Evening Time -->
+              <div>
+                <label for="edit_evening_time" class="block text-sm font-medium text-gray-700 mb-2">
+                  Evening Time
+                </label>
+                <input
+                  id="edit_evening_time"
+                  v-model="editData.evening_time"
+                  type="time"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+              </div>
+
+              <!-- Midday Yield -->
+              <div>
+                <label for="edit_midday_yield" class="block text-sm font-medium text-gray-700 mb-2">
+                  Midday Yield (liters)
+                  <span class="text-gray-400 font-normal text-xs ml-1">(optional)</span>
+                </label>
+                <input
+                  id="edit_midday_yield"
+                  v-model="editData.midday_yield"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="e.g., 8.00"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+              </div>
+
+              <!-- Midday Time -->
+              <div>
+                <label for="edit_midday_time" class="block text-sm font-medium text-gray-700 mb-2">
+                  Midday Time
+                </label>
+                <input
+                  id="edit_midday_time"
+                  v-model="editData.midday_time"
+                  type="time"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
               </div>
 
@@ -285,7 +428,7 @@
                 v-model="editData.notes"
                 rows="3"
                 placeholder="Any observations about milk quality, cow health, etc."
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
 
@@ -301,7 +444,7 @@
               <button
                 type="submit"
                 :disabled="loadingEdit"
-                class="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
+                class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
               >
                 {{ loadingEdit ? 'Updating...' : 'Update Record' }}
               </button>
@@ -400,23 +543,23 @@
     </div>
 
     <!-- Production History -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-semibold">Production History</h2>
+    <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <h2 class="text-lg md:text-xl font-semibold">Production History</h2>
         
         <!-- Filters and Export -->
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-2 sm:gap-3">
           <button
             v-if="filteredProduction.length > 0"
-            class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition text-sm font-medium inline-flex items-center"
+            class="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition text-xs sm:text-sm font-medium inline-flex items-center"
             @click="showExportModal = true"
           >
-            <Icon name="lucide:download" class="w-4 h-4 mr-2" />
-            Export CSV
+            <Icon name="lucide:download" class="w-4 h-4 mr-1 sm:mr-2" />
+            Export
           </button>
           <select
             v-model="filterCow"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-xs sm:text-sm"
           >
             <option value="">All Cows</option>
             <option v-for="cow in cows" :key="cow.id" :value="cow.id">
@@ -426,7 +569,7 @@
 
           <select
             v-model="filterPeriod"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-xs sm:text-sm"
           >
             <option value="1">Today</option>
             <option value="7">Last 7 days</option>
@@ -434,20 +577,6 @@
             <option value="365">Last 365 days</option>
             <option value="all">All time</option>
           </select>
-        </div>
-      </div>
-
-      <!-- Production Trend Chart -->
-      <div v-if="!loadingHistory && filteredProduction.length > 0" class="mb-6">
-        <div class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Production by Cow</h3>
-          </div>
-          <div class="px-5 py-5">
-            <ClientOnly>
-              <ProductionChart :data="chartData" :options="chartOptions" />
-            </ClientOnly>
-          </div>
         </div>
       </div>
 
@@ -464,37 +593,44 @@
       </div>
 
       <!-- Production Table -->
-      <div v-else class="overflow-x-auto">
-        <table class="w-full">
+      <div v-else class="overflow-x-auto -mx-4 md:mx-0">
+        <table class="w-full min-w-[640px]">
           <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Date</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Cow</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Morning</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Evening</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Total</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
+              <th class="px-3 md:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Date</th>
+              <th class="px-3 md:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Cow</th>
+              <th class="px-3 md:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Morning</th>
+              <th class="px-3 md:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider hidden sm:table-cell">Midday</th>
+              <th class="px-3 md:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Evening</th>
+              <th class="px-3 md:px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Total</th>
+              <th class="px-3 md:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="record in filteredProduction" :key="record.id" class="hover:bg-gray-50">
-              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+              <td class="px-3 md:px-4 py-3 whitespace-nowrap text-xs md:text-sm text-gray-900">
                 {{ formatDate(record.production_date) }}
               </td>
-              <td class="px-4 py-3 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">{{ record.cow_name }}</div>
+              <td class="px-3 md:px-4 py-3 whitespace-nowrap">
+                <div class="text-xs md:text-sm font-medium text-gray-900">{{ record.cow_name }}</div>
                 <div class="text-xs text-gray-500">{{ record.cow_tag_id }}</div>
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                {{ record.morning_yield }} L
+              <td class="px-3 md:px-4 py-3 whitespace-nowrap">
+                <div class="text-xs md:text-sm text-gray-900">{{ record.morning_yield || 0 }} L</div>
+                <div v-if="record.morning_time" class="text-xs text-gray-500 hidden md:block">{{ record.morning_time }}</div>
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                {{ record.evening_yield }} L
+              <td class="px-3 md:px-4 py-3 whitespace-nowrap hidden sm:table-cell">
+                <div class="text-xs md:text-sm text-gray-900">{{ record.midday_yield || 0 }} L</div>
+                <div v-if="record.midday_time && record.midday_yield" class="text-xs text-gray-500 hidden md:block">{{ record.midday_time }}</div>
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+              <td class="px-3 md:px-4 py-3 whitespace-nowrap">
+                <div class="text-xs md:text-sm text-gray-900">{{ record.evening_yield || 0 }} L</div>
+                <div v-if="record.evening_time" class="text-xs text-gray-500 hidden md:block">{{ record.evening_time }}</div>
+              </td>
+              <td class="px-3 md:px-4 py-3 whitespace-nowrap text-xs md:text-sm font-bold text-gray-900">
                 {{ record.total_yield }} L
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-sm space-x-2">
+              <td class="px-3 md:px-4 py-3 whitespace-nowrap text-xs md:text-sm space-x-1 md:space-x-2">
                 <button
                   class="text-gray-700 hover:text-gray-900 font-medium"
                   @click="editRecord(record)"
@@ -517,9 +653,6 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { formatDate } from '~/utils/formatDate.js'
-
 definePageMeta({
   middleware: 'auth'
 })
@@ -533,7 +666,11 @@ const formData = ref({
   cow_id: '',
   production_date: new Date().toISOString().split('T')[0],
   morning_yield: '',
+  morning_time: '06:00',
+  midday_yield: '',
+  midday_time: '12:00',
   evening_yield: '',
+  evening_time: '17:00',
   notes: ''
 })
 
@@ -567,7 +704,11 @@ const editData = ref({
   cow_tag_id: '',
   production_date: '',
   morning_yield: '',
+  morning_time: '06:00',
+  midday_yield: '',
+  midday_time: '12:00',
   evening_yield: '',
+  evening_time: '17:00',
   notes: ''
 })
 
@@ -584,14 +725,16 @@ const todayDate = computed(() => new Date().toISOString().split('T')[0])
 
 const calculatedTotal = computed(() => {
   const morning = Number.parseFloat(formData.value.morning_yield) || 0
+  const midday = Number.parseFloat(formData.value.midday_yield) || 0
   const evening = Number.parseFloat(formData.value.evening_yield) || 0
-  return (morning + evening).toFixed(2)
+  return (morning + midday + evening).toFixed(2)
 })
 
 const calculatedEditTotal = computed(() => {
   const morning = Number.parseFloat(editData.value.morning_yield) || 0
+  const midday = Number.parseFloat(editData.value.midday_yield) || 0
   const evening = Number.parseFloat(editData.value.evening_yield) || 0
-  return (morning + evening).toFixed(2)
+  return (morning + midday + evening).toFixed(2)
 })
 
 const filteredProduction = computed(() => {
@@ -613,100 +756,47 @@ const filteredProduction = computed(() => {
   return filtered
 })
 
-// Chart data
-const chartData = computed(() => {
-  const records = [...filteredProduction.value]
-
-  // Group by Cow Name and sum totals for the selected period
-  const cowMap = new Map()
+// Daily totals for all cows (herd summary)
+const dailyTotals = computed(() => {
+  const today = new Date().toISOString().split('T')[0]
+  const todayRecords = productionRecords.value.filter(r => r.production_date === today)
   
-  records.forEach(record => {
-    const cowName = record.cow_name || 'Unknown'
-    const total = Number.parseFloat(record.total_yield) || 0
+  let morningTotal = 0
+  let middayTotal = 0
+  let eveningTotal = 0
+  let morningCount = 0
+  let middayCount = 0
+  let eveningCount = 0
+  
+  todayRecords.forEach(record => {
+    const morning = Number.parseFloat(record.morning_yield) || 0
+    const midday = Number.parseFloat(record.midday_yield) || 0
+    const evening = Number.parseFloat(record.evening_yield) || 0
     
-    if (cowMap.has(cowName)) {
-      cowMap.set(cowName, cowMap.get(cowName) + total)
-    } else {
-      cowMap.set(cowName, total)
+    if (morning > 0) {
+      morningTotal += morning
+      morningCount++
+    }
+    if (midday > 0) {
+      middayTotal += midday
+      middayCount++
+    }
+    if (evening > 0) {
+      eveningTotal += evening
+      eveningCount++
     }
   })
-
-  // Sort by highest production
-  const sortedCows = Array.from(cowMap.entries()).sort((a, b) => b[1] - a[1])
   
-  const labels = sortedCows.map(([name]) => name)
-  const data = sortedCows.map(([_, total]) => total)
-
   return {
-    labels,
-    datasets: [
-      {
-        label: 'Total Production (L)',
-        data,
-        backgroundColor: '#4B5563',
-        borderRadius: 4,
-        barPercentage: 0.5,
-        categoryPercentage: 0.9,
-        maxBarThickness: 50
-      }
-    ]
+    morning: morningTotal.toFixed(2),
+    midday: middayTotal.toFixed(2),
+    evening: eveningTotal.toFixed(2),
+    total: (morningTotal + middayTotal + eveningTotal).toFixed(2),
+    morningCount,
+    middayCount,
+    eveningCount
   }
 })
-
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: true,
-  aspectRatio: 2.5,
-  plugins: {
-    legend: {
-      display: true,
-      position: 'top',
-      labels: {
-        color: '#374151',
-        font: {
-          size: 12,
-          family: 'system-ui'
-        }
-      }
-    },
-    tooltip: {
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      padding: 12,
-      titleColor: '#fff',
-      bodyColor: '#fff',
-      borderColor: '#4B5563',
-      borderWidth: 1
-    }
-  },
-  scales: {
-    x: {
-      grid: {
-        display: false
-      },
-      ticks: {
-        color: '#6B7280',
-        font: {
-          size: 11
-        }
-      }
-    },
-    y: {
-      beginAtZero: true,
-      grid: {
-        color: 'rgba(0, 0, 0, 0.05)'
-      },
-      ticks: {
-        color: '#6B7280',
-        font: {
-          size: 11
-        },
-        callback: function(value) {
-          return value + ' L'
-        }
-      }
-    }
-  }
-}
 
 // Methods
 
@@ -723,7 +813,11 @@ async function loadProductionRecords() {
         cow_id,
         production_date,
         morning_yield,
+        morning_time,
+        midday_yield,
+        midday_time,
         evening_yield,
+        evening_time,
         total_yield,
         quality,
         notes,
@@ -738,7 +832,11 @@ async function loadProductionRecords() {
     productionRecords.value = (data || []).map(record => ({
       ...record,
       cow_name: record.cows?.name || 'Unknown',
-      cow_tag_id: record.cows?.tag_id || 'N/A'
+      cow_tag_id: record.cows?.tag_id || 'N/A',
+      morning_time: record.morning_time || null,
+      midday_yield: record.midday_yield || 0,
+      midday_time: record.midday_time || null,
+      evening_time: record.evening_time || null
     }))
   } catch (err) {
     console.error('Error loading production records:', err)
@@ -880,10 +978,14 @@ async function checkProductionAlerts() {
   }
 }
 
-async function handleProductionUpdate(existingRecord, morningInput, eveningInput) {
+async function handleProductionUpdate(existingRecord, morningInput, middayInput, eveningInput) {
   const newMorning = (morningInput !== '' && morningInput !== null) 
     ? Number.parseFloat(morningInput) 
     : existingRecord.morning_yield
+
+  const newMidday = (middayInput !== '' && middayInput !== null)
+    ? Number.parseFloat(middayInput)
+    : existingRecord.midday_yield || 0
 
   const newEvening = (eveningInput !== '' && eveningInput !== null)
     ? Number.parseFloat(eveningInput)
@@ -893,7 +995,11 @@ async function handleProductionUpdate(existingRecord, morningInput, eveningInput
     .from('milk_production')
     .update({
       morning_yield: newMorning,
+      midday_yield: newMidday,
       evening_yield: newEvening,
+      morning_time: formData.value.morning_time || existingRecord.morning_time,
+      midday_time: formData.value.midday_time || existingRecord.midday_time,
+      evening_time: formData.value.evening_time || existingRecord.evening_time,
       notes: formData.value.notes ? formData.value.notes : existingRecord.notes
     })
     .eq('id', existingRecord.id)
@@ -901,8 +1007,9 @@ async function handleProductionUpdate(existingRecord, morningInput, eveningInput
   if (error) throw error
 }
 
-async function handleProductionInsert(user, morningInput, eveningInput) {
+async function handleProductionInsert(user, morningInput, middayInput, eveningInput) {
   const morningYield = morningInput ? Number.parseFloat(morningInput) : 0
+  const middayYield = middayInput ? Number.parseFloat(middayInput) : 0
   const eveningYield = eveningInput ? Number.parseFloat(eveningInput) : 0
 
   const { error } = await $supabase
@@ -912,7 +1019,11 @@ async function handleProductionInsert(user, morningInput, eveningInput) {
       farm_id: user.user.id,
       production_date: formData.value.production_date,
       morning_yield: morningYield,
+      midday_yield: middayYield,
       evening_yield: eveningYield,
+      morning_time: formData.value.morning_time || null,
+      midday_time: formData.value.midday_time || null,
+      evening_time: formData.value.evening_time || null,
       notes: formData.value.notes || null
     })
 
@@ -938,11 +1049,14 @@ async function addProduction() {
 
     // Validate at least one yield value is provided
     const morningInput = formData.value.morning_yield
+    const middayInput = formData.value.midday_yield
     const eveningInput = formData.value.evening_yield
     
     // Check if anything was entered
-    if ((morningInput === '' || morningInput === null) && (eveningInput === '' || eveningInput === null)) {
-      error.value = 'Please enter at least morning or evening yield'
+    if ((morningInput === '' || morningInput === null) && 
+        (middayInput === '' || middayInput === null) && 
+        (eveningInput === '' || eveningInput === null)) {
+      error.value = 'Please enter at least one yield value (morning, midday, or evening)'
       return
     }
 
@@ -955,12 +1069,12 @@ async function addProduction() {
       .single()
 
     if (existingRecord) {
-      await handleProductionUpdate(existingRecord, morningInput, eveningInput)
+      await handleProductionUpdate(existingRecord, morningInput, middayInput, eveningInput)
       success.value = 'Milk production updated successfully!'
       toast.success('Milk production updated successfully!')
     } else {
       try {
-        await handleProductionInsert(user, morningInput, eveningInput)
+        await handleProductionInsert(user, morningInput, middayInput, eveningInput)
         success.value = 'Milk production recorded successfully!'
         toast.success('Milk production recorded successfully!')
       } catch (e) {
@@ -977,7 +1091,11 @@ async function addProduction() {
       cow_id: '',
       production_date: new Date().toISOString().split('T')[0],
       morning_yield: '',
+      morning_time: '06:00',
+      midday_yield: '',
+      midday_time: '12:00',
       evening_yield: '',
+      evening_time: '17:00',
       notes: ''
     }
 
@@ -1073,7 +1191,7 @@ function generateExport() {
     }
 
     // Prepare CSV headers
-    const headers = ['Date', 'Cow Name', 'Tag ID', 'Morning Yield (L)', 'Evening Yield (L)', 'Total Yield (L)', 'Notes']
+    const headers = ['Date', 'Cow Name', 'Tag ID', 'Morning Yield (L)', 'Morning Time', 'Midday Yield (L)', 'Midday Time', 'Evening Yield (L)', 'Evening Time', 'Total Yield (L)', 'Notes']
     
     // Prepare CSV rows
     const rows = records.map(record => [
@@ -1081,7 +1199,11 @@ function generateExport() {
       record.cow_name,
       record.cow_tag_id,
       record.morning_yield || '0',
+      record.morning_time || '',
+      record.midday_yield || '0',
+      record.midday_time || '',
       record.evening_yield || '0',
+      record.evening_time || '',
       record.total_yield,
       record.notes || ''
     ])
@@ -1133,7 +1255,11 @@ function editRecord(record) {
     cow_tag_id: record.cow_tag_id,
     production_date: record.production_date,
     morning_yield: record.morning_yield || '',
+    morning_time: record.morning_time || '06:00',
+    midday_yield: record.midday_yield || '',
+    midday_time: record.midday_time || '12:00',
     evening_yield: record.evening_yield || '',
+    evening_time: record.evening_time || '17:00',
     notes: record.notes || ''
   }
   showEditModal.value = true
@@ -1147,10 +1273,11 @@ async function updateProduction() {
 
     // Validate at least one yield value is provided
     const morningYield = editData.value.morning_yield ? Number.parseFloat(editData.value.morning_yield) : 0
+    const middayYield = editData.value.midday_yield ? Number.parseFloat(editData.value.midday_yield) : 0
     const eveningYield = editData.value.evening_yield ? Number.parseFloat(editData.value.evening_yield) : 0
     
-    if (morningYield === 0 && eveningYield === 0) {
-      error.value = 'Please enter at least morning or evening yield'
+    if (morningYield === 0 && middayYield === 0 && eveningYield === 0) {
+      error.value = 'Please enter at least one yield value'
       return
     }
 
@@ -1158,7 +1285,11 @@ async function updateProduction() {
       .from('milk_production')
       .update({
         morning_yield: morningYield,
+        midday_yield: middayYield,
         evening_yield: eveningYield,
+        morning_time: editData.value.morning_time || null,
+        midday_time: editData.value.midday_time || null,
+        evening_time: editData.value.evening_time || null,
         notes: editData.value.notes
       })
       .eq('id', editData.value.id)
@@ -1191,7 +1322,11 @@ function closeEditModal() {
     cow_tag_id: '',
     production_date: '',
     morning_yield: '',
+    morning_time: '06:00',
+    midday_yield: '',
+    midday_time: '12:00',
     evening_yield: '',
+    evening_time: '17:00',
     notes: ''
   }
 }

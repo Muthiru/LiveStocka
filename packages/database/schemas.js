@@ -1,5 +1,8 @@
-// Database schemas (placeholder)
-// Use Supabase for actual implementation
+// Database schemas (DEPRECATED - replaced by TypeScript types)
+// Use apps/web/types/supabase.ts for actual implementation
+
+// This file is kept for backwards compatibility
+// Migrate to TypeScript types in apps/web/types/ for better type safety
 
 export const userSchema = {
   id: 'uuid',

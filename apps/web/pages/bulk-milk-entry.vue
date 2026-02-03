@@ -35,10 +35,49 @@
               v-model="sessionType"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
             >
-              <option value="morning">Morning Milking</option>
-              <option value="evening">Evening Milking</option>
-              <option value="both">Both Sessions</option>
+              <option value="morning">Morning Only</option>
+              <option value="midday">Midday Only</option>
+              <option value="evening">Evening Only</option>
+              <option value="morning_evening">Morning + Evening</option>
+              <option value="all">All Sessions (3x Daily)</option>
             </select>
+          </div>
+        </div>
+
+        <!-- Time Settings -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div v-if="showMorning">
+            <label for="morning_time" class="block text-sm font-medium text-gray-700 mb-2">
+              Morning Time
+            </label>
+            <input
+              id="morning_time"
+              v-model="morningTime"
+              type="time"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
+          </div>
+          <div v-if="showMidday">
+            <label for="midday_time" class="block text-sm font-medium text-gray-700 mb-2">
+              Midday Time
+            </label>
+            <input
+              id="midday_time"
+              v-model="middayTime"
+              type="time"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
+          </div>
+          <div v-if="showEvening">
+            <label for="evening_time" class="block text-sm font-medium text-gray-700 mb-2">
+              Evening Time
+            </label>
+            <input
+              id="evening_time"
+              v-model="eveningTime"
+              type="time"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
           </div>
         </div>
       
@@ -90,11 +129,14 @@
           <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Cow</th>
-              <th v-if="sessionType !== 'evening'" class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Morning Yield (L)
+              <th v-if="showMorning" class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Morning (L)
               </th>
-              <th v-if="sessionType !== 'morning'" class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Evening Yield (L)
+              <th v-if="showMidday" class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Midday (L)
+              </th>
+              <th v-if="showEvening" class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Evening (L)
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Total (L)</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Notes</th>
@@ -107,29 +149,39 @@
                 <div class="text-sm font-medium text-gray-900">{{ entry.cow_name }}</div>
                 <div class="text-xs text-gray-500">{{ entry.cow_tag_id }}</div>
               </td>
-              <td v-if="sessionType !== 'evening'" class="px-4 py-3">
-                  <input
-                    v-model="entry.morning_yield"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm"
-                  >
-                </td>
-                <td v-if="sessionType !== 'morning'" class="px-4 py-3">
-                  <input
-                    v-model="entry.evening_yield"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm"
-                  >
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ calculateTotal(entry) }}
-                </td>
+              <td v-if="showMorning" class="px-4 py-3">
+                <input
+                  v-model="entry.morning_yield"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  class="w-20 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm"
+                >
+              </td>
+              <td v-if="showMidday" class="px-4 py-3">
+                <input
+                  v-model="entry.midday_yield"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  class="w-20 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm"
+                >
+              </td>
+              <td v-if="showEvening" class="px-4 py-3">
+                <input
+                  v-model="entry.evening_yield"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  class="w-20 px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent text-sm"
+                >
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ calculateTotal(entry) }}
+              </td>
                 <td class="px-4 py-3">
                   <input
                     v-model="entry.notes"
@@ -161,10 +213,13 @@
             <tfoot class="bg-gray-50 border-t-2 border-gray-300">
               <tr>
                 <td class="px-4 py-3 text-sm font-bold text-gray-900">Total</td>
-                <td v-if="sessionType !== 'evening'" class="px-4 py-3 text-sm font-bold text-gray-900">
+                <td v-if="showMorning" class="px-4 py-3 text-sm font-bold text-gray-900">
                   {{ totalMorning.toFixed(2) }} L
                 </td>
-                <td v-if="sessionType !== 'morning'" class="px-4 py-3 text-sm font-bold text-gray-900">
+                <td v-if="showMidday" class="px-4 py-3 text-sm font-bold text-gray-900">
+                  {{ totalMidday.toFixed(2) }} L
+                </td>
+                <td v-if="showEvening" class="px-4 py-3 text-sm font-bold text-gray-900">
                   {{ totalEvening.toFixed(2) }} L
                 </td>
                 <td class="px-4 py-3 text-sm font-bold text-gray-900">
@@ -200,12 +255,20 @@ const { fetchCows, isMilkable } = useCows()
 // State
 const entryDate = ref(new Date().toISOString().split('T')[0])
 const sessionType = ref('morning')
+const morningTime = ref('06:00')
+const middayTime = ref('12:00')
+const eveningTime = ref('18:00')
 const entries = ref([])
 const allCows = ref([])
 const selectedCowId = ref('')
 const loading = ref(false)
 const loadingCows = ref(false)
 const savingCowIds = ref([])
+
+// Session visibility computed properties
+const showMorning = computed(() => ['morning', 'morning_evening', 'all'].includes(sessionType.value))
+const showMidday = computed(() => ['midday', 'all'].includes(sessionType.value))
+const showEvening = computed(() => ['evening', 'morning_evening', 'all'].includes(sessionType.value))
 
 // Computed
 const todayDate = computed(() => new Date().toISOString().split('T')[0])
@@ -225,6 +288,13 @@ const totalMorning = computed(() => {
   }, 0)
 })
 
+const totalMidday = computed(() => {
+  return entries.value.reduce((sum, entry) => {
+    const val = Number.parseFloat(entry.midday_yield) || 0
+    return sum + val
+  }, 0)
+})
+
 const totalEvening = computed(() => {
   return entries.value.reduce((sum, entry) => {
     const val = Number.parseFloat(entry.evening_yield) || 0
@@ -235,16 +305,18 @@ const totalEvening = computed(() => {
 const grandTotal = computed(() => {
   return entries.value.reduce((sum, entry) => {
     const morning = Number.parseFloat(entry.morning_yield) || 0
+    const midday = Number.parseFloat(entry.midday_yield) || 0
     const evening = Number.parseFloat(entry.evening_yield) || 0
-    return sum + morning + evening
+    return sum + morning + midday + evening
   }, 0)
 })
 
 // Methods
 function calculateTotal(entry) {
   const morning = Number.parseFloat(entry.morning_yield) || 0
+  const midday = Number.parseFloat(entry.midday_yield) || 0
   const evening = Number.parseFloat(entry.evening_yield) || 0
-  return (morning + evening).toFixed(2)
+  return (morning + midday + evening).toFixed(2)
 }
 
 async function loadAllCows() {
@@ -277,7 +349,7 @@ async function addCowToEntry() {
     const { data: user } = await $supabase.auth.getUser()
     const { data: existingRecord } = await $supabase
       .from('milk_production')
-      .select('morning_yield, evening_yield, notes')
+      .select('morning_yield, midday_yield, evening_yield, notes')
       .eq('farm_id', user.user.id)
       .eq('cow_id', cow.id)
       .eq('production_date', entryDate.value)
@@ -288,6 +360,7 @@ async function addCowToEntry() {
       cow_name: cow.name,
       cow_tag_id: cow.tag_id,
       morning_yield: existingRecord?.morning_yield ?? '',
+      midday_yield: existingRecord?.midday_yield ?? '',
       evening_yield: existingRecord?.evening_yield ?? '',
       notes: existingRecord?.notes ?? ''
     })
@@ -319,9 +392,10 @@ async function saveSingleEntry(entry) {
     }
 
     const morning = Number.parseFloat(entry.morning_yield) || 0
+    const midday = Number.parseFloat(entry.midday_yield) || 0
     const evening = Number.parseFloat(entry.evening_yield) || 0
 
-    if (morning === 0 && evening === 0) {
+    if (morning === 0 && midday === 0 && evening === 0) {
       toast.warning(`Please enter at least one yield value for ${entry.cow_name}`)
       return
     }
@@ -331,7 +405,11 @@ async function saveSingleEntry(entry) {
       cow_id: entry.cow_id,
       production_date: entryDate.value,
       morning_yield: morning,
+      morning_time: showMorning.value && morning > 0 ? morningTime.value : null,
+      midday_yield: midday,
+      midday_time: showMidday.value && midday > 0 ? middayTime.value : null,
       evening_yield: evening,
+      evening_time: showEvening.value && evening > 0 ? eveningTime.value : null,
       notes: entry.notes || null
     }
 
