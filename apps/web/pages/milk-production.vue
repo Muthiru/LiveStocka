@@ -32,7 +32,7 @@
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Choose a cow</option>
-              <option v-for="cow in cows" :key="cow.id" :value="cow.id">
+              <option v-for="cow in milkableCows" :key="cow.id" :value="cow.id">
                 {{ cow.name }} ({{ cow.tag_id }})
               </option>
             </select>
@@ -659,7 +659,7 @@ definePageMeta({
 
 const { $supabase } = useNuxtApp()
 const toast = useToast()
-const { fetchCows } = useCows()
+const { fetchCows, isMilkable } = useCows()
 
 // Form data
 const formData = ref({
@@ -676,6 +676,7 @@ const formData = ref({
 
 // State
 const cows = ref([])
+const milkableCows = computed(() => cows.value.filter(cow => isMilkable(cow.status)))
 const productionRecords = ref([])
 const loading = ref(false)
 const loadingHistory = ref(false)
@@ -1335,8 +1336,9 @@ function closeEditModal() {
 
 // Lifecycle
 onMounted(async () => {
-  // Load active cows for dropdown
-  cows.value = await fetchCows({ status: 'active', orderBy: 'name' })
+  // Load all cows and filter for milkable
+  const allCows = await fetchCows({ orderBy: 'name' })
+  cows.value = allCows || []
   await loadProductionRecords()
   await loadStats()
 })
