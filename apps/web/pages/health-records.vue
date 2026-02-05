@@ -332,11 +332,14 @@
 <script setup lang="ts">
 import type { Cow, HealthRecord } from '~/types'
 import { getCowStatusColor, getHealthRecordTypeColor, formatRecordType, isOverdue } from '~/utils/statusHelpers'
-import { useRoute, useRouter } from 'vue-router'
 
 definePageMeta({
   middleware: 'auth'
 })
+
+
+const route = useRoute()
+const router = useRouter()
 
 const { healthRecords, loading: recordsLoading, fetchHealthRecords, deleteHealthRecord, getOverdueVaccinations } = useHealthRecords()
 const { cows, loading: cowsLoading, fetchCows } = useCows()
@@ -508,8 +511,6 @@ onMounted(async () => {
     fetchHealthRecords()
   ])
   // Open add modal if navigated with ?add=1 (optionally with ?cowId=<id>)
-  const route = useRoute()
-  const router = useRouter()
   if (route.query.add) {
     preselectedCowId.value = route.query.cowId ? String(route.query.cowId) : null
     showAddModal.value = true

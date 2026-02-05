@@ -1,5 +1,13 @@
 <template>
   <div class="py-6">
+    <!-- Add/Edit Health Record Modal (opened by Quick Report) -->
+    <HealthRecordModal
+      v-model="showAddModal"
+      :record="selectedRecord"
+      :cows="cows"
+      :preselected-cow-id="preselectedCowId"
+      @save="handleSave"
+    />
     <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
       <!-- Header -->
       <div class="mb-8 flex items-start justify-between">
