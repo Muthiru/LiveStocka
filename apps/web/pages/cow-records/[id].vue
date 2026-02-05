@@ -329,7 +329,7 @@ const refresh = async () => {
 <style scoped>
 /* Force uniform dark text across this page for a consistent report look */
 .root,
-.root * {
+.root > *:not(span[class*="rounded-full"]) {
   color: #111827 !important; /* tailwind gray-900 */
 }
 

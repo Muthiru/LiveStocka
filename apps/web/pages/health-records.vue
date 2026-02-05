@@ -355,6 +355,7 @@ onMounted(async () => {
     fetchCows(),
     fetchHealthRecords()
   ])
+
   // Open add modal if navigated with ?add=1 (optionally with ?cowId=<id>)
   if (route.query.add) {
     preselectedCowId.value = route.query.cowId ? String(route.query.cowId) : null
@@ -366,19 +367,20 @@ onMounted(async () => {
       console.error('Failed to clear query params after opening add modal:', e)
     }
   }
-    // Open cow modal if navigated with ?cowId=<id>
-    if (route.query.cowId) {
-      const id = String(route.query.cowId)
-      const cowFound = cows.value.find(c => c.id === id)
-      if (cowFound) {
-        selectedCow.value = cowFound
-        showCowModal.value = true
-      }
-      try {
-        router.replace({ path: route.path, query: {} })
-      } catch (e) {
-        console.error('Failed to clear query params after opening cow modal:', e)
-      }
+
+  // Open cow modal if navigated with ?cowId=<id>
+  if (route.query.cowId) {
+    const id = String(route.query.cowId)
+    const cowFound = cows.value.find(c => c.id === id)
+    if (cowFound) {
+      selectedCow.value = cowFound
+      showCowModal.value = true
     }
+    try {
+      router.replace({ path: route.path, query: {} })
+    } catch (e) {
+      console.error('Failed to clear query params after opening cow modal:', e)
+    }
+  }
 })
 </script>

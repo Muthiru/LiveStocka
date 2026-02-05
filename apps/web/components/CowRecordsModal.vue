@@ -3,10 +3,10 @@
     <div class="flex items-start justify-center min-h-screen px-4 pt-12 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-30" @click="close"/>
 
-      <div class="inline-block w-full max-w-3xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-lg">
+      <dialog class="inline-block w-full max-w-3xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-lg" open aria-labelledby="cow-records-title" @keydown.escape="close">
         <div class="px-6 py-3 bg-white border-b border-gray-200 flex items-center justify-between">
           <div>
-            <h3 class="text-lg font-semibold text-gray-900">Health Records for {{ cow?.name }}</h3>
+            <h3 id="cow-records-title" class="text-lg font-semibold text-gray-900">Health Records for {{ cow?.name }}</h3>
             <p class="text-sm text-gray-600">Tag: {{ cow?.tag_id }}</p>
           </div>
 
@@ -15,7 +15,7 @@
               <Icon name="lucide:plus" class="w-4 h-4" />
               Add Health Record
             </button>
-            <button class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg" @click="close">
+            <button class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg" aria-label="Close" @click="close">
               <Icon name="lucide:x" class="w-5 h-5" />
             </button>
           </div>
@@ -23,7 +23,7 @@
 
         <div class="px-6 py-3 border-b border-gray-100 bg-white">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-            <input v-model="localSearch" type="text" placeholder="Search records..." class="w-full px-3 py-2 border border-gray-200 rounded-md">
+            <input v-model="localSearch" type="text" placeholder="Search records..." aria-label="Search records" class="w-full px-3 py-2 border border-gray-200 rounded-md">
             <select v-model="typeFilter" class="w-full px-3 py-2 border border-gray-200 rounded-md">
               <option value="">All types</option>
               <option value="vaccination">Vaccination</option>
@@ -70,10 +70,10 @@
                 </div>
 
                 <div class="flex gap-1">
-                  <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg" @click="$emit('edit', record)">
+                  <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg" aria-label="Edit record" @click="$emit('edit', record)">
                     <Icon name="lucide:edit" class="w-4 h-4" />
                   </button>
-                  <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg" @click="$emit('delete', record)">
+                  <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg" aria-label="Delete record" @click="$emit('delete', record)">
                     <Icon name="lucide:trash-2" class="w-4 h-4" />
                   </button>
                 </div>
@@ -81,7 +81,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </dialog>
     </div>
   </div>
 </template>

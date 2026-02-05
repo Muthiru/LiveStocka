@@ -39,14 +39,27 @@ export type RecoveryStatus = keyof typeof statusColors.recovery
  * Get color class for a given status type and value
  */
 export const getStatusColor = (type: StatusType, status?: string | null): string => {
-  const colorMap = statusColors[type]
-  if (!status) return 'bg-gray-100 text-gray-800'
+  const colorMap = statusColors[type] as Record<string, string>
+
+  const resolveFallback = (): string => {
+    // prefer explicit 'default' or 'unknown' keys if present
+    if (colorMap.default) return colorMap.default
+    if (colorMap.unknown) return colorMap.unknown
+    // otherwise use the first defined mapping value
+    const vals = Object.values(colorMap)
+    if (vals.length > 0) return vals[0]
+    // last resort
+    return 'bg-gray-100 text-gray-800'
+  }
+
+  if (!status) return resolveFallback()
+
   try {
     const key = String(status).toLowerCase()
-    return (colorMap as Record<string, string>)[key] || 'bg-gray-100 text-gray-800'
+    return colorMap[key] || resolveFallback()
   } catch (e) {
     console.warn('getStatusColor error', e)
-    return 'bg-gray-100 text-gray-800'
+    return resolveFallback()
   }
 }
 
