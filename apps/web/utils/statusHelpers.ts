@@ -38,29 +38,49 @@ export type RecoveryStatus = keyof typeof statusColors.recovery
 /**
  * Get color class for a given status type and value
  */
-export const getStatusColor = (type: StatusType, status: string): string => {
-  const colorMap = statusColors[type]
-  return (colorMap as Record<string, string>)[status.toLowerCase()] || 'bg-gray-100 text-gray-800'
+export const getStatusColor = (type: StatusType, status?: string | null): string => {
+  const colorMap = statusColors[type] as Record<string, string>
+
+  const resolveFallback = (): string => {
+    // prefer explicit 'default' or 'unknown' keys if present
+    if (colorMap.default) return colorMap.default
+    if (colorMap.unknown) return colorMap.unknown
+    // otherwise use the first defined mapping value
+    const vals = Object.values(colorMap)
+    if (vals.length > 0) return vals[0]
+    // last resort
+    return 'bg-gray-100 text-gray-800'
+  }
+
+  if (!status) return resolveFallback()
+
+  try {
+    const key = String(status).toLowerCase()
+    return colorMap[key] || resolveFallback()
+  } catch (e) {
+    console.warn('getStatusColor error', e)
+    return resolveFallback()
+  }
 }
 
 /**
  * Get cow status color
  */
-export const getCowStatusColor = (status: string): string => {
+export const getCowStatusColor = (status?: string | null): string => {
   return getStatusColor('cow', status)
 }
 
 /**
  * Get health record type color
  */
-export const getHealthRecordTypeColor = (type: string): string => {
+export const getHealthRecordTypeColor = (type?: string | null): string => {
   return getStatusColor('healthRecord', type)
 }
 
 /**
  * Get icon for health record type
  */
-export const getHealthRecordTypeIcon = (type: string): string => {
+export const getHealthRecordTypeIcon = (type?: string | null): string => {
   const icons: Record<string, string> = {
     vaccination: 'lucide:syringe',
     medication: 'lucide:pill',
@@ -70,15 +90,22 @@ export const getHealthRecordTypeIcon = (type: string): string => {
     injury: 'lucide:bandage',
     other: 'lucide:file-text'
   }
-  return icons[type?.toLowerCase()] || icons.other
+  try {
+    const key = String(type || '').toLowerCase()
+    return icons[key] || icons.other
+  } catch (e) {
+    console.warn('getHealthRecordTypeIcon error', e)
+    return icons.other
+  }
 }
 
 /**
  * Format record type for display
  */
-export const formatRecordType = (type: string): string => {
+export const formatRecordType = (type?: string | null): string => {
   if (!type) return ''
-  return type.charAt(0).toUpperCase() + type.slice(1)
+  const s = String(type)
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 /**
@@ -91,7 +118,7 @@ export const isOverdue = (date: string | Date): boolean => {
 /**
  * Get recovery status color
  */
-export const getRecoveryStatusColor = (status: string): string => {
+export const getRecoveryStatusColor = (status?: string | null): string => {
   return getStatusColor('recovery', status)
 }
 

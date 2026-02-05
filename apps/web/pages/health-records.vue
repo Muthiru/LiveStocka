@@ -164,7 +164,7 @@
                   :class="[
                     'px-3 py-1.5 text-sm rounded-lg',
                     page === currentPage
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-green-600 text-white'
                       : 'border border-gray-300 hover:bg-gray-100'
                   ]"
                   @click="currentPage = page"
@@ -184,138 +184,15 @@
         </div>
       </div>
 
-      <!-- Selected Cow Health Records Panel -->
-      <div v-if="selectedCow" class="mt-6 bg-white rounded-lg shadow-sm">
-        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <div>
-            <h2 class="text-xl font-semibold text-gray-900">
-              Health Records for {{ selectedCow.name }}
-            </h2>
-            <p class="text-sm text-gray-600">Tag: {{ selectedCow.tag_id }}</p>
-          </div>
-          <div class="flex gap-2">
-            <button
-              class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              @click="openAddModal(selectedCow)"
-            >
-              <Icon name="lucide:plus" class="w-4 h-4" />
-              Add Health Record
-            </button>
-            <button
-              class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
-              @click="selectedCow = null"
-            >
-              <Icon name="lucide:x" class="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <!-- Disease Frequency Analysis -->
-        <div v-if="selectedCowDiseaseStats.length > 0" class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h3 class="text-sm font-semibold text-gray-700 mb-3">
-            <Icon name="lucide:activity" class="w-4 h-4 inline mr-1" />
-            Disease Frequency Analysis
-          </h3>
-          <div class="flex flex-wrap gap-3">
-            <div
-              v-for="stat in selectedCowDiseaseStats"
-              :key="stat.disease"
-              class="flex items-center gap-2 px-3 py-2 bg-white border rounded-lg shadow-sm"
-            >
-              <span :class="getDiseaseFrequencyColor(stat.count)" class="inline-flex items-center justify-center w-6 h-6 rounded-full text-sm font-bold">
-                {{ stat.count }}
-              </span>
-              <span class="text-sm text-gray-700">{{ stat.disease }}</span>
-              <span v-if="stat.count >= 3" class="text-xs text-orange-600 font-medium">
-                (Prone)
-              </span>
-            </div>
-          </div>
-          <p v-if="selectedCowDiseaseStats.some(s => s.count >= 3)" class="mt-3 text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded p-2">
-            <Icon name="lucide:alert-triangle" class="w-4 h-4 inline mr-1" />
-            This cow has recurring health issues. Consider additional preventive measures.
-          </p>
-        </div>
-
-        <!-- Cow's Health Records -->
-        <div class="p-6">
-          <div v-if="selectedCowRecords.length === 0" class="text-center py-8">
-            <Icon name="lucide:heart-pulse" class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <h3 class="text-lg font-medium text-gray-900 mb-1">No Health Records</h3>
-            <p class="text-gray-600 mb-4">This cow doesn't have any health records yet</p>
-            <button
-              class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              @click="openAddModal(selectedCow)"
-            >
-              <Icon name="lucide:plus" class="w-4 h-4" />
-              Add First Record
-            </button>
-          </div>
-
-          <div v-else class="space-y-4">
-            <div
-              v-for="record in selectedCowRecords"
-              :key="record.id"
-              class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
-            >
-              <div class="flex justify-between items-start">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-2">
-                    <span :class="getTypeColor(record.record_type)" class="px-3 py-1 rounded-full text-xs font-medium">
-                      {{ formatRecordType(record.record_type) }}
-                    </span>
-                    <h4 class="font-semibold text-gray-900">{{ record.title }}</h4>
-                    <span class="text-sm text-gray-500">
-                      {{ formatDate(record.record_date) }}
-                      <span v-if="record.record_time" class="text-gray-400">at {{ record.record_time }}</span>
-                    </span>
-                  </div>
-
-                  <p v-if="record.description" class="text-gray-700 text-sm mb-2">{{ record.description }}</p>
-
-                  <div class="flex flex-wrap gap-4 text-sm text-gray-600">
-                    <span v-if="record.vaccine_name">
-                      <Icon name="lucide:syringe" class="w-4 h-4 inline mr-1" />
-                      {{ record.vaccine_name }}
-                    </span>
-                    <span v-if="record.medication_name">
-                      <Icon name="lucide:pill" class="w-4 h-4 inline mr-1" />
-                      {{ record.medication_name }}
-                    </span>
-                    <span v-if="record.vet_name">
-                      <Icon name="lucide:user-check" class="w-4 h-4 inline mr-1" />
-                      {{ record.vet_name }}
-                    </span>
-                    <span v-if="record.cost">
-                      <Icon name="lucide:dollar-sign" class="w-4 h-4 inline mr-1" />
-                      ${{ record.cost }}
-                    </span>
-                    <span v-if="record.next_checkup_date" :class="{ 'text-red-600': isOverdue(record.next_checkup_date) }">
-                      <Icon name="lucide:bell" class="w-4 h-4 inline mr-1" />
-                      Next: {{ formatDate(record.next_checkup_date) }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="flex gap-1">
-                  <button
-                    class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
-                    @click="editRecord(record)"
-                  >
-                    <Icon name="lucide:edit" class="w-4 h-4" />
-                  </button>
-                  <button
-                    class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                    @click="confirmDelete(record)"
-                  >
-                    <Icon name="lucide:trash-2" class="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Cow Records Modal (replaces inline selected-cow panel) -->
+      <CowRecordsModal
+        v-model="showCowModal"
+        :cow="selectedCow"
+        :records="selectedCowRecords"
+        @add="openAddModal"
+        @edit="editRecord"
+        @delete="confirmDelete"
+      />
     </div>
 
     <!-- Add/Edit Modal -->
@@ -331,11 +208,15 @@
 
 <script setup lang="ts">
 import type { Cow, HealthRecord } from '~/types'
-import { getCowStatusColor, getHealthRecordTypeColor, formatRecordType, isOverdue } from '~/utils/statusHelpers'
+import { getCowStatusColor } from '~/utils/statusHelpers'
 
 definePageMeta({
   middleware: 'auth'
 })
+
+
+const route = useRoute()
+const router = useRouter()
 
 const { healthRecords, loading: recordsLoading, fetchHealthRecords, deleteHealthRecord, getOverdueVaccinations } = useHealthRecords()
 const { cows, loading: cowsLoading, fetchCows } = useCows()
@@ -349,6 +230,7 @@ const itemsPerPage = ref(10)
 const currentPage = ref(1)
 const selectedCow = ref<Cow | null>(null)
 const showAddModal = ref(false)
+const showCowModal = ref(false)
 const selectedRecord = ref<HealthRecord | null>(null)
 const preselectedCowId = ref<string | null>(null)
 
@@ -405,32 +287,6 @@ const selectedCowRecords = computed(() => {
     .sort((a, b) => new Date(b.record_date).getTime() - new Date(a.record_date).getTime())
 })
 
-// Disease frequency analysis for selected cow
-const selectedCowDiseaseStats = computed(() => {
-  if (!selectedCow.value) return []
-
-  // Filter for disease related records
-  const diseaseRecords = healthRecords.value.filter(
-    r => r.cow_id === selectedCow.value?.id && r.record_type === 'disease'
-  )
-
-  // Count disease/illness occurrences by title
-  const diseaseCount = new Map<string, number>()
-
-  diseaseRecords.forEach(record => {
-    const disease = record.title?.toLowerCase().trim() || 'unknown'
-    diseaseCount.set(disease, (diseaseCount.get(disease) || 0) + 1)
-  })
-
-  // Convert to array and sort by count
-  return Array.from(diseaseCount.entries())
-    .map(([disease, count]) => ({
-      disease: disease.charAt(0).toUpperCase() + disease.slice(1),
-      count
-    }))
-    .sort((a, b) => b.count - a.count)
-})
-
 // Methods
 const getCowName = (cowId: string) => {
   const cow = cows.value.find(c => c.id === cowId)
@@ -448,25 +304,18 @@ const getLastCheckupDate = (cowId: string) => {
   const latest = cowRecords.reduce((a, b) =>
     new Date(a.record_date) > new Date(b.record_date) ? a : b
   )
-  return formatDate(latest.record_date)
+  return new Date(latest.record_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 const getStatusColor = getCowStatusColor
-const getTypeColor = getHealthRecordTypeColor
-
-const getDiseaseFrequencyColor = (count: number) => {
-  if (count >= 3) return 'bg-red-100 text-red-700'
-  if (count === 2) return 'bg-orange-100 text-orange-700'
-  return 'bg-gray-100 text-gray-700'
-}
-
-const formatDate = (date: string | null | undefined) => {
-  if (!date) return 'N/A'
-  return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-}
 
 const selectCow = (cow: Cow) => {
-  selectedCow.value = cow
+  // Navigate to the paginated health report book page for this cow
+  try {
+    router.push({ path: `/cow-records/${cow.id}` })
+  } catch (e) {
+    console.error('Failed to navigate to cow records page:', e)
+  }
 }
 
 const openAddModal = (cow: Cow) => {
@@ -506,5 +355,32 @@ onMounted(async () => {
     fetchCows(),
     fetchHealthRecords()
   ])
+
+  // Open add modal if navigated with ?add=1 (optionally with ?cowId=<id>)
+  if (route.query.add) {
+    preselectedCowId.value = route.query.cowId ? String(route.query.cowId) : null
+    showAddModal.value = true
+    // remove query param to avoid reopening modal on navigation
+    try {
+      router.replace({ path: route.path, query: {} })
+    } catch (e) {
+      console.error('Failed to clear query params after opening add modal:', e)
+    }
+  }
+
+  // Open cow modal if navigated with ?cowId=<id>
+  if (route.query.cowId) {
+    const id = String(route.query.cowId)
+    const cowFound = cows.value.find(c => c.id === id)
+    if (cowFound) {
+      selectedCow.value = cowFound
+      showCowModal.value = true
+    }
+    try {
+      router.replace({ path: route.path, query: {} })
+    } catch (e) {
+      console.error('Failed to clear query params after opening cow modal:', e)
+    }
+  }
 })
 </script>

@@ -50,7 +50,7 @@
             <button
               :class="activeTab === 'health' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-              @click="activeTab = 'health'"
+              @click="goToRecords('health')"
             >
               Health
             </button>
@@ -96,7 +96,7 @@
               </div>
               <div>
                 <dt class="text-sm font-medium text-gray-500">Age</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ cow.age ? `${cow.age} years` : 'N/A' }}</dd>
+                  <dd class="mt-1 text-sm text-gray-900">{{ formatAge(cow.birth_date) }}</dd>
               </div>
               <div>
                 <dt class="text-sm font-medium text-gray-500">Weight</dt>
@@ -147,12 +147,12 @@
                 </svg>
                 Add Record
               </NuxtLink>
-              <NuxtLink
-                :to="`/cow/${cow.id}/health`"
+              <button
                 class="text-sm font-medium text-green-600 hover:text-green-800"
+                @click="goToRecords('health')"
               >
                 View All →
-              </NuxtLink>
+              </button>
             </div>
           </div>
           <div class="px-5 py-5">
@@ -342,11 +342,62 @@
 
 <script setup>
 import { getHealthRecordTypeColor as getRecordTypeColor } from '~/utils/statusHelpers'
+import { getAgeParts } from '~/utils/formatDate'
 
 const { $supabase } = useNuxtApp()
 const { getCowById, getStatusClass } = useCows()
 const route = useRoute()
 const cow = ref(null)
+
+// Restore last active tab if user navigated back from reports page
+const restoreTab = () => {
+  try {
+    const key = `cow:${route.params.id}:lastTab`
+    const last = sessionStorage.getItem(key)
+    if (last) {
+      activeTab.value = last
+      sessionStorage.removeItem(key)
+    }
+  } catch (e) {
+    console.warn('restoreTab: sessionStorage access failed', e)
+  }
+}
+
+// Age parts are computed by `getAgeParts` from utils/formatDate
+
+// Format age as human-friendly string using computed parts
+const formatAge = (birth) => {
+  try {
+    const p = getAgeParts(birth)
+    if (!p) return 'N/A'
+
+    if (p.years >= 1) {
+      const remMonths = Math.floor((p.days % 365) / 30)
+      return remMonths > 0 ? `${p.years}y ${remMonths}m` : `${p.years}y`
+    }
+
+    if (p.months >= 1) {
+      const remDays = p.days % 30
+      return remDays > 0 ? `${p.months}m ${remDays}d` : `${p.months}m`
+    }
+
+    if (p.days >= 1) {
+      const remHours = p.hours % 24
+      return remHours > 0 ? `${p.days}d ${remHours}h` : `${p.days}d`
+    }
+
+    if (p.hours >= 1) {
+      const remMinutes = p.minutes % 60
+      return remMinutes > 0 ? `${p.hours}h ${remMinutes}m` : `${p.hours}h`
+    }
+
+    if (p.minutes >= 1) return `${p.minutes}m`
+    return `${p.seconds}s`
+  } catch (e) {
+    console.error('formatAge error', e)
+    return 'N/A'
+  }
+}
 
 const healthRecords = ref([])
 const milkRecords = ref([])
@@ -386,7 +437,7 @@ async function exportProfile() {
     report += `Breed: ${cow.value.breed || 'N/A'}\n`
     report += `Status: ${cow.value.status}\n`
     report += `Birth Date: ${formatDate(cow.value.birth_date)}\n`
-    report += `Age: ${cow.value.age} years\n\n`
+    report += `Age: ${formatAge(cow.value.birth_date)}\n\n`
 
     report += `HEALTH RECORDS (${allHealth?.length || 0})\n`
     report += `-----------------\n`
@@ -474,6 +525,14 @@ async function loadMilkProduction() {
 onMounted(async () => {
   // Fetch cow details
   cow.value = await getCowById(route.params.id)
+  // Try immediate restore on mount
+  restoreTab()
+
+  // Also restore when the user navigates back via browser (popstate/pageshow)
+  if (typeof globalThis !== 'undefined' && globalThis.window) {
+    globalThis.window.addEventListener('popstate', restoreTab)
+    globalThis.window.addEventListener('pageshow', restoreTab)
+  }
 
   // Fetch recent health records
   const { data: records } = await $supabase
@@ -489,5 +548,23 @@ onMounted(async () => {
   await loadMilkProduction()
   
   loading.value = false
+})
+
+// Save current tab and navigate to records page
+const goToRecords = (tab = 'health') => {
+  try {
+    const idKey = route.params.id || (cow?.value?.id)
+    if (idKey) sessionStorage.setItem(`cow:${idKey}:lastTab`, tab)
+  } catch (e) {
+    console.warn('goToRecords: sessionStorage set failed', e)
+  }
+  return navigateTo(`/cow-records/${route.params.id}`)
+}
+
+onBeforeUnmount(() => {
+  if (typeof globalThis !== 'undefined' && globalThis.window) {
+    globalThis.window.removeEventListener('popstate', restoreTab)
+    globalThis.window.removeEventListener('pageshow', restoreTab)
+  }
 })
 </script>
