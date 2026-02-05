@@ -2,15 +2,32 @@
   <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
       <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p class="mt-2 text-sm text-gray-600">Overview of your cattle management</p>
+      <div class="mb-8 flex items-start justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p class="mt-2 text-sm text-gray-600">Overview of your cattle management</p>
+        </div>
+
+    <!-- Add/Edit Health Record Modal (opened by Quick Report) -->
+    <HealthRecordModal
+      v-model="showAddModal"
+      :record="selectedRecord"
+      :cows="cows"
+      :preselected-cow-id="preselectedCowId"
+      @save="handleSave"
+    />
+        <div class="flex items-center gap-3">
+          <button @click="showAddModal = true" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg shadow hover:bg-green-700">
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            Quick Report
+          </button>
+        </div>
       </div>
 
       <!-- Stats Grid -->
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="p-5">
+        <div class="bg-white overflow-hidden shadow-sm rounded-xl relative">
+          <div class="p-6">
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,15 +42,15 @@
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-5 py-3">
+          <div class="bg-gray-50 px-5 py-3 rounded-b-xl">
             <div class="text-sm">
               <NuxtLink to="/cows" class="font-medium text-gray-700 hover:text-gray-900">View all →</NuxtLink>
             </div>
           </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="p-5">
+        <div class="bg-white overflow-hidden shadow-sm rounded-xl relative">
+          <div class="p-6">
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,13 +65,13 @@
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-5 py-3">
-            <div class="text-sm text-gray-500">Healthy and active</div>
+          <div class="bg-gray-50 px-5 py-3 rounded-b-xl">
+            <div class="text-sm text-gray-500">Healthy and Productive</div>
           </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="p-5">
+        <div class="bg-white overflow-hidden shadow-sm rounded-xl relative">
+          <div class="p-6">
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,15 +86,15 @@
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-5 py-3">
+          <div class="bg-gray-50 px-5 py-3 rounded-b-xl">
             <div class="text-sm">
               <NuxtLink to="/health-records" class="font-medium text-gray-700 hover:text-gray-900">View alerts →</NuxtLink>
             </div>
           </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="p-5">
+        <div class="bg-white overflow-hidden shadow-sm rounded-xl relative">
+          <div class="p-6">
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +109,7 @@
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-5 py-3">
+          <div class="bg-gray-50 px-5 py-3 rounded-b-xl">
             <div class="text-sm">
               <NuxtLink to="/milk-production" class="font-medium text-gray-700 hover:text-gray-900">View details →</NuxtLink>
             </div>
@@ -278,7 +295,7 @@
 
 <script setup>
 const { $supabase } = useNuxtApp()
-const { isMilkable } = useCows()
+const { cows, fetchCows, isMilkable } = useCows()
 const toast = useToast()
 
 const cowsCount = ref(0)
@@ -289,6 +306,11 @@ const upcomingEvents = ref([])
 const loading = ref(true)
 const loadingProduction = ref(true)
 
+// Add Health Record modal state (Quick Report)
+const showAddModal = ref(false)
+const selectedRecord = ref(null)
+const preselectedCowId = ref(null)
+
 // Today's production data
 const todayProduction = ref({
   totalYield: 0,
@@ -298,6 +320,8 @@ const todayProduction = ref({
   evening: 0,
   avgPerCow: 0
 })
+
+
 
 const getEventIconClass = (type) => {
   const classes = {
@@ -542,6 +566,22 @@ onMounted(async () => {
   // Set total for stat card
   totalMilkProduction.value = todayProduction.value.totalYield
 
+  // Ensure cows are loaded for modal select
+  try {
+    await fetchCows()
+  } catch (e) {
+    console.error('Failed to fetch cows for Quick Report modal:', e)
+    if (toast && toast.error) toast.error('Could not load cows for Quick Report')
+  }
+
   loading.value = false
 })
+
+// handler for modal save (top-level so template can call it)
+const handleSave = async () => {
+  showAddModal.value = false
+  selectedRecord.value = null
+  preselectedCowId.value = null
+  try { await fetchTodayProduction() } catch (e) { console.error('Failed to refresh production after save:', e); if (toast && toast.error) toast.error('Failed to refresh production data') }
+}
 </script>

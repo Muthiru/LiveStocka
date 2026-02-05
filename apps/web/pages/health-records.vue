@@ -164,7 +164,7 @@
                   :class="[
                     'px-3 py-1.5 text-sm rounded-lg',
                     page === currentPage
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-green-600 text-white'
                       : 'border border-gray-300 hover:bg-gray-100'
                   ]"
                   @click="currentPage = page"
@@ -332,6 +332,7 @@
 <script setup lang="ts">
 import type { Cow, HealthRecord } from '~/types'
 import { getCowStatusColor, getHealthRecordTypeColor, formatRecordType, isOverdue } from '~/utils/statusHelpers'
+import { useRoute, useRouter } from 'vue-router'
 
 definePageMeta({
   middleware: 'auth'
@@ -506,5 +507,18 @@ onMounted(async () => {
     fetchCows(),
     fetchHealthRecords()
   ])
+  // Open add modal if navigated with ?add=1 (optionally with ?cowId=<id>)
+  const route = useRoute()
+  const router = useRouter()
+  if (route.query.add) {
+    preselectedCowId.value = route.query.cowId ? String(route.query.cowId) : null
+    showAddModal.value = true
+    // remove query param to avoid reopening modal on navigation
+    try {
+      router.replace({ path: route.path, query: {} })
+    } catch (e) {
+      console.error('Failed to clear query params after opening add modal:', e)
+    }
+  }
 })
 </script>
