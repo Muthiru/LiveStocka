@@ -2,6 +2,15 @@ type DateFormatOptions = Intl.DateTimeFormatOptions
 
 type DateInput = string | Date | null | undefined
 
+type AgeParts = {
+  years: number
+  months: number
+  days: number
+  hours: number
+  minutes: number
+  seconds: number
+} | null
+
 export const formatDate = (date: DateInput, options: DateFormatOptions = {}): string => {
   if (!date) return 'N/A'
   
@@ -49,6 +58,23 @@ export const formatTime = (date: DateInput): string => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+export const getAgeParts = (birth: DateInput): AgeParts => {
+  if (!birth) return null
+  const b = new Date(birth)
+  const now = new Date()
+  const diff = now.getTime() - b.getTime()
+  if (Number.isNaN(b.getTime()) || diff < 0) return null
+
+  const seconds = Math.floor(diff / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+  const months = Math.floor(days / 30)
+  const years = Math.floor(days / 365)
+
+  return { years, months, days, hours, minutes, seconds }
 }
 
 export const isToday = (date: string | Date): boolean => {

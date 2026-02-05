@@ -25,7 +25,7 @@
       @save="handleSave"
     />
         <div class="flex items-center gap-3">
-          <button @click="showAddModal = true" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg shadow hover:bg-green-700">
+          <button class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg shadow hover:bg-green-700" @click="showAddModal = true">
             <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
             Quick Report
           </button>
@@ -212,7 +212,7 @@
                   <p class="text-xs text-green-600">Total Yield</p>
                 </div>
                 <div class="bg-blue-50 rounded-lg p-3 text-center">
-                  <p class="text-2xl font-bold text-blue-700">{{ todayProduction.totalCows }}</p>
+                  <p class="text-2xl font-bold text-blue-700">{{ todayProduction.totalCows }} / {{ activeCowsCount }}</p>
                   <p class="text-xs text-blue-600">Cows Milked</p>
                 </div>
               </div>
