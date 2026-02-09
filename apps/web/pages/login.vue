@@ -30,14 +30,14 @@
               <p class="text-gray-800 text-left text-lg font-medium">Monitor milk production</p>
             </div>
 
-            <!-- Reproduction Feature -->
+            <!-- Breeding Feature -->
             <div class="flex items-center gap-4 w-full">
               <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-purple-100">
                 <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </div>
-              <p class="text-gray-800 text-left text-lg font-medium">Manage reproduction cycles</p>
+              <p class="text-gray-800 text-left text-lg font-medium">Manage breeding cycles</p>
             </div>
           </div>
         </div>

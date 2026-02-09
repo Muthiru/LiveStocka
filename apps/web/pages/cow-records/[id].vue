@@ -10,24 +10,25 @@
             <!-- Tabs bar similar to cow page -->
             <nav class="mt-4 -mb-px flex space-x-8">
               <button
-                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (false ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
+                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab === 'overview' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
                 @click.prevent="goToCow('overview')"
               >
                 Overview
               </button>
-                  <button
-                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-gray-700 text-gray-900"
-                  >
-                    Health
-                  </button>
               <button
-                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (false ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
-                @click.prevent="goToCow('reproduction')"
+                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab === 'health' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
+                @click.prevent="activeTab = 'health'"
               >
-                Reproduction
+                Health
               </button>
               <button
-                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (false ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
+                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab === 'reproduction' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
+                @click.prevent="activeTab = 'reproduction'"
+              >
+                Breeding
+              </button>
+              <button
+                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab === 'milk' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
                 @click.prevent="goToCow('milk')"
               >
                 Milk Production
@@ -49,7 +50,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div v-if="activeTab === 'health'" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <input v-model="search" type="text" placeholder="Search title or description" class="form-input">
           <select v-model="typeFilter" class="form-select">
             <option value="">All types</option>
@@ -68,98 +69,103 @@
             <option :value="20">20 per page</option>
             <option :value="50">50 per page</option>
           </select>
-                </div>
         </div>
 
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full table-auto divide-y divide-gray-200 text-sm">
-            <thead class="bg-gray-50">
-                <tr>
-                  <th class="pl-0 pr-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date / Time</th>
-                    <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Type</th>
-                    <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Title</th>
-                    <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Details</th>
-                    <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Vet</th>
-                    <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Cost</th>
-                    <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Notes</th>
-                    <th class="px-2 py-2 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+        <div v-if="activeTab === 'health'" class="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full table-auto divide-y divide-gray-200 text-sm">
+              <thead class="bg-gray-50">
+                  <tr>
+                    <th class="pl-0 pr-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date / Time</th>
+                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Type</th>
+                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Title</th>
+                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Details</th>
+                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Vet</th>
+                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Cost</th>
+                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Notes</th>
+                      <th class="px-2 py-2 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                  </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="rec in paginated" :key="rec.id">
+                  <td class="pl-0 pr-3 py-2 align-top">
+                    <div class="flex flex-col">
+                      <div class="font-medium">{{ formatDateOnly(rec.record_date, rec.record_time) }}</div>
+                      <div class="text-xs text-gray-600">{{ formatTimeOnly(rec.record_date, rec.record_time) }}</div>
+                    </div>
+                  </td>
+                  <td class="px-2 py-2 whitespace-nowrap"><span :class="getTypeColor(rec.record_type)" class="px-2 py-1 rounded-full text-xs font-medium">{{ formatRecordType(rec.record_type) }}</span></td>
+                  <td class="px-2 py-2 whitespace-nowrap">{{ rec.title }}</td>
+                  <td class="px-2 py-2 whitespace-nowrap">
+                    <div v-if="rec.vaccine_name">Vaccine: {{ rec.vaccine_name }}</div>
+                    <div v-if="rec.medication_name">Medication: {{ rec.medication_name }}</div>
+                    <div v-if="rec.disease_name">Disease: {{ rec.disease_name }}</div>
+                    <div v-if="rec.treatment_plan">Treatment: {{ rec.treatment_plan }}</div>
+                    <div v-if="rec.dosage">Dosage: {{ rec.dosage }}</div>
+                    <div v-if="rec.administered_by">By: {{ rec.administered_by }}</div>
+                  </td>
+                  <td class="px-2 py-2 whitespace-nowrap">{{ rec.vet_name || '-' }}</td>
+                  <td class="px-2 py-2 whitespace-nowrap">{{ formatCost(rec.cost) }}</td>
+                  <td class="px-2 py-2 whitespace-nowrap">{{ rec.notes || '-' }}</td>
+                  <td class="px-2 py-2 whitespace-nowrap text-right">
+                    <button class="p-2 text-gray-500 hover:text-indigo-600" @click="onEdit(rec)"><Icon name="lucide:edit" class="w-4 h-4" /></button>
+                    <button class="p-2 text-gray-500 hover:text-red-600" @click="onDelete(rec)"><Icon name="lucide:trash-2" class="w-4 h-4" /></button>
+                  </td>
                 </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="rec in paginated" :key="rec.id">
-                <td class="pl-0 pr-3 py-2 align-top">
-                  <div class="flex flex-col">
-                    <div class="font-medium">{{ formatDateOnly(rec.record_date, rec.record_time) }}</div>
-                    <div class="text-xs text-gray-600">{{ formatTimeOnly(rec.record_date, rec.record_time) }}</div>
-                  </div>
-                </td>
-                <td class="px-2 py-2 whitespace-nowrap"><span :class="getTypeColor(rec.record_type)" class="px-2 py-1 rounded-full text-xs font-medium">{{ formatRecordType(rec.record_type) }}</span></td>
-                <td class="px-2 py-2 whitespace-nowrap">{{ rec.title }}</td>
-                <td class="px-2 py-2 whitespace-nowrap">
-                  <div v-if="rec.vaccine_name">Vaccine: {{ rec.vaccine_name }}</div>
-                  <div v-if="rec.medication_name">Medication: {{ rec.medication_name }}</div>
-                  <div v-if="rec.disease_name">Disease: {{ rec.disease_name }}</div>
-                  <div v-if="rec.treatment_plan">Treatment: {{ rec.treatment_plan }}</div>
-                  <div v-if="rec.dosage">Dosage: {{ rec.dosage }}</div>
-                  <div v-if="rec.administered_by">By: {{ rec.administered_by }}</div>
-                </td>
-                <td class="px-2 py-2 whitespace-nowrap">{{ rec.vet_name || '-' }}</td>
-                <td class="px-2 py-2 whitespace-nowrap">{{ formatCost(rec.cost) }}</td>
-                <td class="px-2 py-2 whitespace-nowrap">{{ rec.notes || '-' }}</td>
-                <td class="px-2 py-2 whitespace-nowrap text-right">
-                  <button class="p-2 text-gray-500 hover:text-indigo-600" @click="onEdit(rec)"><Icon name="lucide:edit" class="w-4 h-4" /></button>
-                  <button class="p-2 text-gray-500 hover:text-red-600" @click="onDelete(rec)"><Icon name="lucide:trash-2" class="w-4 h-4" /></button>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot v-if="filtered.length">
-              <tr class="bg-gray-50 font-semibold">
-                <td colspan="5" class="px-2 py-2 text-right">Total</td>
-                <td class="px-2 py-2">{{ totalCost }}</td>
-                <td class="px-2 py-2">{{ filtered.length }} records</td>
-                <td/>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-        <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
-          <div class="text-sm text-gray-700">
-            <template v-if="filtered.length === 0">Showing <span class="font-medium">0</span> records</template>
-            <template v-else>Showing <span class="font-medium">{{ displayStart }}</span> to <span class="font-medium">{{ displayEnd }}</span> of <span class="font-medium">{{ filtered.length }}</span> records</template>
+              </tbody>
+              <tfoot v-if="filtered.length">
+                <tr class="bg-gray-50 font-semibold">
+                  <td colspan="5" class="px-2 py-2 text-right">Total</td>
+                  <td class="px-2 py-2">{{ totalCost }}</td>
+                  <td class="px-2 py-2">{{ filtered.length }} records</td>
+                  <td/>
+                </tr>
+              </tfoot>
+            </table>
           </div>
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-2">
-              <button :disabled="page === 1" class="px-3 py-1.5 border rounded-md" @click="page--">Previous</button>
+          <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
+            <div class="text-sm text-gray-700">
+              <template v-if="filtered.length === 0">Showing <span class="font-medium">0</span> records</template>
+              <template v-else>Showing <span class="font-medium">{{ displayStart }}</span> to <span class="font-medium">{{ displayEnd }}</span> of <span class="font-medium">{{ filtered.length }}</span> records</template>
             </div>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2" v-if="totalPages > 1">
+                <button :disabled="page === 1" class="px-3 py-1.5 border rounded-md disabled:opacity-50" @click="page--">Previous</button>
+              </div>
 
-            <div v-if="totalPages <= 7" class="flex items-center gap-1">
-              <button
-                v-for="n in totalPages"
-                :key="n"
-                :class="[
-                  'px-3 py-1.5 border rounded-md',
-                  n === page ? 'bg-green-600 text-white' : 'hover:bg-gray-100'
-                ]"
-                @click="page = n"
-              >
-                {{ n }}
-              </button>
+              <div v-if="totalPages <= 7 && totalPages > 1" class="flex items-center gap-1">
+                <button
+                  v-for="n in totalPages"
+                  :key="n"
+                  :class="[
+                    'px-3 py-1.5 border rounded-md',
+                    n === page ? 'bg-green-600 text-white border-green-600' : 'hover:bg-gray-100'
+                  ]"
+                  @click="page = n"
+                >
+                  {{ n }}
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2" v-if="totalPages > 1">
+                <button :disabled="page === totalPages" class="px-3 py-1.5 border rounded-md disabled:opacity-50" @click="page++">Next</button>
+              </div>
+
+              <div class="ml-3 text-sm text-gray-600" v-if="totalPages > 1">Page <span class="font-medium">{{ page }}</span> of <span class="font-medium">{{ totalPages }}</span></div>
             </div>
-
-            <div class="flex items-center gap-2">
-              <button :disabled="page === totalPages" class="px-3 py-1.5 border rounded-md" @click="page++">Next</button>
-            </div>
-
-            <div class="ml-3 text-sm text-gray-600">Page <span class="font-medium">{{ page }}</span> of <span class="font-medium">{{ totalPages }}</span></div>
           </div>
         </div>
-      </div>
+
+        <!-- Reproduction Tab -->
+        <div v-else-if="activeTab === 'reproduction'" class="space-y-6">
+           <BreedingHistoryTable :cow-id="id" />
+        </div>
     </div>
     <HealthRecordModal v-model="showModal" :record="editing" :cows="cows" :preselected-cow-id="cow?.id" @save="refresh" />
     </div>
     
-  </template>
+  </div>
+</template>
 
 <script setup lang="ts">
 import type { HealthRecord, Cow } from '~/types'
@@ -176,6 +182,7 @@ const typeFilter = ref('')
 const dateFrom = ref('')
 const dateTo = ref('')
 
+const activeTab = ref('health')
 const page = ref(1)
 const perPage = ref(10)
 
@@ -208,12 +215,8 @@ const paginated = computed(() => filtered.value.slice(start.value, end.value))
 const displayStart = computed(() => filtered.value.length === 0 ? 0 : start.value + 1)
 const displayEnd = computed(() => filtered.value.length === 0 ? 0 : Math.min(end.value, filtered.value.length))
 
-// `visiblePages` removed — numeric pages now rendered directly when totalPages <= 7
-
 const totalCost = computed(() => filtered.value.reduce((sum, r) => sum + (Number(r.cost) || 0), 0))
 
-// use imported `formatDate` from utils/formatDate
-// date formatting helpers: show date as dd/mm/yyyy and time on the line below
 const formatDateOnly = (d, t) => {
   if (!d) return 'N/A'
   try {
@@ -247,9 +250,6 @@ const formatTimeOnly = (d, t) => {
   }
 }
 
-
-
-// Navigate back to the cow page and set its lastTab so it opens the correct tab
 const goToCow = (tab = 'overview') => {
   try {
     const idKey = route.params.id
@@ -294,12 +294,13 @@ const exportCSV = () => {
   a.remove()
   URL.revokeObjectURL(url)
 }
+
 const formatRecordType = (t) => t ? t.charAt(0).toUpperCase() + t.slice(1) : 'Unknown'
 const getTypeColor = (type) => {
-  if (type === 'vaccination') return 'px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700'
-  if (type === 'medication') return 'px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700'
-  if (type === 'disease') return 'px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700'
-  return 'px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700'
+  if (type === 'vaccination') return 'text-blue-700 bg-blue-100 px-2 py-1 rounded-full text-xs font-medium'
+  if (type === 'medication') return 'text-purple-700 bg-purple-100 px-2 py-1 rounded-full text-xs font-medium'
+  if (type === 'disease') return 'text-red-700 bg-red-100 px-2 py-1 rounded-full text-xs font-medium'
+  return 'text-gray-700 bg-gray-100 px-2 py-1 rounded-full text-xs font-medium'
 }
 
 const openAdd = () => {
@@ -327,16 +328,13 @@ const refresh = async () => {
 </script>
 
 <style scoped>
-/* Force uniform dark text across this page for a consistent report look */
 .root,
 .root > *:not(span[class*="rounded-full"]) {
-  color: #111827 !important; /* tailwind gray-900 */
+  color: #111827 !important;
 }
 
-/* Keep table header font-weight and uppercase styling intact */
 .root th {
   text-transform: uppercase !important;
   font-weight: 700 !important;
 }
 </style>
-

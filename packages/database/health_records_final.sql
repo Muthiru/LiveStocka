@@ -89,7 +89,6 @@ ALTER TABLE health_records ADD COLUMN IF NOT EXISTS is_completed BOOLEAN DEFAULT
 -- ALTER TABLE health_records ADD CONSTRAINT health_records_recovery_status_check 
 --   CHECK (recovery_status IS NULL OR recovery_status IN ('recovering', 'recovered', 'ongoing', 'critical'));
 
--- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_health_records_cow_id ON health_records(cow_id);
 CREATE INDEX IF NOT EXISTS idx_health_records_farm_id ON health_records(farm_id);
 CREATE INDEX IF NOT EXISTS idx_health_records_date ON health_records(record_date DESC);
@@ -98,12 +97,15 @@ CREATE INDEX IF NOT EXISTS idx_health_records_next_due ON health_records(next_du
 
 -- Trigger for updated_at
 CREATE OR REPLACE FUNCTION update_health_records_updated_at()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+SET search_path = public  -- Explicit search_path prevents security vulnerabilities
+LANGUAGE plpgsql
+AS $$
 BEGIN
   NEW.updated_at = TIMEZONE('utc'::text, NOW());
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 DROP TRIGGER IF EXISTS update_health_records_updated_at ON health_records;
 CREATE TRIGGER update_health_records_updated_at
@@ -112,6 +114,7 @@ CREATE TRIGGER update_health_records_updated_at
   EXECUTE FUNCTION update_health_records_updated_at();
 
 -- View for upcoming health events
+-- SECURITY DEFINER removed for safety; default is SECURITY INVOKER
 CREATE OR REPLACE VIEW upcoming_health_events AS
 SELECT 
   hr.id,
@@ -128,21 +131,24 @@ WHERE hr.next_due_date >= CURRENT_DATE
   AND hr.next_due_date <= CURRENT_DATE + INTERVAL '30 days'
 ORDER BY hr.next_due_date ASC;
 
--- RLS Policies (ensure users can only access their own farm's records)
 ALTER TABLE health_records ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view their own health records" ON health_records;
-CREATE POLICY "Users can view their own health records" ON health_records
-  FOR SELECT USING (auth.uid() = farm_id);
+DROP POLICY IF EXISTS "Users view their own health records" ON health_records;
+CREATE POLICY "Users view their own health records" ON health_records
+  FOR SELECT USING ((select auth.uid()) = farm_id);
 
 DROP POLICY IF EXISTS "Users can insert their own health records" ON health_records;
-CREATE POLICY "Users can insert their own health records" ON health_records
-  FOR INSERT WITH CHECK (auth.uid() = farm_id);
+DROP POLICY IF EXISTS "Users insert their own health records" ON health_records;
+CREATE POLICY "Users insert their own health records" ON health_records
+  FOR INSERT WITH CHECK ((select auth.uid()) = farm_id);
 
 DROP POLICY IF EXISTS "Users can update their own health records" ON health_records;
-CREATE POLICY "Users can update their own health records" ON health_records
-  FOR UPDATE USING (auth.uid() = farm_id);
+DROP POLICY IF EXISTS "Users update their own health records" ON health_records;
+CREATE POLICY "Users update their own health records" ON health_records
+  FOR UPDATE USING ((select auth.uid()) = farm_id);
 
 DROP POLICY IF EXISTS "Users can delete their own health records" ON health_records;
-CREATE POLICY "Users can delete their own health records" ON health_records
-  FOR DELETE USING (auth.uid() = farm_id);
+DROP POLICY IF EXISTS "Users delete their own health records" ON health_records;
+CREATE POLICY "Users delete their own health records" ON health_records
+  FOR DELETE USING ((select auth.uid()) = farm_id);

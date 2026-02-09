@@ -25,36 +25,44 @@ CREATE INDEX IF NOT EXISTS idx_milk_production_date ON milk_production(productio
 ALTER TABLE milk_production ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Users can only see milk production records for their farm
-CREATE POLICY "Users can view milk production for their farm"
+DROP POLICY IF EXISTS "Users can view milk production for their farm" ON milk_production;
+DROP POLICY IF EXISTS "Users view own production" ON milk_production;
+DROP POLICY IF EXISTS "Users can insert milk production for their farm" ON milk_production;
+DROP POLICY IF EXISTS "Users insert own production" ON milk_production;
+DROP POLICY IF EXISTS "Users can update milk production for their farm" ON milk_production;
+DROP POLICY IF EXISTS "Users update own production" ON milk_production;
+DROP POLICY IF EXISTS "Users can delete milk production for their farm" ON milk_production;
+DROP POLICY IF EXISTS "Users delete own production" ON milk_production;
+
+CREATE POLICY "Users view own production"
   ON milk_production FOR SELECT
-  USING (farm_id = auth.uid());
+  USING (farm_id = (select auth.uid()));
 
--- Policy: Users can insert milk production records for their farm
-CREATE POLICY "Users can insert milk production for their farm"
+CREATE POLICY "Users insert own production"
   ON milk_production FOR INSERT
-  WITH CHECK (farm_id = auth.uid());
+  WITH CHECK (farm_id = (select auth.uid()));
 
--- Policy: Users can update milk production records for their farm
-CREATE POLICY "Users can update milk production for their farm"
+CREATE POLICY "Users update own production"
   ON milk_production FOR UPDATE
-  USING (farm_id = auth.uid())
-  WITH CHECK (farm_id = auth.uid());
+  USING (farm_id = (select auth.uid()))
+  WITH CHECK (farm_id = (select auth.uid()));
 
--- Policy: Users can delete milk production records for their farm
-CREATE POLICY "Users can delete milk production for their farm"
+CREATE POLICY "Users delete own production"
   ON milk_production FOR DELETE
-  USING (farm_id = auth.uid());
+  USING (farm_id = (select auth.uid()));
 
--- Function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_milk_production_updated_at()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+SET search_path = public  -- Explicit search_path prevents security vulnerabilities
+LANGUAGE plpgsql
+AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
--- Trigger to call the function
+DROP TRIGGER IF EXISTS update_milk_production_updated_at_trigger ON milk_production;
 CREATE TRIGGER update_milk_production_updated_at_trigger
   BEFORE UPDATE ON milk_production
   FOR EACH ROW
