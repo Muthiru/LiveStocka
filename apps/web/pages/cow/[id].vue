@@ -59,7 +59,7 @@
               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
               @click="activeTab = 'reproduction'"
             >
-              Reproduction
+                Breeding
             </button>
             <button
               :class="activeTab === 'milk' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
@@ -192,18 +192,20 @@
           </div>
         </div>
 
-        <!-- Reproduction Tab -->
-        <div v-if="activeTab === 'reproduction'" class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Reproduction History</h3>
-          </div>
-          <div class="px-5 py-5">
-            <div class="text-center py-8">
-              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              <p class="mt-2 text-sm text-gray-500">Reproduction tracking coming soon</p>
-            </div>
+        <!-- Breeding Tab -->
+        <div v-if="activeTab === 'reproduction'" class="space-y-6">
+          <BreedingHistoryTable :cow-id="cow.id" />
+          
+          <!-- Optional: Add a quick record breeding button or form if needed, 
+               but the history table is the priority here -->
+          <div class="bg-white shadow rounded-lg p-5">
+             <div class="flex items-center justify-between">
+                <div>
+                   <h4 class="text-sm font-medium text-gray-900">Record New Attempt</h4>
+                   <p class="text-xs text-gray-500">Add a new breeding entry for this cow.</p>
+                </div>
+                <NuxtLink to="/breeding" class="text-indigo-600 text-sm font-medium hover:underline">Go to Breeding Page →</NuxtLink>
+             </div>
           </div>
         </div>
 

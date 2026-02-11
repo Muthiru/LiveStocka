@@ -11,7 +11,6 @@
           </div>
           <nav class="mt-5 flex-1 px-2 space-y-1">
             <NuxtLink
-              to="/dashboard"
               class="group flex items-center px-2 py-2 text-sm font-medium rounded-md"
               :class="isActive('/dashboard') ? 'bg-indigo-100 text-indigo-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
             >
@@ -23,7 +22,6 @@
             <NuxtLink
               to="/cows"
               class="group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-              :class="isActive('/cows') ? 'bg-indigo-100 text-indigo-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
             >
               <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
@@ -52,7 +50,7 @@
                 Health Records
               </NuxtLink>
               <NuxtLink
-                to="/reproduction"
+                to="/breeding"
                 class="group flex items-center px-2 py-2 mt-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               >
                 <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +135,7 @@
               </svg>
               Health Records
             </NuxtLink>
-            <NuxtLink to="/reproduction" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+            <NuxtLink to="/breeding" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
               <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>

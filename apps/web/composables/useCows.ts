@@ -1,34 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Ref } from 'vue'
 import type { Cow, CowFormData } from '~/types'
-import type { Database } from '~/types/supabase'
 import { getCowStatusColor } from '~/utils/statusHelpers'
-
-// Helper function to convert form data to database insert format
-const convertCowFormToDbInsert = (formData: CowFormData, farmId: string): Database['public']['Tables']['cows']['Insert'] => {
-  const { age, weight, ...rest } = formData
-  return {
-    ...rest,
-    farm_id: farmId,
-    age: age ? Number.parseInt(age, 10) : null,
-    weight: weight ? Number.parseFloat(weight) : null
-  }
-}
-
-// Helper function to convert form data to database update format  
-const convertCowFormToDbUpdate = (formData: Partial<CowFormData>): Database['public']['Tables']['cows']['Update'] => {
-  const { age, weight, ...rest } = formData
-  const updates: Database['public']['Tables']['cows']['Update'] = { ...rest }
-  
-  if (age !== undefined) {
-    updates.age = age ? Number.parseInt(age, 10) : null
-  }
-  if (weight !== undefined) {
-    updates.weight = weight ? Number.parseFloat(weight) : null
-  }
-  
-  return updates
-}
 
 interface FetchCowsParams {
   limit?: number | null
@@ -49,6 +22,11 @@ interface PaginatedCowsResult {
   count: number
 }
 
+interface CowStats {
+  total: number
+  active: number
+}
+
 interface CowStatus {
   value: string
   label: string
@@ -56,42 +34,44 @@ interface CowStatus {
 
 export const useCows = () => {
   const { $supabase } = useNuxtApp()
+
+
   const cows: Ref<Cow[]> = ref([])
   const loading: Ref<boolean> = ref(false)
   const error: Ref<string | null> = ref(null)
 
+  // Helper to get auth token
+  const getAuthToken = async (): Promise<string | null> => {
+    const { data } = await $supabase.auth.getSession()
+    return data?.session?.access_token || null
+  }
+
   const fetchCows = async ({ limit = null, status = null, orderBy = 'created_at' }: FetchCowsParams = {}): Promise<Cow[]> => {
     loading.value = true
     try {
-      // Get current user to ensure RLS (Row Level Security) works
-      let query = $supabase
-        .from('cows')
-        .select('*')
-      
-      if (status) {
-        query = query.eq('status', status)
-      }
+      const token = await getAuthToken()
+      if (!token) throw new Error('User not authenticated')
 
-      if (orderBy === 'name') {
-        query = query.order('name', { ascending: true })
-      } else {
-        query = query.order(orderBy, { ascending: false })
-      }
-      
-      if (limit) {
-        query = query.limit(limit)
-      }
+      const params = new URLSearchParams()
+      if (limit) params.append('limit', String(limit))
+      if (status) params.append('status', status)
+      if (orderBy) params.append('order_by', orderBy)
 
-      const { data, error: err } = await query
-      
+      const { data, error: err } = await $supabase.functions.invoke(`cowService/get_cows?${params.toString()}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
       if (err) throw err
-      
+      if (data?.error) throw new Error(data.error)
+
+      const result = data?.cows || []
+
       // If fetching main list (no limit, default sort), update state.
       if (!limit && !status) {
-         cows.value = data || []
+        cows.value = result
       }
-      return data || []
-
+      return result
     } catch (e: any) {
       error.value = e.message
       console.error('Error fetching cows:', e)
@@ -101,40 +81,34 @@ export const useCows = () => {
     }
   }
 
-  const fetchCowsPaginated = async ({ 
-    page = 1, 
-    pageSize = 12, 
-    search = '', 
-    status = '', 
-    breed = '' 
+  const fetchCowsPaginated = async ({
+    page = 1,
+    pageSize = 12,
+    search = '',
+    status = '',
+    breed = ''
   }: FetchCowsPaginatedParams = {}): Promise<PaginatedCowsResult> => {
     loading.value = true
     try {
-      const from = (page - 1) * pageSize
-      const to = from + pageSize - 1
+      const token = await getAuthToken()
+      if (!token) throw new Error('User not authenticated')
 
-      let query = $supabase
-        .from('cows')
-        .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false })
+      const params = new URLSearchParams()
+      params.append('page', String(page))
+      params.append('page_size', String(pageSize))
+      if (search) params.append('search', search)
+      if (status) params.append('status', status)
+      if (breed) params.append('breed', breed)
 
-      if (search) {
-        query = query.or(`name.ilike.%${search}%,tag_id.ilike.%${search}%`)
-      }
-
-      if (status) {
-        query = query.eq('status', status)
-      }
-
-      if (breed) {
-        query = query.eq('breed', breed)
-      }
-
-      const { data, count, error: err } = await query.range(from, to)
+      const { data, error: err } = await $supabase.functions.invoke(`cowService/get_cows?${params.toString()}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` }
+      })
 
       if (err) throw err
+      if (data?.error) throw new Error(data.error)
 
-      return { data: data || [], count: count || 0 }
+      return { data: data?.cows || [], count: data?.count || 0 }
     } catch (e: any) {
       console.error('Error fetching paginated cows:', e)
       return { data: [], count: 0 }
@@ -145,14 +119,18 @@ export const useCows = () => {
 
   const getCowById = async (id: string): Promise<Cow | null> => {
     try {
-      const { data, error: err } = await $supabase
-        .from('cows')
-        .select('*')
-        .eq('id', id)
-        .single()
-      
+      const token = await getAuthToken()
+      if (!token) throw new Error('User not authenticated')
+
+      const { data, error: err } = await $supabase.functions.invoke(`cowService/get_cow?id=${id}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
       if (err) throw err
-      return data
+      if (data?.error) throw new Error(data.error)
+
+      return data?.cow || null
     } catch (e: any) {
       console.error('Error fetching cow:', e)
       return null
@@ -162,22 +140,26 @@ export const useCows = () => {
   const addCow = async (cowData: CowFormData): Promise<Cow> => {
     loading.value = true
     try {
-      // Get authenticated user
-      const { data: { user } } = await $supabase.auth.getUser()
-      if (!user) throw new Error('User not authenticated')
+      const token = await getAuthToken()
+      if (!token) throw new Error('User not authenticated')
 
-      const result = await ($supabase as any)
-        .from('cows')
-        .insert([convertCowFormToDbInsert(cowData, user.id)])
-        .select()
-        .single()
-      
-      const { data, error: err } = result as unknown as { data: Cow | null; error: any }
-      
+      const { data, error: err } = await $supabase.functions.invoke('cowService/create_cow', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: cowData
+      })
+
       if (err) throw err
-      
-      cows.value = [data, ...cows.value]
-      return data
+      if (data?.error) throw new Error(data.error)
+
+      const newCow = data?.cow
+      if (newCow) {
+        cows.value = [newCow, ...cows.value]
+      }
+      return newCow
     } catch (e: any) {
       error.value = e.message
       throw e
@@ -189,24 +171,30 @@ export const useCows = () => {
   const updateCow = async (id: string, updates: Partial<CowFormData>): Promise<Cow | null> => {
     loading.value = true
     try {
-      const result = await ($supabase as any)
-        .from('cows')
-        .update(convertCowFormToDbUpdate(updates))
-        .eq('id', id)
-        .select()
-        .single()
-      
-      const { data, error: err } = result as unknown as { data: Cow | null; error: any }
-      
+      const token = await getAuthToken()
+      if (!token) throw new Error('User not authenticated')
+
+      const { data, error: err } = await $supabase.functions.invoke('cowService/update_cow', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: { id, ...updates }
+      })
+
       if (err) throw err
-      
+      if (data?.error) throw new Error(data.error)
+
+      const updatedCow = data?.cow
+
       // Update local state
       const index = cows.value.findIndex(cow => cow.id === id)
-      if (index !== -1) {
-        cows.value[index] = data
+      if (index !== -1 && updatedCow) {
+        cows.value[index] = updatedCow
       }
-      
-      return data
+
+      return updatedCow
     } catch (e: any) {
       error.value = e.message
       console.error('Error updating cow:', e)
@@ -219,13 +207,21 @@ export const useCows = () => {
   const deleteCow = async (id: string): Promise<boolean> => {
     loading.value = true
     try {
-      const { error: err } = await $supabase
-        .from('cows')
-        .delete()
-        .eq('id', id)
-      
+      const token = await getAuthToken()
+      if (!token) throw new Error('User not authenticated')
+
+      const { data, error: err } = await $supabase.functions.invoke('cowService/delete_cow', {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: { id }
+      })
+
       if (err) throw err
-      
+      if (data?.error) throw new Error(data.error)
+
       // Remove from local state
       cows.value = cows.value.filter(cow => cow.id !== id)
       return true
@@ -233,6 +229,29 @@ export const useCows = () => {
       error.value = e.message
       console.error('Error deleting cow:', e)
       return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const fetchStats = async (): Promise<CowStats> => {
+    loading.value = true
+    try {
+      const token = await getAuthToken()
+      if (!token) return { total: 0, active: 0 }
+
+      const { data, error: err } = await $supabase.functions.invoke('cowService/get_stats', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (err) throw err
+      if (data?.error) throw new Error(data.error)
+
+      return data || { total: 0, active: 0 }
+    } catch (e: any) {
+      console.error('Error fetching cow stats:', e)
+      return { total: 0, active: 0 }
     } finally {
       loading.value = false
     }
@@ -260,11 +279,11 @@ export const useCows = () => {
    */
   const isMilkable = (status: string): boolean => {
     const normalizedStatus = (status || 'active').toLowerCase()
-    return normalizedStatus !== 'bull' && 
-           normalizedStatus !== 'calf' && 
-           normalizedStatus !== 'dry' &&
-           normalizedStatus !== 'sold' &&
-           normalizedStatus !== 'deceased'
+    return normalizedStatus !== 'bull' &&
+      normalizedStatus !== 'calf' &&
+      normalizedStatus !== 'dry' &&
+      normalizedStatus !== 'sold' &&
+      normalizedStatus !== 'deceased'
   }
 
   return {
@@ -277,6 +296,7 @@ export const useCows = () => {
     addCow,
     updateCow,
     deleteCow,
+    fetchStats,
     getStatusClass,
     cowStatuses,
     isMilkable

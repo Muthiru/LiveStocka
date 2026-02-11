@@ -494,6 +494,7 @@ const handleSubmit = async () => {
 
     if (result) {
       console.log('Success! Emitting save and closing')
+      useToast().success(isEdit.value ? 'Health record updated successfully' : 'Health record added successfully')
       emit('save')
       close()
     } else {
@@ -501,6 +502,7 @@ const handleSubmit = async () => {
     }
   } catch (err) {
     console.error('handleSubmit error:', err)
+    useToast().error('Failed to save health record')
   } finally {
     saving.value = false
   }

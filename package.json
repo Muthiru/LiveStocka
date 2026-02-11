@@ -1,5 +1,6 @@
 {
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.87"
+    "@iconify-json/lucide": "^1.2.87",
+    "supabase": "^2.76.4"
   }
 }
