@@ -57,7 +57,7 @@ async function handleGetCows(req: Request) {
     const limit = url.searchParams.get('limit');
     const status = url.searchParams.get('status');
     const orderBy = url.searchParams.get('order_by') || 'created_at';
-    const sortOrder = url.searchParams.get('sort_order') === 'asc' ? true : false;
+    const sortOrder = url.searchParams.get('sort_order') === 'asc';
 
     // Pagination
     const page = Number(url.searchParams.get('page') || 1);
@@ -217,33 +217,7 @@ async function handleGetStats(req: Request) {
     if (totalErr) return jsonResponse({ error: 'fetch_failed', detail: totalErr.message }, 500);
 
     // Active/Milkable cows (not bull, calf, dry, sold, deceased)
-    // Supabase JS doesn't support complex NOT IN with list easily, so we might need to filter or use raw SQL?
-    // Or we can just count status!=...
-    // Let's use filter
-    const { count: active, error: activeErr } = await supabase
-        .from('cows')
-        .select('*', { count: 'exact', head: true })
-        .eq('farm_id', farm_id)
-        .neq('status', 'bull')
-        .neq('status', 'calf')
-        .neq('status', 'dry')
-        .neq('status', 'sold')
-        .neq('status', 'deceased')
-        .neq('status', 'sick'); // Maybe sick cows overlap with active? User logic in useCows said:
-    /*
-       const isMilkable = (status: string): boolean => {
-        const normalizedStatus = (status || 'active').toLowerCase()
-        return normalizedStatus !== 'bull' && 
-               normalizedStatus !== 'calf' && 
-               normalizedStatus !== 'dry' &&
-               normalizedStatus !== 'sold' &&
-               normalizedStatus !== 'deceased'
-      }
-    */
-    // So 'sick' IS milkable? Probably not, but following user logic.
-    // Actually, sick cows shouldn't be milked usually, but they are "Active" in the herd.
-    // The dashboard says "Active Cows".
-    // Let's fetch all statuses and count in memory to be safe and consistent with frontend logic.
+    // We fetch all statuses and count in memory to be safe and consistent with frontend logic.
 
     const { data: allCows, error: statErr } = await supabase
         .from('cows')
