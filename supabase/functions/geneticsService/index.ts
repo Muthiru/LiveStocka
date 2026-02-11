@@ -18,9 +18,23 @@ function jsonResponse(body: unknown, status = 200) {
 
 async function getUserAndFarm(req: Request) {
   const authHeader = req.headers.get('authorization') || '';
-  const token = authHeader.replace(/^Bearer /i, '').trim();
+  let token = authHeader.replace(/^Bearer /i, '').trim();
+
+  // Fallback: Check query param if header is missing
+  if (!token) {
+    try {
+      const url = new URL(req.url);
+      const paramToken = url.searchParams.get('auth_token');
+      if (paramToken) {
+        token = paramToken;
+      }
+    } catch (e) {
+      console.error('Error checking query params for token', e);
+    }
+  }
 
   if (!token) {
+    console.error('Auth Error: Missing token');
     return { error: 'AUTH_HEADER_MISSING_OR_MALFORMED' };
   }
 
@@ -28,22 +42,31 @@ async function getUserAndFarm(req: Request) {
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error) {
+      console.error('Auth Error: Supabase getUser failed', error);
+      // Log env vars existence (not values) to check config
+      console.log('Env Check:', {
+        hasUrl: !!Deno.env.get('SUPABASE_URL'),
+        hasKey: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+      });
       return { error: `SUPABASE_AUTH_ERROR: ${error.message}` };
     }
 
     if (!user) {
+      console.error('Auth Error: No user found for token (getUser returned success but no user)');
       return { error: 'SUPABASE_AUTH_NO_USER' };
     }
 
+    console.log(`[Auth Success] User: ${user.id}`);
     return { user, farm_id: user.id };
   } catch (err: any) {
+    console.error('Auth Exception:', err);
     return { error: `EDGE_FUNCTION_EXCEPTION: ${err.message}` };
   }
 }
 
 // helper: gather ancestors up to depth by iterative queries to avoid recursive SQL
 async function fetchAncestors(cowId: string, depth = 5, farm_id?: string) {
-  const ancestors: { id: string; relation: string; depth: number }[] = [];
+  const ancestors: { id: string; relation: string; depth: number; child_id: string }[] = [];
   let frontier = [cowId];
   const seen = new Set<string>();
   for (let d = 1; d <= depth; d++) {
@@ -75,18 +98,18 @@ async function fetchDescendants(cowId: string, depth = 5, farm_id?: string) {
   return descendants;
 }
 
-async function processCowParents(id: string, depth: number, ancestors: { id: string; relation: string; depth: number }[], next: string[], seen: Set<string>, farm_id?: string) {
+async function processCowParents(id: string, depth: number, ancestors: { id: string; relation: string; depth: number; child_id: string }[], next: string[], seen: Set<string>, farm_id?: string) {
   const row = await getCowParents(id, farm_id);
   if (!row) return;
   const sire = (row as any).sire_id;
   if (sire && !seen.has(sire)) {
-    ancestors.push({ id: sire, relation: 'sire', depth });
+    ancestors.push({ id: sire, relation: 'sire', depth, child_id: id });
     next.push(sire);
     seen.add(sire);
   }
   const dam = (row as any).dam_id;
   if (dam && !seen.has(dam)) {
-    ancestors.push({ id: dam, relation: 'dam', depth });
+    ancestors.push({ id: dam, relation: 'dam', depth, child_id: id });
     next.push(dam);
     seen.add(dam);
   }
@@ -172,6 +195,7 @@ async function handleCheckBreedingCompatibility(req: Request) {
 serve(async (req: Request) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, '');
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }

@@ -41,6 +41,17 @@
             <div class="pt-4 mt-4 border-t border-gray-200">
               <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Features</p>
               <NuxtLink
+                to="/family-tree"
+                class="group flex items-center px-2 py-2 mt-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              >
+                <!-- Premium Cow Head Icon -->
+                <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 14c0-3.3-1.8-5-5-5s-5 1.7-5 5c0 1.5.7 2.8 1.8 3.5C8.3 18.2 8 19 8 20c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2 0-1-.3-1.8-.8-2.5 1.1-.7 1.8-2 1.8-3.5zM9 12l.01.01M15 12l.01.01" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 9c-1-1-2-1-2 1s.5 2.5 1.5 3.5M18 9c1-1 2-1 2 1s-.5 2.5-1.5 3.5" />
+                </svg>
+                Family Tree
+              </NuxtLink>
+              <NuxtLink
                 to="/health-records"
                 class="group flex items-center px-2 py-2 mt-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               >
@@ -129,6 +140,14 @@
           </NuxtLink>
           <div class="pt-3 mt-3 border-t border-gray-200">
             <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Features</p>
+            <NuxtLink to="/family-tree" class="flex items-center px-3 py-2 mt-1 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                <!-- Premium Cow Head Icon -->
+                <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 14c0-3.3-1.8-5-5-5s-5 1.7-5 5c0 1.5.7 2.8 1.8 3.5C8.3 18.2 8 19 8 20c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2 0-1-.3-1.8-.8-2.5 1.1-.7 1.8-2 1.8-3.5zM9 12l.01.01M15 12l.01.01" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 9c-1-1-2-1-2 1s.5 2.5 1.5 3.5M18 9c1-1 2-1 2 1s-.5 2.5-1.5 3.5" />
+                </svg>
+                Family Tree
+            </NuxtLink>
             <NuxtLink to="/health-records" class="flex items-center px-3 py-2 mt-1 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
               <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

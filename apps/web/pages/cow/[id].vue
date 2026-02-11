@@ -11,10 +11,28 @@
         <div class="mb-6">
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-3xl font-bold text-gray-900">{{ cow.name }}</h1>
+              <div class="flex items-center gap-3">
+                <h1 class="text-3xl font-bold text-gray-900">{{ cow.name }}</h1>
+                <span 
+                  v-if="cow.genetic_line === 'Pedigree'"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200"
+                >
+                  <Icon name="lucide:award" class="w-3 h-3 mr-1" />
+                  Pedigree
+                </span>
+              </div>
               <p class="mt-2 text-sm text-gray-600">Tag ID: {{ cow.tag_id || 'N/A' }}</p>
             </div>
             <div class="flex space-x-3">
+              <NuxtLink
+                :to="`/family-tree?root=${cow.id}`"
+                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <svg class="mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
+                </svg>
+                View Lineage
+              </NuxtLink>
               <button
                 class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
                 @click="exportProfile"
@@ -89,6 +107,10 @@
               <div>
                 <dt class="text-sm font-medium text-gray-500">Breed</dt>
                 <dd class="mt-1 text-sm text-gray-900">{{ cow.breed || 'N/A' }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Genetic Line</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ cow.genetic_line || 'N/A' }}</dd>
               </div>
               <div>
                 <dt class="text-sm font-medium text-gray-500">Color</dt>

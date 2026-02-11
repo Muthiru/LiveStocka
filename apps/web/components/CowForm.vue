@@ -108,6 +108,23 @@
               @input="updateField('birth_date', ($event.target as HTMLInputElement).value)"
             >
           </div>
+
+          <div>
+            <label for="genetic_line" class="form-label">Genetic Line</label>
+            <select
+              id="genetic_line"
+              :value="form.genetic_line"
+              class="form-select"
+              @change="updateField('genetic_line', ($event.target as HTMLSelectElement).value)"
+            >
+              <option value="">Select Line...</option>
+              <option value="Foundation">Foundation</option>
+              <option value="Grade">Grade</option>
+              <option value="Appendix">Appendix</option>
+              <option value="Pedigree">Pedigree</option>
+              <option value="Cross">Cross</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>

@@ -16,13 +16,29 @@ export interface Cow {
   color?: string
   age?: number
   weight?: number
-  status: 'active' | 'sold' | 'deceased' | 'dry'
+  status: 'active' | 'sold' | 'deceased' | 'dry' | 'bull'
   birth_date?: string
   sire?: string
+  sire_id?: string
   dam?: string
+  dam_id?: string
+  genetic_line?: string
   notes?: string
   created_at: string
   updated_at: string
+}
+
+export interface Ancestor {
+  id: string
+  relation: 'sire' | 'dam'
+  depth: number
+  child_id: string
+}
+
+export interface Descendant {
+  id: string
+  via: 'sire' | 'dam'
+  depth: number
 }
 
 export interface HealthRecord {
@@ -116,6 +132,7 @@ export interface CowFormData {
   birth_date?: string
   sire?: string
   dam?: string
+  genetic_line?: string
   notes?: string
 }
 

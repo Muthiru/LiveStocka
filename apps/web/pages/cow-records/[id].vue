@@ -4,7 +4,16 @@
     <div class="max-w-7xl mx-auto">
       <div class="flex justify-between items-start mb-6">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">{{ cow?.name || 'Cow' }}</h1>
+            <div class="flex items-center gap-3">
+              <h1 class="text-2xl font-bold text-gray-900">{{ cow?.name || 'Cow' }}</h1>
+              <span 
+                v-if="cow?.genetic_line === 'Pedigree'"
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200"
+              >
+                <Icon name="lucide:award" class="w-3 h-3 mr-1" />
+                Pedigree
+              </span>
+            </div>
             <p class="text-sm text-gray-600">Tag: {{ cow?.tag_id || 'N/A' }}</p>
 
             <!-- Tabs bar similar to cow page -->
@@ -46,6 +55,14 @@
             <button class="px-3 py-2 border rounded-md" @click="exportCSV">
               Export CSV
             </button>
+            <NuxtLink 
+              v-if="cow"
+              :to="`/family-tree?root=${cow.id}`" 
+              class="px-3 py-2 border rounded-md hover:bg-gray-50 flex items-center gap-2"
+            >
+              <Icon name="lucide:network" class="w-4 h-4" />
+              Lineage
+            </NuxtLink>
             <NuxtLink to="/health-records" class="px-3 py-2 border rounded-md">Back</NuxtLink>
           </div>
         </div>
