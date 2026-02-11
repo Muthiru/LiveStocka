@@ -117,11 +117,19 @@
     </div>
     <!-- Entry Table -->
     <div v-if="entries.length > 0" class="bg-white rounded-lg shadow-md">
-      <div class="px-6 py-4 border-b border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
         <h3 class="text-lg font-medium text-gray-900">
           Production Entries
           <span class="text-sm text-gray-500 font-normal ml-2">({{ entries.length }} cows)</span>
         </h3>
+        <button
+          :disabled="isSavingAll || entries.length === 0"
+          class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+          @click="saveAllEntries"
+        >
+          <Icon name="lucide:save" class="w-4 h-4 mr-2" />
+          {{ isSavingAll ? 'Saving...' : 'Save All Entries' }}
+        </button>
       </div>
 
       <div class="overflow-x-auto">
@@ -248,9 +256,10 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const { $supabase } = useNuxtApp()
+
 const toast = useToast()
 const { fetchCows, isMilkable } = useCows()
+const { fetchProduction, bulkAddProduction } = useMilkProduction()
 
 // State
 const entryDate = ref(new Date().toISOString().split('T')[0])
@@ -260,10 +269,12 @@ const middayTime = ref('12:00')
 const eveningTime = ref('18:00')
 const entries = ref([])
 const allCows = ref([])
+const dateRecords = ref([])
 const selectedCowId = ref('')
 const loading = ref(false)
 const loadingCows = ref(false)
 const savingCowIds = ref([])
+const isSavingAll = ref(false)
 
 // Session visibility computed properties
 const showMorning = computed(() => ['morning', 'morning_evening', 'all'].includes(sessionType.value))
@@ -322,13 +333,23 @@ function calculateTotal(entry) {
 async function loadAllCows() {
   try {
     loadingCows.value = true
-    const cows = await fetchCows({ orderBy: 'name' })
+    const cows = await fetchCows()
     allCows.value = cows || []
   } catch (err) {
     console.error('Error loading cows:', err)
     toast.error('Failed to load cows')
   } finally {
     loadingCows.value = false
+  }
+}
+
+async function loadDateRecords() {
+  try {
+    // console.log('Loading records for date:', entryDate.value)
+    const records = await fetchProduction(entryDate.value)
+    dateRecords.value = records || []
+  } catch (err) {
+    console.error('Error loading date records:', err)
   }
 }
 
@@ -344,52 +365,52 @@ async function addCowToEntry() {
     return
   }
 
-  try {
-    // Fetch existing record for this date if any
-    const { data: user } = await $supabase.auth.getUser()
-    const { data: existingRecord } = await $supabase
-      .from('milk_production')
-      .select('morning_yield, midday_yield, evening_yield, notes')
-      .eq('farm_id', user.user.id)
-      .eq('cow_id', cow.id)
-      .eq('production_date', entryDate.value)
-      .single()
+  // Check existing record from pre-fetched data
+  const existingRecord = dateRecords.value.find(r => r.cow_id === cow.id)
 
-    entries.value.push({
-      cow_id: cow.id,
-      cow_name: cow.name,
-      cow_tag_id: cow.tag_id,
-      morning_yield: existingRecord?.morning_yield ?? '',
-      midday_yield: existingRecord?.midday_yield ?? '',
-      evening_yield: existingRecord?.evening_yield ?? '',
-      notes: existingRecord?.notes ?? ''
-    })
+  entries.value.push({
+    cow_id: cow.id,
+    cow_name: cow.name,
+    cow_tag_id: cow.tag_id,
+    morning_yield: existingRecord?.morning_yield ?? '',
+    midday_yield: existingRecord?.midday_yield ?? '',
+    evening_yield: existingRecord?.evening_yield ?? '',
+    notes: existingRecord?.notes ?? ''
+  })
 
-    toast.success(`${cow.name} added to entries`)
-    selectedCowId.value = '' // Reset selection
-  } catch (err) {
-    console.error('Error adding cow:', err)
-    toast.error('Failed to add cow')
-  }
+  // toast.success(`${cow.name} added to list`)
+  selectedCowId.value = '' // Reset selection
 }
 
 function removeEntry(cowId) {
   const entry = entries.value.find(e => e.cow_id === cowId)
   entries.value = entries.value.filter(e => e.cow_id !== cowId)
   if (entry) {
-    toast.info(`${entry.cow_name} removed from entries`)
+    // toast.info(`${entry.cow_name} removed`)
+  }
+}
+
+function prepareRecord(entry) {
+  const morning = Number.parseFloat(entry.morning_yield) || 0
+  const midday = Number.parseFloat(entry.midday_yield) || 0
+  const evening = Number.parseFloat(entry.evening_yield) || 0
+
+  return {
+    cow_id: entry.cow_id,
+    production_date: entryDate.value,
+    morning_yield: morning,
+    morning_time: showMorning.value && morning > 0 ? morningTime.value : null,
+    midday_yield: midday,
+    midday_time: showMidday.value && midday > 0 ? middayTime.value : null,
+    evening_yield: evening,
+    evening_time: showEvening.value && evening > 0 ? eveningTime.value : null,
+    notes: entry.notes || null
   }
 }
 
 async function saveSingleEntry(entry) {
   try {
     savingCowIds.value.push(entry.cow_id)
-
-    const { data: user } = await $supabase.auth.getUser()
-    if (!user?.user?.id) {
-      toast.error('User not authenticated')
-      return
-    }
 
     const morning = Number.parseFloat(entry.morning_yield) || 0
     const midday = Number.parseFloat(entry.midday_yield) || 0
@@ -400,36 +421,88 @@ async function saveSingleEntry(entry) {
       return
     }
 
-    const record = {
-      farm_id: user.user.id,
-      cow_id: entry.cow_id,
-      production_date: entryDate.value,
-      morning_yield: morning,
-      morning_time: showMorning.value && morning > 0 ? morningTime.value : null,
-      midday_yield: midday,
-      midday_time: showMidday.value && midday > 0 ? middayTime.value : null,
-      evening_yield: evening,
-      evening_time: showEvening.value && evening > 0 ? eveningTime.value : null,
-      notes: entry.notes || null
+    const record = prepareRecord(entry)
+    const result = await bulkAddProduction([record])
+
+    if (result && result.failed > 0) {
+       throw new Error(result.errors[0]?.error || 'Failed to save')
     }
 
-    const { error: saveError } = await $supabase
-      .from('milk_production')
-      .upsert(record, { onConflict: 'cow_id,production_date' })
-
-    if (saveError) throw saveError
-
-    toast.success(`✓ ${entry.cow_name}: ${calculateTotal(entry)}L saved successfully`)
+    toast.success(`✓ ${entry.cow_name}: ${calculateTotal(entry)}L saved`)
     
-    // Remove the entry from the list after successful save
+    // Remove the entry from the list after successful save (and refresh buffer)
     entries.value = entries.value.filter(e => e.cow_id !== entry.cow_id)
+    await loadDateRecords() // Refresh background data
+    
   } catch (err) {
     console.error('Error saving entry:', err)
-    toast.error(`Failed to save ${entry.cow_name}`)
+    toast.error(`Failed to save ${entry.cow_name}: ${err.message}`)
   } finally {
     savingCowIds.value = savingCowIds.value.filter(id => id !== entry.cow_id)
   }
 }
+
+async function saveAllEntries() {
+  if (entries.value.length === 0) return
+  
+  isSavingAll.value = true
+  try {
+    const validRecords = []
+    
+    // Validate all first
+    for (const entry of entries.value) {
+        const morning = Number.parseFloat(entry.morning_yield) || 0
+        const midday = Number.parseFloat(entry.midday_yield) || 0
+        const evening = Number.parseFloat(entry.evening_yield) || 0
+        
+        if (morning > 0 || midday > 0 || evening > 0) {
+            validRecords.push(prepareRecord(entry))
+        }
+    }
+    
+    if (validRecords.length === 0) {
+        toast.warning('No valid entries with data to save')
+        return
+    }
+    
+    const result = await bulkAddProduction(validRecords)
+    
+    if (result) {
+        const successCount = result.success || 0
+        const failedCount = result.failed || 0
+        
+        if (successCount > 0) {
+            toast.success(`Successfully saved ${successCount} records`)
+            
+             // Construct set of successful IDs to remove
+            const successfulCowIds = new Set(result.results.map(r => r.cow_id))
+            entries.value = entries.value.filter(e => !successfulCowIds.has(e.cow_id))
+            
+            await loadDateRecords()
+        }
+        
+        if (failedCount > 0) {
+             toast.error(`Failed to save ${failedCount} records. Check errors.`)
+             console.error('Bulk save errors:', result.errors)
+        }
+    }
+    
+  } catch (err) {
+    console.error('Error in bulk save:', err)
+    toast.error('Failed to save entries')
+  } finally {
+    isSavingAll.value = false
+  }
+}
+
+// Watch date to refresh records
+watch(entryDate, () => {
+    loadDateRecords()
+    // Optional: clear entries if date changes? Or keep them?
+    // User might want to carry over list to another date? 
+    // Usually bulk entry is for TODAY. Let's keep them but warn if data exists?
+    // For now, let's reload date records so new additions get correct pre-fill
+}, { immediate: true })
 
 // Load cows on mount
 onMounted(() => {

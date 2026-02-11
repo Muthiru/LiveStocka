@@ -120,11 +120,41 @@ export const useMilkProduction = () => {
         }
     }
 
+    const bulkAddProduction = async (records: ProductionFormData[]): Promise<any> => {
+        loading.value = true
+        error.value = null
+        try {
+            const { data } = await $supabase.auth.getSession()
+            const token = data?.session?.access_token
+            if (!token) throw new Error('User not authenticated')
+
+            const { data: responseData, error: err } = await $supabase.functions.invoke('milkProductionService/bulk_create_production', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: { records }
+            })
+
+            if (err) throw err
+            if (responseData?.error) throw new Error(responseData.error)
+
+            return responseData
+        } catch (e: any) {
+            error.value = e.message
+            throw e
+        } finally {
+            loading.value = false
+        }
+    }
+
     return {
         loading,
         error,
         fetchProduction,
         addProduction,
+        bulkAddProduction,
         fetchStats
     }
 }
