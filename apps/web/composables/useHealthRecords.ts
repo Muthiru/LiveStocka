@@ -3,40 +3,6 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 import type { HealthRecord, HealthRecordFormData } from '~/types'
 
-// Helper function to convert form data to database insert format
-const convertHealthRecordFormToDbInsert = (formData: HealthRecordFormData, farmId: string): any => {
-  const { cost, next_checkup_date, record_date, ...rest } = formData
-  return {
-    ...rest,
-    farm_id: farmId,
-    date: record_date, // Map record_date to date column
-    record_date: record_date,
-    cost: cost ? Number.parseFloat(cost) : null,
-    next_due_date: next_checkup_date || null
-  }
-}
-
-// Helper function to convert form data to database update format
-const convertHealthRecordFormToDbUpdate = (formData: Partial<HealthRecordFormData>): any => {
-  const { cost, next_checkup_date, record_date, ...rest } = formData
-  const updates: any = { ...rest }
-  
-  if (record_date !== undefined) {
-    updates.date = record_date
-    updates.record_date = record_date
-  }
-  
-  if (cost !== undefined) {
-    updates.cost = cost ? Number.parseFloat(cost) : null
-  }
-  
-  if (next_checkup_date !== undefined) {
-    updates.next_due_date = next_checkup_date || null
-  }
-  
-  return updates
-}
-
 export const useHealthRecords = () => {
   const { $supabase } = useNuxtApp()
   const toast = useToast()
@@ -46,41 +12,39 @@ export const useHealthRecords = () => {
   const error: Ref<string | null> = ref(null)
   const upcomingEvents: Ref<any[]> = ref([])
 
+  // Helper to get auth token
+  const getAuthToken = async (): Promise<string | null> => {
+    const { data } = await $supabase.auth.getSession()
+    return data?.session?.access_token || null
+  }
+
   // Fetch all health records or by cow
   const fetchHealthRecords = async (cowId: string | null = null): Promise<HealthRecord[]> => {
     loading.value = true
     error.value = null
 
     try {
-      const { data: user } = await $supabase.auth.getUser()
-      if (!user?.user?.id) {
+      const token = await getAuthToken()
+      if (!token) {
         throw new Error('User not authenticated')
       }
 
-      let query = $supabase
-        .from('health_records')
-        .select(`
-          *,
-          cows (
-            id,
-            name,
-            tag_id,
-            breed
-          )
-        `)
-        .eq('farm_id', user.user.id)
-        .order('record_date', { ascending: false })
+      const endpoint = cowId
+        ? `healthRecordService/health_records?cow_id=${cowId}`
+        : 'healthRecordService/health_records'
 
-      if (cowId) {
-        query = query.eq('cow_id', cowId)
-      }
-
-      const { data, error: fetchError } = await query
+      const { data, error: fetchError } = await $supabase.functions.invoke(endpoint, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
 
       if (fetchError) throw fetchError
+      if (data?.error) throw new Error(data.error)
 
-      healthRecords.value = data || []
-      return data || []
+      healthRecords.value = data?.records || []
+      return data?.records || []
     } catch (err: any) {
       error.value = err.message
       console.error('Failed to fetch health records:', err)
@@ -94,60 +58,79 @@ export const useHealthRecords = () => {
   // Fetch upcoming vaccinations and appointments
   const fetchUpcomingEvents = async (): Promise<any[]> => {
     try {
-      const { data: user } = await $supabase.auth.getUser()
-      if (!user?.user?.id) return []
+      const token = await getAuthToken()
+      if (!token) return []
 
-      const { data, error: fetchError } = await $supabase
-        .from('upcoming_health_events')
-        .select('*')
-        .eq('farm_id', user.user.id)
+      const { data, error: fetchError } = await $supabase.functions.invoke('healthRecordService/upcoming_events', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
 
       if (fetchError) throw fetchError
+      if (data?.error) throw new Error(data.error)
 
-      upcomingEvents.value = data || []
-      return data || []
+      upcomingEvents.value = data?.upcoming || []
+      return data?.upcoming || []
     } catch (err: any) {
       console.error('Failed to fetch upcoming events:', err)
       return []
     }
   }
 
+  // Get overdue vaccinations
+  const getOverdueVaccinations = async (): Promise<any[]> => {
+    try {
+      const token = await getAuthToken()
+      if (!token) return []
+
+      const { data, error: fetchError } = await $supabase.functions.invoke('healthRecordService/overdue_checkups', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (fetchError) throw fetchError
+      if (data?.error) throw new Error(data.error)
+
+      return data?.overdue || []
+    } catch (err: any) {
+      console.error('Failed to fetch overdue vaccinations:', err)
+      return []
+    }
+  }
+
   // Add new health record
-  const addHealthRecord = async (recordData: HealthRecordFormData): Promise<HealthRecord | null> => {
+  const addHealthRecord = async (formData: HealthRecordFormData): Promise<HealthRecord | null> => {
     loading.value = true
     error.value = null
 
     try {
-      const { data: user } = await $supabase.auth.getUser()
-      if (!user?.user?.id) {
+      const token = await getAuthToken()
+      if (!token) {
         throw new Error('User not authenticated')
       }
 
-      const result = await ($supabase as any)
-        .from('health_records')
-        .insert([convertHealthRecordFormToDbInsert(recordData, user.user.id)])
-        .select(`
-          *,
-          cows (
-            id,
-            name,
-            tag_id
-          )
-        `)
-        .single()
+      const { data, error: createError } = await $supabase.functions.invoke('healthRecordService/create_health_record', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: formData
+      })
 
-      const { data, error: insertError } = result as unknown as { data: any; error: any }
-
-      if (insertError) {
-        throw insertError
-      }
-
-      // Add to local state
-      healthRecords.value = [data, ...healthRecords.value]
+      if (createError) throw createError
+      if (data?.error) throw new Error(data.error)
 
       toast.success('Health record added successfully')
 
-      return data
+      // Refresh the list
+      await fetchHealthRecords()
+
+      return data?.record || null
     } catch (err: any) {
       error.value = err.message
       console.error('Failed to add health record:', err)
@@ -158,50 +141,43 @@ export const useHealthRecords = () => {
     }
   }
 
-  // Update health record
-  const updateHealthRecord = async (id: string, updates: Partial<HealthRecordFormData>): Promise<HealthRecord | null> => {
+  // Update existing health record
+  const updateHealthRecord = async (id: string, updates: Partial<HealthRecordFormData>): Promise<boolean> => {
     loading.value = true
     error.value = null
 
     try {
-      const { data: user } = await $supabase.auth.getUser()
-      if (!user?.user?.id) {
+      const token = await getAuthToken()
+      if (!token) {
         throw new Error('User not authenticated')
       }
 
-      const result = await ($supabase as any)
-        .from('health_records')
-        .update(convertHealthRecordFormToDbUpdate(updates))
-        .eq('id', id)
-        .eq('farm_id', user.user.id)
-        .select(`
-          *,
-          cows (
-            id,
-            name,
-            tag_id
-          )
-        `)
-        .single()
-
-      const { data, error: updateError } = result as unknown as { data: any; error: any }
+      const { data, error: updateError } = await $supabase.functions.invoke('healthRecordService/update_health_record', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: {
+          id,
+          ...updates
+        }
+      })
 
       if (updateError) throw updateError
-
-      // Update local state
-      const index = healthRecords.value.findIndex(r => r.id === id)
-      if (index !== -1) {
-        healthRecords.value[index] = data
-      }
+      if (data?.error) throw new Error(data.error)
 
       toast.success('Health record updated successfully')
 
-      return data
+      // Refresh the list
+      await fetchHealthRecords()
+
+      return true
     } catch (err: any) {
       error.value = err.message
       console.error('Failed to update health record:', err)
       toast.error(err.message || 'Failed to update health record')
-      return null
+      return false
     } finally {
       loading.value = false
     }
@@ -213,23 +189,27 @@ export const useHealthRecords = () => {
     error.value = null
 
     try {
-      const { data: user } = await $supabase.auth.getUser()
-      if (!user?.user?.id) {
+      const token = await getAuthToken()
+      if (!token) {
         throw new Error('User not authenticated')
       }
 
-      const { error: deleteError } = await $supabase
-        .from('health_records')
-        .delete()
-        .eq('id', id)
-        .eq('farm_id', user.user.id)
+      const { data, error: deleteError } = await $supabase.functions.invoke('healthRecordService/delete_health_record', {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: { id }
+      })
 
       if (deleteError) throw deleteError
-
-      // Remove from local state
-      healthRecords.value = healthRecords.value.filter(r => r.id !== id)
+      if (data?.error) throw new Error(data.error)
 
       toast.success('Health record deleted successfully')
+
+      // Refresh the list
+      await fetchHealthRecords()
 
       return true
     } catch (err: any) {
@@ -242,24 +222,6 @@ export const useHealthRecords = () => {
     }
   }
 
-  // Get overdue vaccinations/checkups
-  const getOverdueVaccinations = (): HealthRecord[] => {
-    const today = new Date().toISOString().split('T')[0]
-    return healthRecords.value.filter(record => 
-      record.next_checkup_date &&
-      record.next_checkup_date < today
-    )
-  }
-
-  // Get record type statistics
-  const getRecordTypeStats = (): Record<string, number> => {
-    const stats: Record<string, number> = {}
-    healthRecords.value.forEach(record => {
-      stats[record.record_type] = (stats[record.record_type] || 0) + 1
-    })
-    return stats
-  }
-
   return {
     healthRecords,
     loading,
@@ -267,10 +229,9 @@ export const useHealthRecords = () => {
     upcomingEvents,
     fetchHealthRecords,
     fetchUpcomingEvents,
+    getOverdueVaccinations,
     addHealthRecord,
     updateHealthRecord,
-    deleteHealthRecord,
-    getOverdueVaccinations,
-    getRecordTypeStats
+    deleteHealthRecord
   }
 }

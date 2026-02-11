@@ -266,8 +266,11 @@
             <p class="mt-2 text-sm text-gray-500">No upcoming events</p>
           </div>
           <ul v-else class="divide-y divide-gray-200">
-            <li v-for="event in upcomingEvents" :key="event.id" class="py-3">
-              <div class="flex items-center">
+            <li v-for="event in upcomingEvents" :key="event.id">
+              <NuxtLink 
+                :to="getAlertNavigationUrl(event)" 
+                class="py-3 flex items-center hover:bg-gray-50 transition-colors duration-150 cursor-pointer group"
+              >
                 <div class="flex-shrink-0">
                   <div :class="getEventIconClass(event.type)" class="h-8 w-8 rounded-full flex items-center justify-center">
                     <svg class="h-5 w-5" :class="getEventIconColor(event.type)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -276,15 +279,16 @@
                   </div>
                 </div>
                 <div class="ml-4 flex-1">
-                  <p class="text-sm font-medium text-gray-900">{{ event.title }}</p>
+                  <p class="text-sm font-medium text-gray-900 group-hover:text-green-600 transition-colors">{{ event.title }}</p>
                   <p class="text-sm text-gray-500">{{ event.description }}</p>
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="text-sm text-gray-500">{{ formatDate(event.date) }}</span>
+                  <Icon name="lucide:arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-green-600 transition-colors" />
                   <button
                     class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                     title="Mark as completed"
-                    @click="markEventComplete(event)"
+                    @click.prevent="markEventComplete(event)"
                   >
                     <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -292,7 +296,7 @@
                     Done
                   </button>
                 </div>
-              </div>
+              </NuxtLink>
             </li>
           </ul>
         </div>
@@ -302,8 +306,12 @@
 </template>
 
 <script setup>
-const { $supabase } = useNuxtApp()
-const { cows, fetchCows, isMilkable } = useCows()
+import { formatRelativeStatus } from '~/utils/formatDate'
+
+const { cows, fetchStats: fetchCowStats } = useCows()
+const { getAlertNavigationUrl } = useAlertNavigation()
+const { getOverdueVaccinations, fetchUpcomingEvents, updateHealthRecord } = useHealthRecords()
+const { fetchProduction } = useMilkProduction()
 const toast = useToast()
 
 const cowsCount = ref(0)
@@ -329,7 +337,8 @@ const todayProduction = ref({
   avgPerCow: 0
 })
 
-
+// Expose format helper to template
+const formatDate = formatRelativeStatus
 
 const getEventIconClass = (type) => {
   const classes = {
@@ -379,14 +388,9 @@ async function markEventComplete(event) {
         completed_at: completedAt
       }
   
-  try {
-    const { error } = await $supabase
-      .from('health_records')
-      .update(updateData)
-      .eq('id', recordId)
-    
-    if (error) throw error
-    
+  const success = await updateHealthRecord(recordId, updateData)
+  
+  if (success) {
     // Remove from local state immediately
     upcomingEvents.value = upcomingEvents.value.filter(e => e.id !== event.id)
     
@@ -394,9 +398,6 @@ async function markEventComplete(event) {
     healthAlertsCount.value = upcomingEvents.value.filter(e => e.type === 'overdue' || e.type === 'due_today').length
     
     toast.success(`"${event.title}" marked as complete!`)
-  } catch (err) {
-    console.error('Failed to mark event complete:', err)
-    toast.error('Failed to mark event as complete. Please try again.')
   }
 }
 
@@ -409,105 +410,65 @@ async function fetchHealthAlerts() {
   const tomorrow = new Date(today)
   tomorrow.setDate(tomorrow.getDate() + 1)
   
-  const twoDaysFromNow = new Date(today)
-  twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2)
+  // 1. Fetch Overdue (Calls 'healthRecordService/overdue_checkups')
+  const overdueRecords = await getOverdueVaccinations()
+  
+  overdueRecords.forEach(record => {
+     // Overdue items
+     const cowName = record.cows?.name || 'Unknown'
+     const cowTag = record.cows?.tag_id || ''
+     
+     events.push({
+        id: `${record.id}-due-overdue`,
+        type: 'overdue',
+        cow_id: record.cow_id,
+        recordType: record.record_type,
+        title: `OVERDUE: ${record.title}`,
+        description: `${cowName} (${cowTag}) - ${record.record_type}`,
+        date: record.next_due_date, // Service returns 'next_due_date'
+        priority: 1
+     })
+  })
 
-  // Fetch health records with next_due_date or next_checkup_date
-  const { data: healthRecords } = await $supabase
-    .from('health_records')
-    .select(`
-      id,
-      title,
-      record_type,
-      next_due_date,
-      next_checkup_date,
-      cow_id,
-      cows (name, tag_id)
-    `)
-    .or('next_due_date.not.is.null,next_checkup_date.not.is.null')
-
-  if (healthRecords) {
-    healthRecords.forEach(record => {
+  // 2. Fetch Upcoming (Calls 'healthRecordService/upcoming_events')
+  // Returns next 30 days. We filter for Today and Tomorrow.
+  const upcomingRecords = await fetchUpcomingEvents()
+  
+  upcomingRecords.forEach(record => {
+      if (!record.next_due_date) return
+      
+      const dueDate = new Date(record.next_due_date)
+      dueDate.setHours(0, 0, 0, 0)
+      
       const cowName = record.cows?.name || 'Unknown'
       const cowTag = record.cows?.tag_id || ''
       
-      // Check next_due_date (vaccinations, medications)
-      if (record.next_due_date) {
-        const dueDate = new Date(record.next_due_date)
-        dueDate.setHours(0, 0, 0, 0)
-        
-        if (dueDate < today) {
-          // Overdue
-          events.push({
-            id: `${record.id}-due-overdue`,
-            type: 'overdue',
-            title: `OVERDUE: ${record.title}`,
-            description: `${cowName} (${cowTag}) - ${record.record_type}`,
-            date: record.next_due_date,
-            priority: 1
-          })
-        } else if (dueDate.getTime() === today.getTime()) {
-          // Due today
-          events.push({
+      if (dueDate.getTime() === today.getTime()) {
+         // Due Today
+         events.push({
             id: `${record.id}-due-today`,
             type: 'due_today',
+            cow_id: record.cow_id,
+            recordType: record.record_type,
             title: `Due Today: ${record.title}`,
             description: `${cowName} (${cowTag}) - ${record.record_type}`,
             date: record.next_due_date,
             priority: 2
-          })
-        } else if (dueDate.getTime() === tomorrow.getTime()) {
-          // Due tomorrow (24 hours notice)
-          events.push({
+         })
+      } else if (dueDate.getTime() === tomorrow.getTime()) {
+         // Due Tomorrow
+         events.push({
             id: `${record.id}-due-tomorrow`,
             type: 'due_tomorrow',
+            cow_id: record.cow_id,
+            recordType: record.record_type,
             title: `Due Tomorrow: ${record.title}`,
             description: `${cowName} (${cowTag}) - Prepare for ${record.record_type}`,
             date: record.next_due_date,
             priority: 3
-          })
-        }
+         })
       }
-      
-      // Check next_checkup_date
-      if (record.next_checkup_date) {
-        const checkupDate = new Date(record.next_checkup_date)
-        checkupDate.setHours(0, 0, 0, 0)
-        
-        if (checkupDate < today) {
-          // Overdue checkup
-          events.push({
-            id: `${record.id}-checkup-overdue`,
-            type: 'overdue',
-            title: `OVERDUE Checkup: ${record.title}`,
-            description: `${cowName} (${cowTag}) - Follow-up required`,
-            date: record.next_checkup_date,
-            priority: 1
-          })
-        } else if (checkupDate.getTime() === today.getTime()) {
-          // Checkup today
-          events.push({
-            id: `${record.id}-checkup-today`,
-            type: 'due_today',
-            title: `Checkup Today: ${record.title}`,
-            description: `${cowName} (${cowTag}) - Scheduled follow-up`,
-            date: record.next_checkup_date,
-            priority: 2
-          })
-        } else if (checkupDate.getTime() === tomorrow.getTime()) {
-          // Checkup tomorrow (24 hours notice)
-          events.push({
-            id: `${record.id}-checkup-tomorrow`,
-            type: 'due_tomorrow',
-            title: `Checkup Tomorrow: ${record.title}`,
-            description: `${cowName} (${cowTag}) - Prepare for follow-up`,
-            date: record.next_checkup_date,
-            priority: 3
-          })
-        }
-      }
-    })
-  }
+  })
 
   // Sort by priority (overdue first, then today, then tomorrow)
   events.sort((a, b) => a.priority - b.priority)
@@ -516,14 +477,13 @@ async function fetchHealthAlerts() {
 }
 
 // Fetch today's herd production summary
-async function fetchTodayProduction() {
+async function fetchTodayProductionData() {
   loadingProduction.value = true
   try {
     const today = new Date().toISOString().split('T')[0]
-    const { data: milkData } = await $supabase
-      .from('milk_production')
-      .select('morning_yield, midday_yield, evening_yield, total_yield')
-      .eq('production_date', today)
+    
+    // Fetch records for today
+    const milkData = await fetchProduction(today)
     
     if (milkData && milkData.length > 0) {
       const morning = milkData.reduce((sum, r) => sum + Number.parseFloat(r.morning_yield || 0), 0)
@@ -540,6 +500,16 @@ async function fetchTodayProduction() {
         evening: evening.toFixed(1),
         avgPerCow: cowCount > 0 ? (total / cowCount).toFixed(1) : '0'
       }
+    } else {
+       // Reset if no data
+       todayProduction.value = {
+        totalYield: 0,
+        totalCows: 0,
+        morning: 0,
+        midday: 0,
+        evening: 0,
+        avgPerCow: 0
+      }
     }
   } catch (e) {
     console.error('Error fetching production:', e)
@@ -548,41 +518,37 @@ async function fetchTodayProduction() {
   }
 }
 
-onMounted(async () => {
-  // Fetch total cows count
-  const { count: totalCount } = await $supabase
-    .from('cows')
-    .select('*', { count: 'exact', head: true })
-  cowsCount.value = totalCount || 0
-
-  // Fetch active cows count (milkable cows - excludes bulls, calves, and dry)
-  const { data: allCowsData } = await $supabase
-    .from('cows')
-    .select('status')
+const loadDashboardData = async () => {
+  loading.value = true
   
-  if (allCowsData) {
-    activeCowsCount.value = allCowsData.filter(cow => isMilkable(cow.status)).length
-  }
-
-  // Fetch health alerts (overdue, due today, due tomorrow)
-  upcomingEvents.value = await fetchHealthAlerts()
-  healthAlertsCount.value = upcomingEvents.value.filter(e => e.type === 'overdue' || e.type === 'due_today').length
-
-  // Fetch today's milk production summary
-  await fetchTodayProduction()
-  
-  // Set total for stat card
-  totalMilkProduction.value = todayProduction.value.totalYield
-
-  // Ensure cows are loaded for modal select
   try {
-    await fetchCows()
+     // Parallel fetch for independent data
+     const [stats] = await Promise.all([
+        fetchCowStats(),
+        fetchTodayProductionData() // This sets todayProduction.value internally
+     ])
+     
+     if (stats) {
+        cowsCount.value = stats.total
+        activeCowsCount.value = stats.active
+     }
+     
+     // Fetch alerts
+     upcomingEvents.value = await fetchHealthAlerts()
+     healthAlertsCount.value = upcomingEvents.value.filter(e => e.type === 'overdue' || e.type === 'due_today').length
+     
+     // Set total for stat card
+     totalMilkProduction.value = todayProduction.value.totalYield
+     
   } catch (e) {
-    console.error('Failed to fetch cows for Quick Report modal:', e)
-    if (toast && toast.error) toast.error('Could not load cows for Quick Report')
+     console.error('Error loading dashboard:', e)
+  } finally {
+     loading.value = false
   }
+}
 
-  loading.value = false
+onMounted(async () => {
+  await loadDashboardData()
 })
 
 // handler for modal save (top-level so template can call it)
@@ -590,6 +556,6 @@ const handleSave = async () => {
   showAddModal.value = false
   selectedRecord.value = null
   preselectedCowId.value = null
-  try { await fetchTodayProduction() } catch (e) { console.error('Failed to refresh production after save:', e); if (toast && toast.error) toast.error('Failed to refresh production data') }
+  try { await fetchTodayProductionData() } catch (e) { console.error('Failed to refresh production after save:', e); }
 }
 </script>

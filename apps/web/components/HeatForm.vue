@@ -86,7 +86,6 @@ const signs = ref<string[]>([])
 const signsList = ['Mounting behavior', 'Mucus discharge', 'Restlessness', 'Decreased appetite', 'Vocalization', 'Swollen vulva']
 
 const { $supabase } = useNuxtApp()
-const config = useRuntimeConfig()
 
 const op = useAsyncOperation(async () => {
   // Call heatService edge function with create_heat_event path

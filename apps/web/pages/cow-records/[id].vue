@@ -129,7 +129,7 @@
               <template v-else>Showing <span class="font-medium">{{ displayStart }}</span> to <span class="font-medium">{{ displayEnd }}</span> of <span class="font-medium">{{ filtered.length }}</span> records</template>
             </div>
             <div class="flex items-center gap-3">
-              <div class="flex items-center gap-2" v-if="totalPages > 1">
+              <div v-if="totalPages > 1" class="flex items-center gap-2">
                 <button :disabled="page === 1" class="px-3 py-1.5 border rounded-md disabled:opacity-50" @click="page--">Previous</button>
               </div>
 
@@ -147,11 +147,11 @@
                 </button>
               </div>
 
-              <div class="flex items-center gap-2" v-if="totalPages > 1">
+              <div v-if="totalPages > 1" class="flex items-center gap-2">
                 <button :disabled="page === totalPages" class="px-3 py-1.5 border rounded-md disabled:opacity-50" @click="page++">Next</button>
               </div>
 
-              <div class="ml-3 text-sm text-gray-600" v-if="totalPages > 1">Page <span class="font-medium">{{ page }}</span> of <span class="font-medium">{{ totalPages }}</span></div>
+              <div v-if="totalPages > 1" class="ml-3 text-sm text-gray-600">Page <span class="font-medium">{{ page }}</span> of <span class="font-medium">{{ totalPages }}</span></div>
             </div>
           </div>
         </div>
@@ -169,7 +169,7 @@
 
 <script setup lang="ts">
 import type { HealthRecord, Cow } from '~/types'
-import { formatDate } from '~/utils/formatDate'
+import { formatDateOnly, formatTimeOnly } from '~/utils/formatDate'
 const route = useRoute()
 const { healthRecords, fetchHealthRecords, deleteHealthRecord } = useHealthRecords()
 const { cows, fetchCows } = useCows()
@@ -193,7 +193,38 @@ const load = async () => {
   await Promise.all([fetchCows(), fetchHealthRecords()])
 }
 
-onMounted(load)
+onMounted(async () => {
+  await load()
+  
+  // Handle deep linking from alerts
+  const query = route.query
+  if (query.tab) {
+    // Map query tab names to actual tab values
+    const tabMap = {
+      'health': 'health',
+      'milk': 'milk',
+      'breeding': 'reproduction',
+      'reproduction': 'reproduction',
+      'overview': 'overview'
+    }
+    const targetTab = tabMap[String(query.tab)] || 'health'
+    
+    // Redirect to main cow profile for overview and milk tabs
+    if (targetTab === 'overview' || targetTab === 'milk') {
+      return navigateTo(`/cow/${id}?tab=${targetTab}`)
+    }
+    
+    activeTab.value = targetTab
+  }
+  
+  // Auto-open add form if action=add
+  if (query.action === 'add' && activeTab.value === 'health') {
+    // Small delay to ensure the page is fully loaded
+    setTimeout(() => {
+      openAdd()
+    }, 300)
+  }
+})
 
 const filtered = computed(() => {
   let r = healthRecords.value.filter(h => h.cow_id === id)
@@ -217,38 +248,7 @@ const displayEnd = computed(() => filtered.value.length === 0 ? 0 : Math.min(end
 
 const totalCost = computed(() => filtered.value.reduce((sum, r) => sum + (Number(r.cost) || 0), 0))
 
-const formatDateOnly = (d, t) => {
-  if (!d) return 'N/A'
-  try {
-    const datePart = new Date(d)
-    if (t) {
-      const [hours = '00', minutes = '00'] = String(t).split(':')
-      datePart.setHours(Number(hours), Number(minutes))
-    }
-    const day = String(datePart.getDate()).padStart(2, '0')
-    const month = String(datePart.getMonth() + 1).padStart(2, '0')
-    const year = datePart.getFullYear()
-    return `${day}/${month}/${year}`
-  } catch (e) {
-    console.error('formatDateOnly error', e)
-    return formatDate(d)
-  }
-}
 
-const formatTimeOnly = (d, t) => {
-  if (!d) return ''
-  try {
-    const datePart = new Date(d)
-    if (t) {
-      const [hours = '00', minutes = '00'] = String(t).split(':')
-      datePart.setHours(Number(hours), Number(minutes))
-    }
-    return datePart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-  } catch (e) {
-    console.error('formatTimeOnly error', e)
-    return ''
-  }
-}
 
 const goToCow = (tab = 'overview') => {
   try {

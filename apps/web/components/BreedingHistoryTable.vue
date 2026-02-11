@@ -11,7 +11,7 @@
     </div>
 
     <div v-if="loading" class="py-12 flex justify-center items-center gap-3">
-      <div class="w-5 h-5 border-2 border-gray-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      <div class="w-5 h-5 border-2 border-gray-200 border-t-indigo-600 rounded-full animate-spin"/>
       <span class="text-sm text-gray-500">Loading records...</span>
     </div>
 
@@ -34,7 +34,7 @@
               <th class="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-24">Type</th>
               <th class="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Details</th>
               <th class="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Notes</th>
-              <th class="px-4 py-2 text-right text-xs font-bold text-gray-700 uppercase tracking-wider w-16"></th>
+              <th class="px-4 py-2 text-right text-xs font-bold text-gray-700 uppercase tracking-wider w-16"/>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -87,7 +87,8 @@
 
                 <!-- Expand Arrow -->
                 <td class="px-4 py-3 align-top text-right">
-                   <div class="text-gray-400 group-hover:text-gray-600 transition-transform duration-200" 
+                   <div
+class="text-gray-400 group-hover:text-gray-600 transition-transform duration-200" 
                      :class="expandedId === r.id ? 'rotate-180' : ''">
                      <Icon name="lucide:chevron-down" class="w-4 h-4" />
                    </div>
@@ -156,13 +157,13 @@
         </div>
         <div class="flex items-center gap-2">
           <button 
-            @click="prevPage" :disabled="currentPage === 1"
-            class="px-3 py-1.5 border rounded-md bg-white text-sm font-medium text-gray-700 disabled:opacity-50 hover:bg-gray-50">
+            :disabled="currentPage === 1" class="px-3 py-1.5 border rounded-md bg-white text-sm font-medium text-gray-700 disabled:opacity-50 hover:bg-gray-50"
+            @click="prevPage">
             Previous
           </button>
           <button 
-            @click="nextPage" :disabled="currentPage === totalPages"
-            class="px-3 py-1.5 border rounded-md bg-white text-sm font-medium text-gray-700 disabled:opacity-50 hover:bg-gray-50">
+            :disabled="currentPage === totalPages" class="px-3 py-1.5 border rounded-md bg-white text-sm font-medium text-gray-700 disabled:opacity-50 hover:bg-gray-50"
+            @click="nextPage">
             Next
           </button>
         </div>
@@ -233,13 +234,20 @@ const formatTime = (ts: string) => {
   })
 }
 
+interface ErrorObject {
+  message?: string
+  error?: { message?: string }
+  error_description?: string
+  statusText?: string
+}
+
 const errorMessage = computed(() => {
   const val = error.value
   if (val == null) return null
   if (typeof val === 'string') return val
   if (typeof val === 'object') {
-    const anyVal = val as any
-    const msg = anyVal.message || anyVal.error?.message || anyVal.error_description || anyVal.statusText
+    const errorObj = val as ErrorObject
+    const msg = errorObj.message || errorObj.error?.message || errorObj.error_description || errorObj.statusText
     if (msg && typeof msg === 'string') return msg
   }
   return 'Unable to load history'
@@ -263,9 +271,10 @@ const fetchHistory = async () => {
     if (invokeError) throw invokeError
     rows.value = (res?.history || []) as ReproductionRow[]
     
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Error calling reproduction_history edge function:', e)
-    error.value = e?.message || 'Failed to fetch reproduction history'
+    const errorObj = e as ErrorObject
+    error.value = errorObj?.message || 'Failed to fetch reproduction history'
     
     // Fallback: Just fetch breeding (optional handling for global fallback if needed)
     if (props.cowId) {
@@ -278,17 +287,27 @@ const fetchHistory = async () => {
 
         if (qErr) throw qErr
         
-        rows.value = (data || []).map((r: any) => ({
+        interface BreedingAttempt {
+          id: string
+          attempt_time: string
+          notes?: string
+          method?: string
+          sire_id?: string
+          cow_id: string
+          cows?: { name?: string; tag_id?: string }
+        }
+
+        rows.value = (data || []).map((r: BreedingAttempt) => ({
           id: r.id,
-          type: 'breeding',
+          type: 'breeding' as const,
           timestamp: r.attempt_time,
-          cow_name: r.cows?.name || r.cows?.tag_id || null,
+          cow_name: r.cows?.name || r.cows?.tag_id || undefined,
           method: r.method || 'ai',
-          notes: r.notes || null,
-          sire_name: null
+          notes: r.notes || undefined,
+          sire_name: undefined
         }))
         error.value = null
-      } catch (error_: any) {
+      } catch (error_: unknown) {
         console.error('Reproduction History Fallback failed:', error_)
         error.value = 'Complete data fetch failed'
         rows.value = []

@@ -725,17 +725,35 @@ const stats = ref({
 const todayDate = computed(() => new Date().toISOString().split('T')[0])
 
 const calculatedTotal = computed(() => {
-  const morning = Number.parseFloat(formData.value.morning_yield) || 0
-  const midday = Number.parseFloat(formData.value.midday_yield) || 0
-  const evening = Number.parseFloat(formData.value.evening_yield) || 0
-  return (morning + midday + evening).toFixed(2)
+  const morningValue = formData.value.morning_yield
+  const middayValue = formData.value.midday_yield
+  const eveningValue = formData.value.evening_yield
+  
+  const morning = morningValue === '' || morningValue === null ? 0 : Number.parseFloat(String(morningValue))
+  const midday = middayValue === '' || middayValue === null ? 0 : Number.parseFloat(String(middayValue))
+  const evening = eveningValue === '' || eveningValue === null ? 0 : Number.parseFloat(String(eveningValue))
+  
+  const total = (Number.isNaN(morning) ? 0 : morning) + 
+                (Number.isNaN(midday) ? 0 : midday) + 
+                (Number.isNaN(evening) ? 0 : evening)
+  
+  return total.toFixed(2)
 })
 
 const calculatedEditTotal = computed(() => {
-  const morning = Number.parseFloat(editData.value.morning_yield) || 0
-  const midday = Number.parseFloat(editData.value.midday_yield) || 0
-  const evening = Number.parseFloat(editData.value.evening_yield) || 0
-  return (morning + midday + evening).toFixed(2)
+  const morningValue = editData.value.morning_yield
+  const middayValue = editData.value.midday_yield
+  const eveningValue = editData.value.evening_yield
+  
+  const morning = morningValue === '' || morningValue === null ? 0 : Number.parseFloat(String(morningValue))
+  const midday = middayValue === '' || middayValue === null ? 0 : Number.parseFloat(String(middayValue))
+  const evening = eveningValue === '' || eveningValue === null ? 0 : Number.parseFloat(String(eveningValue))
+  
+  const total = (Number.isNaN(morning) ? 0 : morning) + 
+                (Number.isNaN(midday) ? 0 : midday) + 
+                (Number.isNaN(evening) ? 0 : evening)
+  
+  return total.toFixed(2)
 })
 
 const filteredProduction = computed(() => {
@@ -804,33 +822,22 @@ const dailyTotals = computed(() => {
 async function loadProductionRecords() {
   try {
     loadingHistory.value = true
-    const { data: user } = await $supabase.auth.getUser()
-    if (!user?.user?.id) return
+    const { data: session } = await $supabase.auth.getSession()
+    const token = session?.session?.access_token
+    if (!token) return
 
-    const { data, error: fetchError } = await $supabase
-      .from('milk_production')
-      .select(`
-        id,
-        cow_id,
-        production_date,
-        morning_yield,
-        morning_time,
-        midday_yield,
-        midday_time,
-        evening_yield,
-        evening_time,
-        total_yield,
-        quality,
-        notes,
-        cows (name, tag_id)
-      `)
-      .eq('farm_id', user.user.id)
-      .order('production_date', { ascending: false })
+    const { data, error: fetchError } = await $supabase.functions.invoke('milkProductionService/production_records', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
     if (fetchError) throw fetchError
+    if (data?.error) throw new Error(data.error)
 
-    // Flatten the data
-    productionRecords.value = (data || []).map(record => ({
+    // Map the data from service response
+    productionRecords.value = (data?.records || []).map(record => ({
       ...record,
       cow_name: record.cows?.name || 'Unknown',
       cow_tag_id: record.cows?.tag_id || 'N/A',
@@ -848,53 +855,24 @@ async function loadProductionRecords() {
 
 async function loadStats() {
   try {
-    const { data: user } = await $supabase.auth.getUser()
-    if (!user?.user?.id) return
+    const { data: session } = await $supabase.auth.getSession()
+    const token = session?.session?.access_token
+    if (!token) return
 
-    const today = new Date().toISOString().split('T')[0]
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - 7)
-    const monthAgo = new Date()
-    monthAgo.setMonth(monthAgo.getMonth() - 1)
+    const { data, error: fetchError } = await $supabase.functions.invoke('milkProductionService/production_stats', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
-    // Today's total
-    const { data: todayData } = await $supabase
-      .from('milk_production')
-      .select('total_yield')
-      .eq('farm_id', user.user.id)
-      .eq('production_date', today)
+    if (fetchError) throw fetchError
+    if (data?.error) throw new Error(data.error)
 
-    stats.value.todayTotal = (todayData || [])
-      .reduce((sum, r) => sum + Number.parseFloat(r.total_yield || 0), 0)
-      .toFixed(2)
-
-    // This week
-    const { data: weekData } = await $supabase
-      .from('milk_production')
-      .select('total_yield')
-      .eq('farm_id', user.user.id)
-      .gte('production_date', weekAgo.toISOString().split('T')[0])
-
-    stats.value.weekTotal = (weekData || [])
-      .reduce((sum, r) => sum + Number.parseFloat(r.total_yield || 0), 0)
-      .toFixed(2)
-
-    // This month
-    const { data: monthData } = await $supabase
-      .from('milk_production')
-      .select('total_yield')
-      .eq('farm_id', user.user.id)
-      .gte('production_date', monthAgo.toISOString().split('T')[0])
-
-    stats.value.monthTotal = (monthData || [])
-      .reduce((sum, r) => sum + Number.parseFloat(r.total_yield || 0), 0)
-      .toFixed(2)
-
-    // Average per cow (last 30 days)
-    const activeCowCount = cows.value.length
-    if (activeCowCount > 0) {
-      stats.value.avgPerCow = (Number.parseFloat(stats.value.monthTotal) / activeCowCount).toFixed(2)
-    }
+    stats.value.todayTotal = data.todayTotal || '0.00'
+    stats.value.weekTotal = data.weekTotal || '0.00'
+    stats.value.monthTotal = data.monthTotal || '0.00'
+    stats.value.avgPerCow = data.avgPerCow || '0.00'
 
     // Check for alerts
     await checkProductionAlerts()
@@ -907,79 +885,27 @@ async function checkProductionAlerts() {
   try {
     alerts.value = []
     
-    const { data: user } = await $supabase.auth.getUser()
-    if (!user?.user?.id) return
+    const { data: session } = await $supabase.auth.getSession()
+    const token = session?.session?.access_token
+    if (!token) return
 
-    // Get last 30 days of production for each cow
-    const thirtyDaysAgo = new Date()
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-    const { data: recentProduction } = await $supabase
-      .from('milk_production')
-      .select('cow_id, total_yield, production_date, cows(name)')
-      .eq('farm_id', user.user.id)
-      .gte('production_date', thirtyDaysAgo.toISOString().split('T')[0])
-      .order('production_date', { ascending: false })
-
-    if (!recentProduction || recentProduction.length === 0) return
-
-    // Group by cow and calculate averages
-    const cowData = {}
-    recentProduction.forEach(record => {
-      if (!cowData[record.cow_id]) {
-        cowData[record.cow_id] = {
-          name: record.cows?.name || 'Unknown',
-          yields: [],
-          recent: []
-        }
-      }
-      const yield_val = Number.parseFloat(record.total_yield) || 0
-      cowData[record.cow_id].yields.push(yield_val)
-      
-      // Last 3 days
-      if (cowData[record.cow_id].recent.length < 3) {
-        cowData[record.cow_id].recent.push(yield_val)
+    const { data, error: fetchError } = await $supabase.functions.invoke('milkProductionService/production_alerts', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
       }
     })
 
-    // Check for significant drops
-    Object.keys(cowData).forEach(cowId => {
-      const data = cowData[cowId]
-      
-      if (data.yields.length < 5) return // Need enough data
-      
-      // Calculate 30-day average
-      const avg = data.yields.reduce((sum, val) => sum + val, 0) / data.yields.length
-      
-      // Calculate recent average (last 3 days)
-      const recentAvg = data.recent.reduce((sum, val) => sum + val, 0) / data.recent.length
-      
-      // Alert if recent average is 20% or more below overall average
-      const dropPercentage = ((avg - recentAvg) / avg) * 100
-      
-      if (dropPercentage >= 20 && avg > 5) { // Only alert for significant producers
-        alerts.value.push({
-          cow_id: cowId,
-          cow_name: data.name,
-          message: `Recent production (${recentAvg.toFixed(1)}L) is ${dropPercentage.toFixed(0)}% below average (${avg.toFixed(1)}L)`
-        })
-      }
-      
-      // Alert for very low recent production
-      if (recentAvg < 3 && avg > 8) {
-        alerts.value.push({
-          cow_id: cowId,
-          cow_name: data.name,
-          message: `Very low recent production (${recentAvg.toFixed(1)}L) - check cow health`
-        })
-      }
-    })
+    if (fetchError) throw fetchError
+    if (data?.error) throw new Error(data.error)
+
+    alerts.value = data?.alerts || []
   } catch (err) {
     console.error('Error checking alerts:', err)
   }
 }
 
-async function handleProductionUpdate(existingRecord, morningInput, middayInput, eveningInput) {
+async function handleProductionUpdate(existingRecord, morningInput, middayInput, eveningInput, token) {
   const newMorning = (morningInput !== '' && morningInput !== null) 
     ? Number.parseFloat(morningInput) 
     : existingRecord.morning_yield
@@ -992,9 +918,14 @@ async function handleProductionUpdate(existingRecord, morningInput, middayInput,
     ? Number.parseFloat(eveningInput)
     : existingRecord.evening_yield
 
-  const { error } = await $supabase
-    .from('milk_production')
-    .update({
+  const { data, error } = await $supabase.functions.invoke('milkProductionService/update_production', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: {
+      id: existingRecord.id,
       morning_yield: newMorning,
       midday_yield: newMidday,
       evening_yield: newEvening,
@@ -1002,22 +933,26 @@ async function handleProductionUpdate(existingRecord, morningInput, middayInput,
       midday_time: formData.value.midday_time || existingRecord.midday_time,
       evening_time: formData.value.evening_time || existingRecord.evening_time,
       notes: formData.value.notes ? formData.value.notes : existingRecord.notes
-    })
-    .eq('id', existingRecord.id)
+    }
+  })
 
   if (error) throw error
+  if (data?.error) throw new Error(data.error)
 }
 
-async function handleProductionInsert(user, morningInput, middayInput, eveningInput) {
+async function handleProductionInsert(morningInput, middayInput, eveningInput, token) {
   const morningYield = morningInput ? Number.parseFloat(morningInput) : 0
   const middayYield = middayInput ? Number.parseFloat(middayInput) : 0
   const eveningYield = eveningInput ? Number.parseFloat(eveningInput) : 0
 
-  const { error } = await $supabase
-    .from('milk_production')
-    .insert({
+  const { data, error } = await $supabase.functions.invoke('milkProductionService/create_production', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: {
       cow_id: formData.value.cow_id,
-      farm_id: user.user.id,
       production_date: formData.value.production_date,
       morning_yield: morningYield,
       midday_yield: middayYield,
@@ -1026,13 +961,15 @@ async function handleProductionInsert(user, morningInput, middayInput, eveningIn
       midday_time: formData.value.midday_time || null,
       evening_time: formData.value.evening_time || null,
       notes: formData.value.notes || null
-    })
+    }
+  })
 
-  if (error) {
-    if (error.code === '23505') {
+  if (error) throw error
+  if (data?.error) {
+    if (data.already_existed) {
       throw new Error('Production record already exists for this cow on this date')
     }
-    throw error
+    throw new Error(data.error)
   }
 }
 
@@ -1042,8 +979,9 @@ async function addProduction() {
     error.value = ''
     success.value = ''
 
-    const { data: user } = await $supabase.auth.getUser()
-    if (!user?.user?.id) {
+    const { data: session } = await $supabase.auth.getSession()
+    const token = session?.session?.access_token
+    if (!token) {
       error.value = 'User not authenticated'
       return
     }
@@ -1061,21 +999,25 @@ async function addProduction() {
       return
     }
 
-    // Check for existing record
-    const { data: existingRecord } = await $supabase
-      .from('milk_production')
-      .select('*')
-      .eq('cow_id', formData.value.cow_id)
-      .eq('production_date', formData.value.production_date)
-      .single()
+    // Check for existing record via service
+    const { data: checkData } = await $supabase.functions.invoke('milkProductionService/production_records', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    const existingRecord = (checkData?.records || []).find(
+      r => r.cow_id === formData.value.cow_id && r.production_date === formData.value.production_date
+    )
 
     if (existingRecord) {
-      await handleProductionUpdate(existingRecord, morningInput, middayInput, eveningInput)
+      await handleProductionUpdate(existingRecord, morningInput, middayInput, eveningInput, token)
       success.value = 'Milk production updated successfully!'
       toast.success('Milk production updated successfully!')
     } else {
       try {
-        await handleProductionInsert(user, morningInput, middayInput, eveningInput)
+        await handleProductionInsert(morningInput, middayInput, eveningInput, token)
         success.value = 'Milk production recorded successfully!'
         toast.success('Milk production recorded successfully!')
       } catch (e) {

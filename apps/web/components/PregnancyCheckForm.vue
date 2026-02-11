@@ -49,12 +49,15 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 
 const { $supabase } = useNuxtApp()
-const config = useRuntimeConfig()
+
+interface AttemptsResponse {
+  attempts?: Attempt[]
+}
 
 const { data: attemptsData, pending: attemptsPending, error: attemptsError } = await useAsyncData('attempts-' + props.cowId, async () => {
   const base = useRuntimeConfig().public.supabaseUrl
   const url = `${base}/functions/v1/readService/breeding_history?cow_id=${props.cowId}`
-  const res = await $fetch<any>(url)
+  const res = await $fetch<AttemptsResponse>(url)
   return (res?.attempts || []) as Attempt[]
 })
 
