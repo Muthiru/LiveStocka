@@ -18,6 +18,9 @@ export default defineNuxtConfig({
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY || ''
     }
   },
+  nitro: {
+    preset: process.env.VERCEL ? 'vercel' : undefined
+  },
   vite: {
     vue: {
       script: {
