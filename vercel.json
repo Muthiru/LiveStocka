@@ -1,7 +1,7 @@
 {
   "version": 2,
   "framework": "nuxtjs",
-  "installCommand": "npm --prefix apps/web ci",
-  "buildCommand": "npm --prefix apps/web run build",
-  "devCommand": "npm --prefix apps/web run dev"
+  "installCommand": "[ -f apps/web/package-lock.json ] && npm --prefix apps/web ci || npm ci",
+  "buildCommand": "[ -f apps/web/package.json ] && npm --prefix apps/web run build || npm run build",
+  "devCommand": "[ -f apps/web/package.json ] && npm --prefix apps/web run dev || npm run dev"
 }
