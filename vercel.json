@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "framework": "nuxtjs",
+  "installCommand": "npm -C apps/web ci",
+  "buildCommand": "npm -C apps/web run build",
+  "devCommand": "npm -C apps/web run dev"
+}
+

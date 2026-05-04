@@ -95,7 +95,7 @@ All database tables use Row Level Security (RLS) to ensure users can only access
 Deploy to Vercel:
 1. Connect your GitHub repository
 2. Set environment variables: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
-3. Deploy from `apps/web` directory
+3. Ensure Vercel builds the Nuxt app in `apps/web` (set **Root Directory** to `apps/web` or rely on `vercel.json` at repo root)
 
 ### Database
 Use Supabase (free tier):
