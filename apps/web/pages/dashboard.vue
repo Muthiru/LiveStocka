@@ -1,6 +1,5 @@
 <template>
-  <div class="py-6">
-    <!-- Add/Edit Health Record Modal (opened by Quick Report) -->
+  <PageContainer size="wide">
     <HealthRecordModal
       v-model="showAddModal"
       :record="selectedRecord"
@@ -8,29 +7,14 @@
       :preselected-cow-id="preselectedCowId"
       @save="handleSave"
     />
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      <!-- Header -->
-      <div class="mb-8 flex items-start justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p class="mt-2 text-sm text-gray-600">Overview of your cattle management</p>
-        </div>
 
-    <!-- Add/Edit Health Record Modal (opened by Quick Report) -->
-    <HealthRecordModal
-      v-model="showAddModal"
-      :record="selectedRecord"
-      :cows="cows"
-      :preselected-cow-id="preselectedCowId"
-      @save="handleSave"
-    />
-        <div class="flex items-center gap-3">
-          <button class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg shadow hover:bg-green-700" @click="showAddModal = true">
-            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-            Quick Report
-          </button>
-        </div>
-      </div>
+    <PageHeader title="Dashboard" subtitle="Overview of your cattle management">
+      <template #actions>
+        <UButton class="w-full sm:w-auto" color="primary" icon="i-lucide-plus" @click="showAddModal = true">
+          Quick Report
+        </UButton>
+      </template>
+    </PageHeader>
 
       <!-- Stats Grid -->
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -132,7 +116,7 @@
             <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
           </div>
           <div class="p-5">
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NuxtLink
                 to="/add-cow"
                 class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
@@ -189,21 +173,20 @@
             <span class="text-xs text-gray-500">Auto-updated</span>
           </div>
           <div class="p-5">
-            <div v-if="loadingProduction" class="text-center py-4">
-              <p class="text-sm text-gray-500">Loading production data...</p>
-            </div>
-            <div v-else-if="todayProduction.totalCows === 0" class="text-center py-4">
-              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              <p class="mt-2 text-sm text-gray-500">No milk production recorded today.</p>
-              <NuxtLink
-                to="/milk-production"
-                class="mt-2 inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
-              >
-                Record Production
-              </NuxtLink>
-            </div>
+            <LoadingState v-if="loadingProduction" :boxed="false" text="Loading production data..." size="sm" :use-icon="false" />
+            <EmptyState
+              v-else-if="todayProduction.totalCows === 0"
+              :boxed="false"
+              icon="lucide:milk"
+              title="No production recorded today"
+              description="Start by recording milk production for your cows."
+            >
+              <template #actions>
+                <UButton to="/milk-production" color="primary" icon="i-lucide-plus">
+                  Record production
+                </UButton>
+              </template>
+            </EmptyState>
             <div v-else class="space-y-4">
               <!-- Summary Stats -->
               <div class="grid grid-cols-2 gap-4">
@@ -220,7 +203,7 @@
               <!-- Session Breakdown -->
               <div class="border-t border-gray-100 pt-3">
                 <p class="text-xs font-medium text-gray-500 uppercase mb-2">By Session</p>
-                <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="grid grid-cols-1 gap-2 text-center sm:grid-cols-3">
                   <div class="bg-amber-50 rounded p-2">
                     <p class="text-sm font-semibold text-amber-700">{{ todayProduction.morning }}L</p>
                     <p class="text-xs text-amber-600">Morning</p>
@@ -301,8 +284,7 @@
           </ul>
         </div>
       </div>
-    </div>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup>
@@ -312,7 +294,7 @@ const { cows, fetchStats: fetchCowStats } = useCows()
 const { getAlertNavigationUrl } = useAlertNavigation()
 const { getOverdueVaccinations, fetchUpcomingEvents, updateHealthRecord } = useHealthRecords()
 const { fetchProduction } = useMilkProduction()
-const toast = useToast()
+const toast = useAppToast()
 
 const cowsCount = ref(0)
 const activeCowsCount = ref(0)

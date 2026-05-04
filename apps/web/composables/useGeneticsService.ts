@@ -37,7 +37,10 @@ export const useGeneticsService = () => {
 
             if (!response.ok) {
                 console.error('Genetics Service Fetch Error (Ancestors):', response.status, responseData)
-                throw new Error(responseData.error || 'Failed to fetch ancestors')
+                if (response.status === 401) {
+                    throw new Error('Unauthorized (401). Please sign out and sign in again.')
+                }
+                throw new Error(responseData?.error || responseData?.message || 'Failed to fetch ancestors')
             }
 
             return responseData?.ancestors || []
@@ -78,7 +81,10 @@ export const useGeneticsService = () => {
 
             if (!response.ok) {
                 console.error('Genetics Service Fetch Error (Descendants):', response.status, responseData)
-                throw new Error(responseData.error || 'Failed to fetch descendants')
+                if (response.status === 401) {
+                    throw new Error('Unauthorized (401). Please sign out and sign in again.')
+                }
+                throw new Error(responseData?.error || responseData?.message || 'Failed to fetch descendants')
             }
 
             return responseData?.descendants || []

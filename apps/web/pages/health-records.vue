@@ -1,13 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-6">
-    <div class="max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Health Records</h1>
-          <p class="text-gray-600 mt-1">Select a cow to view and manage health records</p>
-        </div>
-      </div>
+  <PageContainer size="wide">
+    <PageHeader title="Health Records" subtitle="Select a cow to view and manage health records" />
 
       <!-- Alerts Section -->
       <div v-if="overdueVaccinations.length > 0" class="mb-6">
@@ -56,12 +49,14 @@
 
       <!-- Cows Data Table -->
       <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-        <LoadingSpinner v-if="loading" text="Loading cows..." />
+        <LoadingState v-if="loading" text="Loading cows..." />
 
-        <div v-else-if="filteredCows.length === 0" class="text-center py-12">
-          <Icon name="lucide:search-x" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">No Cows Found</h3>
-          <p class="text-gray-600">Try adjusting your search or filter criteria</p>
+        <div v-else-if="filteredCows.length === 0" class="p-6">
+          <EmptyState
+            title="No cows found"
+            description="Try adjusting your search or filter criteria."
+            icon="lucide:search-x"
+          />
         </div>
 
         <div v-else>
@@ -185,25 +180,24 @@
       </div>
 
       <!-- Cow Records Modal (replaces inline selected-cow panel) -->
-      <CowRecordsModal
-        v-model="showCowModal"
-        :cow="selectedCow"
-        :records="selectedCowRecords"
-        @add="openAddModal"
-        @edit="editRecord"
-        @delete="confirmDelete"
-      />
-    </div>
+	      <CowRecordsModal
+	        v-model="showCowModal"
+	        :cow="selectedCow"
+	        :records="selectedCowRecords"
+	        @add="openAddModal"
+	        @edit="editRecord"
+	        @delete="confirmDelete"
+	      />
 
-    <!-- Add/Edit Modal -->
-    <HealthRecordModal
-      v-model="showAddModal"
+	    <!-- Add/Edit Modal -->
+	    <HealthRecordModal
+	      v-model="showAddModal"
       :record="selectedRecord"
       :cows="cows"
       :preselected-cow-id="preselectedCowId"
       @save="handleSave"
     />
-  </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">

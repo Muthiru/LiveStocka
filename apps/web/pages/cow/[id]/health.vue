@@ -1,119 +1,116 @@
 <template>
-  <div class="py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      <div class="mb-6 flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">Health Records</h1>
-          <p v-if="cow" class="mt-2 text-sm text-gray-600">for {{ cow.name }}</p>
-        </div>
-        <div class="flex space-x-3">
-          <NuxtLink
-            :to="`/cow/${route.params.id}`"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-          >
-            <Icon name="lucide:arrow-left" class="mr-2 h-5 w-5" />
-            Back to Cow
-          </NuxtLink>
-          <button
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-            type="button"
-@click="() => { console.log('BUTTON CLICKED!!!'); openAddModal(); }"
-          >
-            <Icon name="lucide:plus" class="mr-2 h-5 w-5" />
-            Add Record
-          </button>
-        </div>
-      </div>
+  <PageContainer size="wide">
+    <HealthRecordModal
+      v-model="showAddModal"
+      :record="selectedRecord"
+      :cows="cow ? [cow] : []"
+      @save="handleSave"
+    />
 
-      <!-- Health Records List -->
-      <div class="bg-white shadow rounded-lg">
-        <div class="px-5 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Health History</h3>
+    <PageHeader title="Health Records" :subtitle="cow ? `for ${cow.name}` : undefined">
+      <template #actions>
+        <div class="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-2">
+          <UButton :to="`/cow/${route.params.id}`" variant="outline" color="neutral" icon="i-lucide-arrow-left">
+            Back to cow
+          </UButton>
+          <UButton color="primary" icon="i-lucide-plus" @click="openAddModal">
+            Add record
+          </UButton>
         </div>
-        <div v-if="loading" class="text-center py-8">
-          <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin text-indigo-600 mx-auto" />
-          <p class="mt-2 text-sm text-gray-500">Loading records...</p>
-        </div>
-        <div v-else-if="healthRecords.length === 0" class="text-center py-12">
-          <Icon name="lucide:heart-pulse" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No health records</h3>
-          <p class="mt-1 text-sm text-gray-500">Get started by adding a health record.</p>
-          <button
-            class="mt-4 inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-            @click="openAddModal"
-          >
-            <Icon name="lucide:plus" class="mr-2 h-4 w-4" />
-            Add First Record
-          </button>
-        </div>
-        <ul v-else class="divide-y divide-gray-200">
-          <li v-for="record in healthRecords" :key="record.id" class="px-6 py-4 hover:bg-gray-50">
-            <div class="flex items-start justify-between">
-              <div class="flex items-start flex-1">
+      </template>
+    </PageHeader>
+
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <h3 class="text-base font-semibold text-slate-900">Health History</h3>
+      </div>
+      <div class="p-5">
+        <LoadingState v-if="loading" :boxed="false" text="Loading records..." size="sm" />
+        <EmptyState
+          v-else-if="healthRecords.length === 0"
+          :boxed="false"
+          icon="lucide:heart-pulse"
+          title="No health records yet"
+          description="Get started by adding the first health record for this cow."
+        >
+          <template #actions>
+            <UButton color="primary" icon="i-lucide-plus" @click="openAddModal">
+              Add record
+            </UButton>
+          </template>
+        </EmptyState>
+        <ul v-else class="divide-y divide-slate-200">
+          <li v-for="record in healthRecords" :key="record.id" class="px-1 py-4 sm:px-2">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div class="flex items-start gap-3">
                 <div class="flex-shrink-0">
-                  <div :class="getTypeColor(record.record_type).split(' ')[0]" class="h-10 w-10 rounded-full flex items-center justify-center">
-                    <Icon :name="getTypeIcon(record.record_type)" class="w-5 h-5" :class="getTypeColor(record.record_type).split(' ')[1]" />
+                  <div :class="getTypeColor(record.record_type).split(' ')[0]" class="flex h-10 w-10 items-center justify-center rounded-2xl">
+                    <Icon :name="getTypeIcon(record.record_type)" class="h-5 w-5" :class="getTypeColor(record.record_type).split(' ')[1]" />
                   </div>
                 </div>
-                <div class="ml-4 flex-1">
-                  <div class="flex items-center gap-2 mb-1">
-                    <span :class="getTypeColor(record.record_type)" class="px-2 py-1 rounded-full text-xs font-medium">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span :class="getTypeColor(record.record_type)" class="rounded-full px-2 py-1 text-xs font-medium">
                       {{ record.record_type.charAt(0).toUpperCase() + record.record_type.slice(1) }}
                     </span>
-                    <span class="text-sm font-semibold text-gray-900">{{ record.title }}</span>
+                    <span class="text-sm font-semibold text-slate-900">{{ record.title }}</span>
                   </div>
-                  <p v-if="record.description" class="text-sm text-gray-600 mb-2">{{ record.description }}</p>
-                  
-                  <!-- Additional details -->
-                  <div class="flex flex-wrap gap-3 text-xs text-gray-500">
+                  <p v-if="record.description" class="mt-1 text-sm text-slate-600">{{ record.description }}</p>
+
+                  <div class="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
                     <span v-if="record.vaccine_name" class="flex items-center gap-1">
-                      <Icon name="lucide:syringe" class="w-3 h-3" />
+                      <Icon name="lucide:syringe" class="h-3 w-3" />
                       {{ record.vaccine_name }}
                     </span>
                     <span v-if="record.medication_name" class="flex items-center gap-1">
-                      <Icon name="lucide:pill" class="w-3 h-3" />
+                      <Icon name="lucide:pill" class="h-3 w-3" />
                       {{ record.medication_name }}
                     </span>
                     <span v-if="record.dosage" class="flex items-center gap-1">
-                      <Icon name="lucide:droplet" class="w-3 h-3" />
+                      <Icon name="lucide:droplet" class="h-3 w-3" />
                       {{ record.dosage }}
                     </span>
                     <span v-if="record.vet_name" class="flex items-center gap-1">
-                      <Icon name="lucide:user-check" class="w-3 h-3" />
+                      <Icon name="lucide:user-check" class="h-3 w-3" />
                       {{ record.vet_name }}
                     </span>
                     <span v-if="record.cost" class="flex items-center gap-1">
-                      <Icon name="lucide:dollar-sign" class="w-3 h-3" />
+                      <Icon name="lucide:dollar-sign" class="h-3 w-3" />
                       ${{ record.cost }}
                     </span>
                   </div>
-                  
+
                   <div v-if="record.next_checkup_date" class="mt-2 flex items-center gap-2 text-xs">
-                    <Icon name="lucide:bell" class="w-3 h-3" :class="isOverdue(record.next_checkup_date) ? 'text-red-600' : 'text-blue-600'" />
-                    <span :class="isOverdue(record.next_checkup_date) ? 'text-red-600 font-medium' : 'text-blue-600'">
+                    <Icon name="lucide:bell" class="h-3 w-3" :class="isOverdue(record.next_checkup_date) ? 'text-rose-600' : 'text-sky-600'" />
+                    <span :class="isOverdue(record.next_checkup_date) ? 'text-rose-600 font-medium' : 'text-sky-600'">
                       Next checkup: {{ formatDate(record.next_checkup_date) }}
                       {{ isOverdue(record.next_checkup_date) ? '(Overdue)' : '' }}
                     </span>
                   </div>
                 </div>
               </div>
-              <div class="flex flex-col items-end ml-4">
-                <div class="text-sm font-medium text-gray-900">{{ formatDate(record.record_date) }}</div>
-                <div class="text-xs text-gray-500 mb-2">{{ getRelativeDate(record.record_date) }}</div>
-                <div class="flex gap-2">
+
+              <div class="flex items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-start">
+                <div class="text-right">
+                  <div class="text-sm font-semibold text-slate-900">{{ formatDate(record.record_date) }}</div>
+                  <div class="mt-0.5 text-xs text-slate-500">{{ getRelativeDate(record.record_date) }}</div>
+                </div>
+                <div class="flex gap-1">
                   <button
-                    class="p-1.5 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                    type="button"
+                    class="inline-flex rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                     title="Edit"
                     @click="editRecord(record)"
                   >
-                    <Icon name="lucide:edit" class="w-4 h-4" />
+                    <Icon name="lucide:edit" class="h-4 w-4" />
                   </button>
                   <button
-                    class="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                    type="button"
+                    class="inline-flex rounded-xl p-2 text-slate-500 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
                     title="Delete"
                     @click="confirmDelete(record)"
                   >
-                    <Icon name="lucide:trash-2" class="w-4 h-4" />
+                    <Icon name="lucide:trash-2" class="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -122,15 +119,7 @@
         </ul>
       </div>
     </div>
-
-    <!-- Add/Edit Modal -->
-    <HealthRecordModal
-      v-model="showAddModal"
-      :record="selectedRecord"
-      :cows="cow ? [cow] : []"
-      @save="handleSave"
-    />
-  </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">

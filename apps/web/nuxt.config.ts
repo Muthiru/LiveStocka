@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     typeCheck: false
   },
   modules: [
-    '@nuxtjs/tailwindcss',
+    '@nuxt/ui',
     '@nuxt/icon',
     '@nuxt/eslint'
   ],
@@ -25,5 +25,8 @@ export default defineNuxtConfig({
         propsDestructure: true
       }
     }
+  },
+  ui: {
+    colorMode: false
   }
 })

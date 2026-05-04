@@ -1,34 +1,42 @@
 <template>
-  <div class="py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      <div class="mb-4">
-        <h1 class="text-3xl font-bold text-gray-900">Breeding</h1>
-        <p class="mt-1 text-sm text-gray-600">Record heats, schedule breeding, and view windows</p>
-      </div>
+  <PageContainer size="wide">
+    <PageHeader title="Breeding" subtitle="Record heats, schedule breeding, and view windows" />
 
-      
+    <!-- Info banner -->
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div class="text-sm font-semibold text-slate-900">Optimal Breeding Windows</div>
+      <div class="mt-1 text-sm text-slate-600">Breeding windows are calculated 12–18 hours after heat detection for best conception rates.</div>
+    </div>
 
-      <!-- Info banner -->
-      <div class="mb-6">
-        <div class="rounded-lg border border-gray-200 bg-white p-4">
-          <div class="flex items-start gap-3">
-            <div>
-              <div class="text-sm font-semibold">Optimal Breeding Windows</div>
-              <div class="text-sm text-gray-600">Breeding windows are calculated 12–18 hours after heat detection for best conception rates.</div>
-            </div>
-          </div>
-          </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <main class="lg:col-span-2 space-y-6">
-          <section class="bg-white border rounded-lg shadow">
-            <div class="px-5 py-4 border-b">
-              <h2 class="text-lg font-semibold">Record Heat Event</h2>
+          <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-4">
+              <h2 class="text-base font-semibold text-slate-900">Record Heat Event</h2>
             </div>
             <div class="p-5">
               <div class="mb-4">
-                <label for="cow_select" class="block text-sm font-medium text-gray-700">Select Cow *</label>
-                <select id="cow_select" v-model="selectedCowId" class="mt-1 block w-full rounded border-gray-300 shadow-sm">
+                <label for="cow_select" class="block text-sm font-medium text-slate-700">Select Cow *</label>
+                <LoadingState v-if="cowsLoading" :boxed="false" text="Loading cows..." size="sm" />
+                <EmptyState
+                  v-else-if="breedingCows.length === 0"
+                  :boxed="false"
+                  icon="lucide:database"
+                  title="No cows available"
+                  description="Add an active cow to start recording breeding events."
+                >
+                  <template #actions>
+                    <UButton to="/add-cow" color="primary" icon="i-lucide-plus">
+                      Add cow
+                    </UButton>
+                  </template>
+                </EmptyState>
+                <select
+                  v-else
+                  id="cow_select"
+                  v-model="selectedCowId"
+                  class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
+                >
                   <option value="" disabled>Choose a cow...</option>
                   <option v-for="c in breedingCows" :key="c.id" :value="c.id">{{ c.name || c.tag_id }}</option>
                 </select>
@@ -40,18 +48,18 @@
             </div>
           </section>
 
-          <section id="breeding-form" class="bg-white border rounded-lg shadow">
-            <div class="px-5 py-4 border-b">
-              <h2 class="text-lg font-semibold">Record Breeding Attempt</h2>
+          <section id="breeding-form" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-4">
+              <h2 class="text-base font-semibold text-slate-900">Record Breeding Attempt</h2>
             </div>
             <div class="p-5">
               <BreedingForm :cow-id="selectedCowId" />
             </div>
           </section>
 
-          <section class="bg-white border rounded-lg shadow">
-            <div class="px-5 py-4 border-b">
-              <h2 class="text-lg font-semibold">Breeding History</h2>
+          <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-5 py-4">
+              <h2 class="text-base font-semibold text-slate-900">Breeding History</h2>
             </div>
             <div class="p-5">
               <BreedingHistoryTable :cow-id="selectedCowId" />
@@ -60,18 +68,18 @@
         </main>
 
         <aside class="space-y-6">
-          <div class="bg-white border rounded-lg shadow">
-            <div class="px-4 py-3 border-b">
-              <h3 class="text-sm font-semibold">Active Breeding Windows</h3>
+          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-4 py-3">
+              <h3 class="text-sm font-semibold text-slate-900">Active Breeding Windows</h3>
             </div>
             <div class="p-4">
               <ActiveBreedingWindows />
             </div>
           </div>
 
-          <div class="bg-white border rounded-lg shadow">
-            <div class="px-4 py-3 border-b">
-              <h3 class="text-sm font-semibold">Upcoming Events</h3>
+          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-4 py-3">
+              <h3 class="text-sm font-semibold text-slate-900">Upcoming Events</h3>
             </div>
               <div class="p-4 space-y-3 text-sm text-gray-700">
                 <div v-if="(pregnancyChecks || []).length === 0 && (expectedHeats || []).length === 0" class="p-3 border rounded text-gray-500">No upcoming events.</div>
@@ -93,9 +101,7 @@
           </div>
         </aside>
       </div>
-    </div>
-    </div>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
@@ -104,7 +110,7 @@ import { useCows } from '~/composables/useCows'
 
 definePageMeta({ layout: 'default' })
 
-const { cows, fetchCows } = useCows()
+const { cows, fetchCows, loading: cowsLoading } = useCows()
 const selectedCowId = ref<string | null>(null)
 
 // Filter out bulls, deceased, and sold cows from the breeding list

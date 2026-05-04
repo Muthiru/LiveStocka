@@ -1,34 +1,27 @@
 <template>
-  <div class="py-6">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
-      <!-- Header -->
-      <div class="page-header">
-        <h1 class="page-title">Add New Cow</h1>
-        <p class="page-subtitle">Enter the details for your new cattle</p>
-      </div>
+  <PageContainer size="narrow">
+    <PageHeader title="Add New Cow" subtitle="Enter the details for your new cattle" />
 
-      <CowForm v-model:form="form" @submit="handleSubmit">
-        <template #actions>
-          <div class="flex justify-end space-x-3">
-            <NuxtLink to="/cows" class="btn-secondary">
-              Cancel
-            </NuxtLink>
-            <button type="submit" :disabled="loading" class="btn-primary">
-              <LoadingSpinner v-if="loading" size="sm" :use-icon="true" class="-ml-1 mr-3" />
-              {{ loading ? 'Saving...' : 'Save Cow' }}
-            </button>
-          </div>
-        </template>
-      </CowForm>
-    </div>
-  </div>
+    <CowForm v-model:form="form" @submit="handleSubmit">
+      <template #actions>
+        <div class="flex flex-col justify-end gap-2 sm:flex-row">
+          <UButton to="/cows" variant="outline" color="neutral">
+            Cancel
+          </UButton>
+          <UButton type="submit" :loading="loading" color="primary">
+            Save cow
+          </UButton>
+        </div>
+      </template>
+    </CowForm>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { CowFormData } from '~/types'
 
-const toast = useToast()
+const toast = useAppToast()
 const { addCow, loading } = useCows()
 
 const form = ref<CowFormData>({

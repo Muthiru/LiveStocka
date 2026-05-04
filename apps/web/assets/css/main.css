@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "../../node_modules/@nuxt/ui/node_modules/tailwindcss";
+@reference "../../node_modules/@nuxt/ui/node_modules/tailwindcss";
 
 /* Shared form component classes */
 @layer components {

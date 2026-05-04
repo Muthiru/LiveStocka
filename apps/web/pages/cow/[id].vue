@@ -1,87 +1,64 @@
 <template>
-  <div class="py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      <div v-if="loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"/>
-        <p class="mt-2 text-sm text-gray-500">Loading cow details...</p>
-      </div>
+  <PageContainer size="wide">
+    <LoadingState v-if="loading" text="Loading cow details..." />
 
-      <div v-else-if="cow">
-        <!-- Header -->
-        <div class="mb-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="flex items-center gap-3">
-                <h1 class="text-3xl font-bold text-gray-900">{{ cow.name }}</h1>
-                <span 
-                  v-if="cow.genetic_line === 'Pedigree'"
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200"
-                >
-                  <Icon name="lucide:award" class="w-3 h-3 mr-1" />
-                  Pedigree
-                </span>
-              </div>
-              <p class="mt-2 text-sm text-gray-600">Tag ID: {{ cow.tag_id || 'N/A' }}</p>
-            </div>
-            <div class="flex space-x-3">
-              <NuxtLink
-                :to="`/family-tree?root=${cow.id}`"
-                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                <svg class="mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
-                </svg>
-                View Lineage
-              </NuxtLink>
-              <button
-                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
-                @click="exportProfile"
-              >
-                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Export Profile
-              </button>
-              <button
-                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-700 hover:bg-gray-800"
-                @click="handleEdit"
-              >
-                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                Edit
-              </button>
-            </div>
+    <div v-else-if="cow">
+      <PageHeader :title="cow.name" :subtitle="`Tag ID: ${cow.tag_id || 'N/A'}`">
+        <template #title>
+          <div class="flex flex-wrap items-center gap-3">
+            <span>{{ cow.name }}</span>
+            <span
+              v-if="cow.genetic_line === 'Pedigree'"
+              class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-900"
+            >
+              <Icon name="lucide:award" class="mr-1 h-3 w-3" />
+              Pedigree
+            </span>
           </div>
-        </div>
+        </template>
+
+        <template #actions>
+          <div class="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-3">
+            <UButton :to="`/family-tree?root=${cow.id}`" variant="soft" color="primary" icon="i-lucide-git-branch">
+              Lineage
+            </UButton>
+            <UButton variant="solid" color="primary" icon="i-lucide-download" @click="exportProfile">
+              Export
+            </UButton>
+            <UButton variant="outline" color="neutral" icon="i-lucide-pencil" @click="handleEdit">
+              Edit
+            </UButton>
+          </div>
+        </template>
+      </PageHeader>
 
         <!-- Tabs -->
-        <div class="mb-6 border-b border-gray-200">
-          <nav class="-mb-px flex space-x-8">
+      <div class="mb-6 border-b border-slate-200">
+        <nav class="-mb-px flex gap-6 overflow-x-auto">
             <button
-              :class="activeTab === 'overview' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+              :class="activeTab === 'overview' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+              class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
               @click="activeTab = 'overview'"
             >
               Overview
             </button>
             <button
-              :class="activeTab === 'health' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+              :class="activeTab === 'health' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+              class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
               @click="goToRecords('health')"
             >
               Health
             </button>
             <button
-              :class="activeTab === 'reproduction' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+              :class="activeTab === 'reproduction' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+              class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
               @click="activeTab = 'reproduction'"
             >
                 Breeding
             </button>
             <button
-              :class="activeTab === 'milk' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+              :class="activeTab === 'milk' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+              class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
               @click="activeTab = 'milk'"
             >
               Milk Production
@@ -343,7 +320,6 @@
           </div>
         </div>
       </div>
-      </div>
 
       <div v-else class="text-center py-12 bg-white shadow rounded-lg">
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -359,9 +335,22 @@
             Back to Cows
           </NuxtLink>
         </div>
-      </div>
+        </div>
     </div>
-  </div>
+
+    <EmptyState
+      v-else
+      icon="lucide:search-x"
+      title="Cow not found"
+      description="We couldn't find this cow. It may have been deleted or you may not have access."
+    >
+      <template #actions>
+        <UButton to="/cows" variant="outline" color="neutral" icon="i-lucide-arrow-left">
+          Back to cows
+        </UButton>
+      </template>
+    </EmptyState>
+  </PageContainer>
 </template>
 
 <script setup>
@@ -497,7 +486,7 @@ async function exportProfile() {
     URL.revokeObjectURL(link.href)
   } catch (err) {
     console.error('Error exporting profile:', err)
-    useToast().error('Failed to export profile')
+    useAppToast().error('Failed to export profile')
   }
 }
 

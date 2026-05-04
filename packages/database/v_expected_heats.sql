@@ -8,7 +8,10 @@
 --  - This view performs only read operations and is safe for RLS (farm_id preserved).
 
 -- SECURITY DEFINER removed for safety; default is SECURITY INVOKER
-CREATE OR REPLACE VIEW v_expected_heats AS
+DROP VIEW IF EXISTS v_expected_heats CASCADE;
+CREATE OR REPLACE VIEW v_expected_heats
+WITH (security_invoker = true)
+AS
 SELECT
   h.cow_id,
   c.farm_id,

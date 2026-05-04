@@ -10,42 +10,9 @@
 
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import { corsHeaders } from '../_shared/cors.ts';
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createEdgeHelpers } from '../_shared/http.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { persistSession: false }
-});
-
-function jsonResponse(body: unknown, status = 200) {
-    return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
-}
-
-async function getUserAndFarm(req: Request) {
-    const authHeader = req.headers.get('authorization') || '';
-    const token = authHeader.replace(/^Bearer /i, '').trim();
-
-    if (!token) {
-        return { error: 'AUTH_HEADER_MISSING_OR_MALFORMED' };
-    }
-
-    try {
-        const { data: { user }, error } = await supabase.auth.getUser(token);
-
-        if (error) {
-            return { error: `SUPABASE_AUTH_ERROR: ${error.message}` };
-        }
-
-        if (!user) {
-            return { error: 'SUPABASE_AUTH_NO_USER' };
-        }
-
-        return { user, farm_id: user.id };
-    } catch (err: any) {
-        return { error: `EDGE_FUNCTION_EXCEPTION: ${err.message}` };
-    }
-}
+const { supabase, jsonResponse, getUserAndFarm } = createEdgeHelpers();
 
 // Validation helpers
 const VALID_RECORD_TYPES = new Set(['vaccination', 'medication', 'disease', 'treatment', 'checkup', 'injury', 'other']);
@@ -195,7 +162,7 @@ function buildHealthRecordUpdates(body: any) {
 // Route handlers
 async function handleValidateHealthRecord(req: Request) {
     const body = await req.json().catch((e) => { console.error('invalid json body', e); return null; });
-    if (!body || !body.cow_id || !body.record_type || !body.record_date) {
+    if (!body?.cow_id || !body?.record_type || !body?.record_date) {
         return jsonResponse({ error: 'cow_id_record_type_and_record_date_required' }, 400);
     }
 
@@ -231,7 +198,7 @@ async function handleValidateHealthRecord(req: Request) {
 
 async function handleCreateHealthRecord(req: Request) {
     const body = await req.json().catch((e) => { console.error('invalid json body', e); return null; });
-    if (!body || !body.cow_id || !body.record_type || !body.record_date || !body.title) {
+    if (!body?.cow_id || !body?.record_type || !body?.record_date || !body?.title) {
         return jsonResponse({ error: 'cow_id_record_type_record_date_and_title_required' }, 400);
     }
 
@@ -266,7 +233,7 @@ async function handleCreateHealthRecord(req: Request) {
 
 async function handleUpdateHealthRecord(req: Request) {
     const body = await req.json().catch((e) => { console.error('invalid json body', e); return null; });
-    if (!body || !body.id) {
+    if (!body?.id) {
         return jsonResponse({ error: 'record_id_required' }, 400);
     }
 
@@ -315,7 +282,7 @@ async function handleUpdateHealthRecord(req: Request) {
 
 async function handleDeleteHealthRecord(req: Request) {
     const body = await req.json().catch((e) => { console.error('invalid json body', e); return null; });
-    if (!body || !body.id) {
+    if (!body?.id) {
         return jsonResponse({ error: 'record_id_required' }, 400);
     }
 

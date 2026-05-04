@@ -31,25 +31,21 @@ See [DATABASE.md](DATABASE.md) for complete database setup instructions.
 ```
 LiveStocka/
 ├── apps/
-│   ├── web/              # Nuxt 3 web application
-│   └── mobile/           # Capacitor mobile app (future)
+│   └── web/              # Single Nuxt 3 app for desktop, mobile, and ipad
 ├── packages/
 │   ├── database/         # SQL migrations and schemas
 │   └── shared/           # Shared types and utilities
 ├── supabase/
 │   └── functions/        # Edge functions
-└── docs/                 # Additional documentation
+└── docs/                 # Documentation index and moved guides
 ```
 
 ---
 
 ## 📚 Documentation
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture and design
-- **[REQUIREMENTS.md](REQUIREMENTS.md)** - Feature specifications
-- **[DATABASE.md](DATABASE.md)** - Database setup and maintenance
-- **[heat-breeding-genetics-fullstack-agent-guide.md](heat-breeding-genetics-fullstack-agent-guide.md)** - Development guide
-- **[TODO.md](TODO.md)** - Feature roadmap and progress
+- **[docs/TODO.md](docs/TODO.md)** - Current status + remaining work
+- **[packages/database/](packages/database/)** - Database schema and setup files
 
 ---
 
@@ -73,7 +69,7 @@ LiveStocka/
 - 📋 Reports and analytics
 - 📋 Photo uploads
 - 📋 CSV import/export
-- 📋 Mobile app
+- 📋 Mobile-first responsive polish
 - 📋 Multi-user support
 
 ---
@@ -82,7 +78,7 @@ LiveStocka/
 
 - **Frontend:** Nuxt 3, Vue 3, TypeScript, Tailwind CSS
 - **Backend:** Supabase (PostgreSQL, Auth, Storage)
-- **Mobile:** Capacitor (planned)
+- **Mobile experience:** Same responsive Nuxt app, optimized for phones and tablets
 - **Deployment:** Vercel (web), Supabase (database)
 
 ---

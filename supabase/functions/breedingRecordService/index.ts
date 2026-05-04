@@ -3,50 +3,17 @@
 // Endpoint: POST /record_breeding_attempt
 
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
-import { corsHeaders } from '../_shared/cors.ts';
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createEdgeSupabaseClient, getRequiredEnv, getUserAndFarm, jsonResponse } from '../_shared/http.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { persistSession: false }
-});
-
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
-}
-
-async function getUserAndFarm(req: Request) {
-  const authHeader = req.headers.get('authorization') || '';
-  const token = authHeader.replace(/^Bearer /i, '').trim();
-
-  if (!token) {
-    return { error: 'AUTH_HEADER_MISSING_OR_MALFORMED' };
-  }
-
-  try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-
-    if (error) {
-      return { error: `SUPABASE_AUTH_ERROR: ${error.message}` };
-    }
-
-    if (!user) {
-      return { error: 'SUPABASE_AUTH_NO_USER' };
-    }
-
-    return { user, farm_id: user.id };
-  } catch (err: any) {
-    return { error: `EDGE_FUNCTION_EXCEPTION: ${err.message}` };
-  }
-}
+const supabase = createEdgeSupabaseClient();
+const breedingServiceBaseUrl = getRequiredEnv('SUPABASE_URL');
 
 async function handleRecordBreedingAttempt(req: Request) {
   const body = await req.json().catch((e) => { console.error('invalid json body', e); return null; });
-  if (!body || !body.cow_id || !body.heat_event_id || (!body.sire_id && !body.sire_name)) {
+  if (!body?.cow_id || !body?.heat_event_id || (!body?.sire_id && !body?.sire_name)) {
     return jsonResponse({ error: 'cow_id_heat_event_id_and_sire_required' }, 400);
   }
-  const auth = await getUserAndFarm(req);
+  const auth = await getUserAndFarm(req, supabase);
   if ('error' in auth) return jsonResponse({ error: auth.error }, 401);
   const { farm_id } = auth as any;
 
@@ -109,7 +76,7 @@ async function handleRecordBreedingAttempt(req: Request) {
 
   // Schedule pregnancy check alert for 30 days later
   try {
-    await fetch(`${SUPABASE_URL}/functions/v1/breedingService/schedule_pregnancy_check_alert`, {
+    await fetch(`${breedingServiceBaseUrl}/functions/v1/breedingService/schedule_pregnancy_check_alert`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': req.headers.get('authorization') || '' },
       body: JSON.stringify({ breeding_attempt_id: attemptId })
@@ -125,8 +92,8 @@ serve(async (req: Request) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, '');
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, content-type, apikey, x-client-info', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS', 'Content-Type': 'text/plain' } });
   }
   if (req.method === 'POST' && path.endsWith('/record_breeding_attempt')) return handleRecordBreedingAttempt(req);
-  return new Response('Not found', { status: 404, headers: corsHeaders });
+  return new Response('Not found', { status: 404, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, content-type, apikey, x-client-info', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS' } });
 });

@@ -4,46 +4,13 @@
 
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import { corsHeaders } from '../_shared/cors.ts';
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createEdgeHelpers } from '../_shared/http.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { persistSession: false }
-});
-
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
-}
-
-async function getUserAndFarm(req: Request) {
-  const authHeader = req.headers.get('authorization') || '';
-  const token = authHeader.replace(/^Bearer /i, '').trim();
-
-  if (!token) {
-    return { error: 'AUTH_HEADER_MISSING_OR_MALFORMED' };
-  }
-
-  try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-
-    if (error) {
-      return { error: `SUPABASE_AUTH_ERROR: ${error.message}` };
-    }
-
-    if (!user) {
-      return { error: 'SUPABASE_AUTH_NO_USER' };
-    }
-
-    return { user, farm_id: user.id };
-  } catch (err: any) {
-    return { error: `EDGE_FUNCTION_EXCEPTION: ${err.message}` };
-  }
-}
+const { supabase, jsonResponse, getUserAndFarm } = createEdgeHelpers();
 
 async function handleRecordPregnancyResult(req: Request) {
   const body = await req.json().catch((e) => { console.error('invalid json body', e); return null; });
-  if (!body || !body.breeding_attempt_id || !body.result) {
+  if (!body?.breeding_attempt_id || !body?.result) {
     return jsonResponse({ error: 'breeding_attempt_id_and_result_required' }, 400);
   }
   const auth = await getUserAndFarm(req);

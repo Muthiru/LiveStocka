@@ -43,56 +43,48 @@ const result = ref('pregnant')
 const notes = ref('')
 
 interface Attempt { id: string; attempt_time: string; sire?: { id?: string; name?: string; tag_id?: string } }
+interface AttemptsResponse { attempts?: Attempt[] }
 
 const attempts = ref<Attempt[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 
 const { $supabase } = useNuxtApp()
+const config = useRuntimeConfig()
 
-interface AttemptsResponse {
-  attempts?: Attempt[]
-}
-
-const { data: attemptsData, pending: attemptsPending, error: attemptsError } = await useAsyncData('attempts-' + props.cowId, async () => {
+const { data: attemptsData, pending: attemptsPending, error: attemptsError } = await useAsyncData<AttemptsResponse>('attempts-' + props.cowId, async () => {
   const base = useRuntimeConfig().public.supabaseUrl
   const url = `${base}/functions/v1/readService/breeding_history?cow_id=${props.cowId}`
-  const res = await $fetch<AttemptsResponse>(url)
-  return (res?.attempts || []) as Attempt[]
+  return await $fetch<AttemptsResponse>(url)
 })
 
-attempts.value = attemptsData.value || []
+attempts.value = attemptsData.value?.attempts || []
 loading.value = !!attemptsPending.value
 if (attemptsError.value) error.value = String(attemptsError.value)
 
 const op = useAsyncOperation(async () => {
-  const { data, error: invokeError } = await $supabase.functions.invoke('pregnancyRecordService/record_pregnancy_result', {
-    method: 'POST',
-    body: {
-      breeding_attempt_id: breeding_attempt_id.value,
-      result: result.value,
-      notes: notes.value || null
-    }
-  })
-  
-  if (invokeError) {
-    console.error('record_pregnancy_result edge function error:', invokeError)
-    throw new Error(invokeError.message || 'record_pregnancy_result failed')
+  const session = await $supabase.auth.getSession()
+  const token = session?.data?.session?.access_token
+  const url = `${config.public.supabaseUrl}/functions/v1/pregnancyRecordService/record_pregnancy_result`
+  const body = {
+    breeding_attempt_id: breeding_attempt_id.value,
+    result: result.value,
+    notes: notes.value
   }
-  
-  // Reset form on success
-  breeding_attempt_id.value = null
-  result.value = 'pregnant'
-  notes.value = ''
-  
-  return data
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  }
+  if (token) headers.Authorization = `Bearer ${token}`
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body)
+  })
+  const json = await res.json()
+  if (!res.ok) throw new Error(json?.error || 'record_pregnancy_result failed')
+  return json
 })
 
-const onSubmit = async () => {
-  const data = await op.execute()
-  if (data) {
-    useToast().success('Pregnancy check recorded successfully')
-  }
-}
+const onSubmit = async () => { await op.execute() }
 
 </script>

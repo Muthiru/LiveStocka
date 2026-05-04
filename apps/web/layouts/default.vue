@@ -1,207 +1,191 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Sidebar -->
-    <div class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-      <div class="flex-1 flex flex-col min-h-0 bg-white border-r border-gray-200">
-        <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-          <div class="flex items-center flex-shrink-0 px-4">
-            <NuxtLink to="/dashboard" class="text-2xl font-bold text-gray-900 hover:text-gray-700">
+  <div class="min-h-screen bg-slate-50 text-slate-900">
+    <aside class="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-72 lg:flex-col">
+      <div class="flex min-h-0 flex-1 flex-col border-r border-slate-200 bg-white">
+        <div class="flex-1 overflow-y-auto px-4 py-5">
+          <div class="flex items-center">
+            <NuxtLink to="/dashboard" class="text-2xl font-bold tracking-tight text-slate-900 hover:text-slate-700">
               LiveStocka
             </NuxtLink>
           </div>
-          <nav class="mt-5 flex-1 px-2 space-y-1">
+
+          <nav class="mt-6 space-y-1" aria-label="Primary navigation">
             <NuxtLink
-              class="group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-              :class="isActive('/dashboard') ? 'bg-indigo-100 text-indigo-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+              v-for="item in primaryNav"
+              :key="item.to"
+              :to="item.to"
+              class="group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+              :class="isActive(item.to) ? 'bg-emerald-50 text-emerald-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
             >
-              <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              Dashboard
+              <Icon :name="item.icon" class="mr-3 h-5 w-5" />
+              {{ item.label }}
             </NuxtLink>
-            <NuxtLink
-              to="/cows"
-              class="group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-            >
-              <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-              </svg>
-              My Cows
-            </NuxtLink>
-            <NuxtLink
-              to="/add-cow"
-              class="group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-              :class="isActive('/add-cow') ? 'bg-indigo-100 text-indigo-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
-            >
-              <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Add Cow
-            </NuxtLink>
-            <div class="pt-4 mt-4 border-t border-gray-200">
-              <p class="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Features</p>
+
+            <div class="pt-4 mt-4 border-t border-slate-200">
+              <p class="px-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Features</p>
               <NuxtLink
-                to="/family-tree"
-                class="group flex items-center px-2 py-2 mt-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                v-for="item in featureNav"
+                :key="item.to"
+                :to="item.to"
+                class="group mt-1 flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+                :class="isActive(item.to) ? 'bg-emerald-50 text-emerald-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'"
               >
-                <!-- Premium Cow Head Icon -->
-                <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 14c0-3.3-1.8-5-5-5s-5 1.7-5 5c0 1.5.7 2.8 1.8 3.5C8.3 18.2 8 19 8 20c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2 0-1-.3-1.8-.8-2.5 1.1-.7 1.8-2 1.8-3.5zM9 12l.01.01M15 12l.01.01" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 9c-1-1-2-1-2 1s.5 2.5 1.5 3.5M18 9c1-1 2-1 2 1s-.5 2.5-1.5 3.5" />
-                </svg>
-                Family Tree
-              </NuxtLink>
-              <NuxtLink
-                to="/health-records"
-                class="group flex items-center px-2 py-2 mt-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              >
-                <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Health Records
-              </NuxtLink>
-              <NuxtLink
-                to="/breeding"
-                class="group flex items-center px-2 py-2 mt-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              >
-                <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Reproduction
-              </NuxtLink>
-              <NuxtLink
-                to="/milk-production"
-                class="group flex items-center px-2 py-2 mt-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              >
-                <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-                Milk Production
-              </NuxtLink>
-              <NuxtLink
-                to="/reports"
-                class="group flex items-center px-2 py-2 mt-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              >
-                <svg class="mr-3 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                Reports
+                <Icon :name="item.icon" class="mr-3 h-5 w-5" />
+                {{ item.label }}
               </NuxtLink>
             </div>
           </nav>
         </div>
-        <div class="flex-shrink-0 flex border-t border-gray-200 p-4">
-          <div class="flex items-center w-full">
-            <div class="flex-1">
-              <p class="text-sm font-medium text-gray-700">{{ userEmail }}</p>
+
+        <div class="flex-shrink-0 border-t border-slate-200 p-4">
+          <div class="flex items-center gap-3 rounded-2xl bg-slate-50 px-3 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium text-slate-800">{{ userEmail }}</p>
+              <p class="text-xs text-slate-500">Signed in</p>
             </div>
             <button
-              class="ml-3 flex-shrink-0 bg-white p-1 text-gray-400 rounded-full hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
               @click="handleLogout"
             >
-              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
+              <Icon name="lucide:log-out" class="h-5 w-5" />
+              <span class="sr-only">Sign out</span>
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <!-- Mobile sidebar -->
-    <div class="md:hidden">
-      <div class="bg-white shadow">
+    <div class="flex min-h-screen flex-col lg:pl-72">
+      <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur lg:hidden">
         <div class="flex items-center justify-between px-4 py-3">
-          <h1 class="text-xl font-bold text-indigo-600">LiveStocka</h1>
-          <button class="text-gray-500" @click="mobileMenuOpen = !mobileMenuOpen">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-        <div v-if="mobileMenuOpen" class="px-2 pt-2 pb-3 space-y-1">
-          <NuxtLink to="/dashboard" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            Dashboard
+          <NuxtLink to="/dashboard" class="text-xl font-bold tracking-tight text-slate-900">
+            LiveStocka
           </NuxtLink>
-          <NuxtLink to="/cows" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-            </svg>
-            My Cows
-          </NuxtLink>
-          <NuxtLink to="/add-cow" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-            <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Add Cow
-          </NuxtLink>
-          <div class="pt-3 mt-3 border-t border-gray-200">
-            <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Features</p>
-            <NuxtLink to="/family-tree" class="flex items-center px-3 py-2 mt-1 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-                <!-- Premium Cow Head Icon -->
-                <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 14c0-3.3-1.8-5-5-5s-5 1.7-5 5c0 1.5.7 2.8 1.8 3.5C8.3 18.2 8 19 8 20c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2 0-1-.3-1.8-.8-2.5 1.1-.7 1.8-2 1.8-3.5zM9 12l.01.01M15 12l.01.01" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 9c-1-1-2-1-2 1s.5 2.5 1.5 3.5M18 9c1-1 2-1 2 1s-.5 2.5-1.5 3.5" />
-                </svg>
-                Family Tree
-            </NuxtLink>
-            <NuxtLink to="/health-records" class="flex items-center px-3 py-2 mt-1 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-              <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Health Records
-            </NuxtLink>
-            <NuxtLink to="/breeding" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-              <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Reproduction
-            </NuxtLink>
-            <NuxtLink to="/milk-production" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-              <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              Milk Production
-            </NuxtLink>
-            <NuxtLink to="/reports" class="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
-              <svg class="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              Reports
-            </NuxtLink>
-          </div>
-        </div>
-      </div>
-    </div>
+          <UDropdownMenu
+            v-model:open="mobileMenuOpen"
+            :items="mobileMenuItems"
+            :content="{ side: 'bottom', align: 'end', sideOffset: 8 }"
+            :ui="mobileMenuUi"
+            arrow
+            class="lg:hidden"
+          >
+            <UButton
+              icon="i-lucide-menu"
+              color="neutral"
+              variant="ghost"
+              square
+              size="md"
+              :aria-expanded="mobileMenuOpen"
+              :aria-label="mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'"
+              aria-haspopup="menu"
+            />
 
-    <!-- Main content -->
-    <div class="md:pl-64 flex flex-col flex-1">
+            <template #content-top="{ sub }">
+              <div v-if="!sub" class="border-b border-slate-200/70 px-3 py-2.5">
+                <p class="truncate text-sm font-semibold text-slate-900">
+                  {{ userEmail || 'User' }}
+                </p>
+                <p class="text-xs text-slate-500">Signed in</p>
+              </div>
+            </template>
+          </UDropdownMenu>
+        </div>
+      </header>
+
       <main class="flex-1">
-  <slot />
+        <slot />
       </main>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
 
 const { $supabase } = useNuxtApp()
 const route = useRoute()
+
 const userEmail = ref('')
 const mobileMenuOpen = ref(false)
+const mobileMenuUi = {
+  content: 'w-72 rounded-2xl bg-white/95 backdrop-blur p-1 shadow-xl ring-1 ring-slate-200/70',
+  group: 'py-1',
+  item: 'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-slate-700 data-[highlighted]:bg-slate-50 data-[highlighted]:text-slate-900',
+  itemLeadingIcon: 'h-4 w-4 text-slate-500',
+  itemLabel: 'truncate font-medium',
+  separator: 'mx-2 my-1 h-px bg-slate-200/70',
+  label: 'px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400'
+} as const
 
-const isActive = (path) => {
-  return route.path === path || route.path.startsWith(path + '/')
-}
+const primaryNav = [
+  { label: 'Dashboard', to: '/dashboard', icon: 'lucide:layout-dashboard' },
+  { label: 'My Cows', to: '/cows', icon: 'lucide:clipboard-list' },
+  { label: 'Add Cow', to: '/add-cow', icon: 'lucide:square-plus' }
+]
+
+const featureNav = [
+  { label: 'Family Tree', to: '/family-tree', icon: 'lucide:git-branch' },
+  { label: 'Health Records', to: '/health-records', icon: 'lucide:heart-pulse' },
+  { label: 'Reproduction', to: '/breeding', icon: 'lucide:repeat-2' },
+  { label: 'Milk Production', to: '/milk-production', icon: 'lucide:milk' },
+  { label: 'Reports', to: '/reports', icon: 'lucide:chart-column' }
+]
+
+const isActive = (path) => route.path === path || route.path.startsWith(path + '/')
 
 const handleLogout = async () => {
+  mobileMenuOpen.value = false
   await $supabase.auth.signOut()
   await navigateTo('/login')
 }
+
+const toUiIcon = (icon: string): string | undefined => {
+  if (!icon) return undefined
+  if (icon.startsWith('i-')) return icon
+  if (icon.startsWith('lucide:')) return `i-lucide-${icon.slice('lucide:'.length)}`
+  return icon
+}
+
+const mobileMenuItems = computed(() => {
+  const go = (to: string) => async () => {
+    mobileMenuOpen.value = false
+    await navigateTo(to)
+  }
+
+  const withLogoutClass = <T extends Record<string, unknown>>(base: T) =>
+    ({
+      ...base,
+      class:
+        'text-red-600 data-[highlighted]:bg-red-50 data-[highlighted]:text-red-700 focus:text-red-700'
+    }) as T & { class: string }
+
+  return [
+    [
+      { type: 'label', label: 'Navigate' },
+      ...primaryNav.map(item => ({
+        label: item.label,
+        icon: toUiIcon(item.icon),
+        onSelect: go(item.to)
+      })),
+      { type: 'separator' },
+      ...featureNav.map(item => ({
+        label: item.label,
+        icon: toUiIcon(item.icon),
+        onSelect: go(item.to)
+      })),
+      { type: 'separator' },
+      withLogoutClass({
+        label: 'Logout',
+        icon: 'i-lucide-log-out',
+        onSelect: handleLogout
+      })
+    ]
+  ]
+})
+
+watch(() => route.path, () => {
+  mobileMenuOpen.value = false
+})
 
 onMounted(async () => {
   const { data: { user } } = await $supabase.auth.getUser()

@@ -1,5 +1,5 @@
 <template>
-  <form class="space-y-6" @submit.prevent="$emit('submit')">
+  <form class="space-y-6" @submit.prevent="handleSubmit">
     <!-- Basic Information -->
     <div class="bg-white shadow rounded-lg">
       <div class="px-5 py-4 border-b border-gray-200">
@@ -15,9 +15,11 @@
               type="text"
               required
               class="form-input"
+              :aria-invalid="Boolean(errors.name)"
               :placeholder="isEdit ? '' : 'e.g., Bella'"
               @input="updateField('name', ($event.target as HTMLInputElement).value)"
             >
+            <p v-if="errors.name" class="mt-2 text-sm text-red-600">{{ errors.name }}</p>
           </div>
 
           <div>
@@ -28,9 +30,11 @@
               type="text"
               required
               class="form-input"
+              :aria-invalid="Boolean(errors.tag_id)"
               :placeholder="isEdit ? '' : 'e.g., TAG-001'"
               @input="updateField('tag_id', ($event.target as HTMLInputElement).value)"
             >
+            <p v-if="errors.tag_id" class="mt-2 text-sm text-red-600">{{ errors.tag_id }}</p>
           </div>
 
           <div>
@@ -189,7 +193,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import type { CowFormData } from '~/types'
+import { validateSchema } from '~/utils/schemaValidation'
+import { cowFormSchema } from '~/utils/schemas'
 
 const props = defineProps<{
   form: CowFormData
@@ -201,9 +208,19 @@ const emit = defineEmits<{
   'update:form': [value: CowFormData]
 }>()
 
+const errors = ref<Partial<Record<keyof CowFormData, string>>>({})
+
 const { cowStatuses } = useCows()
 
 const updateField = (field: keyof CowFormData, value: string) => {
+  errors.value[field] = undefined
   emit('update:form', { ...props.form, [field]: value })
+}
+
+const handleSubmit = () => {
+  const result = validateSchema(cowFormSchema, props.form)
+  errors.value = result.errors
+  if (!result.valid) return
+  emit('submit')
 }
 </script>

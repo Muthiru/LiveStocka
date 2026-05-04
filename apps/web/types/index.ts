@@ -89,9 +89,16 @@ export interface MilkProduction {
 
 export interface ToastMessage {
   id: string
+  title?: string
   message: string
   type: 'success' | 'error' | 'warning' | 'info'
   timeout?: number
+  createdAt?: number
+  dismissible?: boolean
+  action?: {
+    label: string
+    onClick: () => void
+  }
 }
 
 export interface SupabaseResponse<T> {
@@ -179,24 +186,6 @@ export interface MilkStats {
   averageDaily: number
   recordsCount: number
   lastRecordDate?: string
-}
-
-// Component prop types
-export interface BaseInputProps {
-  modelValue?: string | number
-  type?: string
-  placeholder?: string
-  required?: boolean
-  disabled?: boolean
-  error?: string
-}
-
-export interface BaseButtonProps {
-  variant?: 'primary' | 'secondary' | 'danger' | 'success'
-  size?: 'sm' | 'md' | 'lg'
-  disabled?: boolean
-  loading?: boolean
-  type?: 'button' | 'submit' | 'reset'
 }
 
 // Composable return types

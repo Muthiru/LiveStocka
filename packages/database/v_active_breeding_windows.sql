@@ -9,7 +9,10 @@
 --  - All calculations are read-only and preserve `farm_id` for RLS.
 
 -- SECURITY DEFINER removed for safety; default is SECURITY INVOKER
-CREATE OR REPLACE VIEW v_active_breeding_windows AS
+DROP VIEW IF EXISTS v_active_breeding_windows CASCADE;
+CREATE OR REPLACE VIEW v_active_breeding_windows
+WITH (security_invoker = true)
+AS
 SELECT
   he.id AS heat_event_id,
   he.farm_id,
