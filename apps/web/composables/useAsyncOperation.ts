@@ -43,7 +43,7 @@ export const useAsyncOperation = <T>(
       console.error(options.errorMessage || 'Operation failed:', message)
       
       if (options.showToast) {
-        const toast = useToast()
+        const toast = useAppToast()
         toast.error(message)
       }
       

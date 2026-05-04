@@ -13,8 +13,6 @@ SELECT
   ba.id AS breeding_attempt_id,
   ba.farm_id,
   ba.cow_id,
-  c.name AS cow_name,
-  c.tag_id AS cow_tag_id,
   ba.attempt_time,
   (ba.attempt_time + INTERVAL '30 days') AS recommended_check_date,
   CASE WHEN now() > (ba.attempt_time + INTERVAL '30 days')
@@ -26,7 +24,6 @@ SELECT
     WHERE pc.breeding_attempt_id = ba.id AND pc.deleted_at IS NULL
   ) AS is_pending
 FROM breeding_attempts ba
-LEFT JOIN cows c ON c.id = ba.cow_id
 WHERE ba.deleted_at IS NULL;
 
 COMMENT ON VIEW v_pending_pregnancy_checks IS 'Breeding attempts with no pregnancy check yet; includes recommended date and overdue days.';

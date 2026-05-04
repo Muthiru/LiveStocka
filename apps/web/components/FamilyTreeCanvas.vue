@@ -1,20 +1,35 @@
 <template>
-  <div class="p-4 bg-white rounded shadow">
-    <h3 class="text-lg font-medium mb-2">Family Tree</h3>
-    <div class="h-96 bg-gray-50 rounded overflow-auto relative">
-      <canvas ref="canvasRef" class="w-full h-full" />
-      <div v-if="loading" class="absolute inset-0 flex items-center justify-center">Loading...</div>
-      <div v-if="error" class="absolute top-2 left-2 text-sm text-red-600">{{ error }}</div>
+  <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <div class="mb-3 flex items-center justify-between">
+      <h3 class="text-base font-semibold text-slate-900">Family Tree</h3>
+      <p v-if="loading" class="text-xs font-medium text-slate-500">Loading…</p>
+    </div>
+
+    <div class="relative h-96 overflow-auto rounded-xl bg-slate-50">
+      <canvas ref="canvasRef" class="h-full w-full" />
+      <div v-if="loading" class="absolute inset-0 flex items-center justify-center text-sm text-slate-600">
+        Loading…
+      </div>
+      <div v-if="error" class="absolute left-2 top-2 max-w-[calc(100%-1rem)] rounded-lg bg-white px-3 py-2 text-sm text-red-700 shadow ring-1 ring-red-200">
+        {{ error }}
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-const props = defineProps<{ cowId: string, depth?: number }>()
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+
+const props = defineProps<{ cowId: string; depth?: number }>()
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const loading = ref(false)
-const error = ref<string | null>(null)
+const depth = computed(() => props.depth || 4)
+
+const ancestors = ref<Ancestor[]>([])
+const descendants = ref<Descendant[]>([])
+
+const genetics = useGeneticsService()
+const loading = computed(() => genetics.loading.value)
+const error = computed(() => genetics.error.value)
 
 interface Ancestor { id: string; relation: string; depth: number }
 interface Descendant { id: string; via: string; depth: number }
@@ -41,33 +56,28 @@ const drawTree = (ancestors: Ancestor[], descendants: Descendant[]) => {
   })
 }
 
-const { data: ancestorsData, pending: _aPending, error: aError } = await useAsyncData('ancestors-' + props.cowId, async () => {
-  const base = useRuntimeConfig().public.supabaseUrl
-  const depth = props.depth || 4
-  const aRes = await $fetch(`${base}/functions/v1/geneticsService/get_ancestors?cow_id=${props.cowId}&depth=${depth}`)
-  return (aRes?.ancestors || []) as Ancestor[]
-})
+const ensureCanvasSize = async () => {
+  await nextTick()
+  const c = canvasRef.value
+  if (!c) return
+  const rect = c.getBoundingClientRect()
+  c.width = Math.max(800, Math.floor(rect.width))
+  c.height = Math.max(400, Math.floor(rect.height))
+}
 
-const { data: descendantsData, pending: _dPending, error: dError } = await useAsyncData('descendants-' + props.cowId, async () => {
-  const base = useRuntimeConfig().public.supabaseUrl
-  const depth = props.depth || 4
-  const dRes = await $fetch(`${base}/functions/v1/geneticsService/get_descendants?cow_id=${props.cowId}&depth=${depth}`)
-  return (dRes?.descendants || []) as Descendant[]
-})
+const loadTree = async () => {
+  if (!props.cowId) return
+  await ensureCanvasSize()
+  ancestors.value = await genetics.fetchAncestors(props.cowId, depth.value)
+  descendants.value = await genetics.fetchDescendants(props.cowId, depth.value)
+  drawTree(ancestors.value, descendants.value)
+}
 
 onMounted(() => {
-  // ensure canvas pixel size matches displayed size
-  const c = canvasRef.value
-  if (c) {
-    const rect = c.getBoundingClientRect()
-    c.width = Math.max(800, rect.width)
-    c.height = Math.max(400, rect.height)
-  }
-  const a = ancestorsData.value || []
-  const d = descendantsData.value || []
-  drawTree(a, d)
+  loadTree()
 })
 
-if (aError.value) error.value = String(aError.value)
-if (dError.value) error.value = (error.value ? error.value + '; ' : '') + String(dError.value)
+watch(() => [props.cowId, depth.value], () => {
+  loadTree()
+})
 </script>

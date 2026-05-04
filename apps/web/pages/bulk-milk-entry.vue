@@ -257,7 +257,7 @@ definePageMeta({
 })
 
 
-const toast = useToast()
+const toast = useAppToast()
 const { fetchCows, isMilkable } = useCows()
 const { fetchProduction, bulkAddProduction } = useMilkProduction()
 

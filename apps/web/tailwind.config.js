@@ -9,7 +9,11 @@ module.exports = {
     './assets/**/*.{css,scss,js}'
   ],
   theme: {
-    extend: {}
+    extend: {
+      boxShadow: {
+        soft: '0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 24px rgba(15, 23, 42, 0.08)'
+      }
+    }
   },
   plugins: []
 }

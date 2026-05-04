@@ -1,41 +1,36 @@
 <template>
-  <div class="py-6">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 md:px-8">
-      <!-- Header -->
-      <div class="page-header">
-        <h1 class="page-title">Edit Cow</h1>
-        <p class="page-subtitle">Update the details for {{ form.name }}</p>
-      </div>
+  <PageContainer size="narrow">
+    <PageHeader title="Edit Cow" :subtitle="form.name ? `Update details for ${form.name}` : 'Update cow details'" />
 
-      <LoadingSpinner v-if="loading" text="Loading cow details..." class="py-12" />
+    <LoadingState v-if="loading" text="Loading cow details..." />
 
-      <CowForm v-else v-model:form="form" :is-edit="true" @submit="handleSubmit">
-        <template #actions>
-          <div class="flex justify-between">
-            <button
-              type="button"
-              :disabled="saving || deleting"
-              class="btn-danger"
-              @click="handleDelete"
-            >
-              <LoadingSpinner v-if="deleting" size="sm" :use-icon="true" class="-ml-1 mr-3" />
-              {{ deleting ? 'Deleting...' : 'Delete Cow' }}
-            </button>
-            
-            <div class="flex space-x-3">
-              <NuxtLink :to="`/cow/${route.params.id}`" class="btn-secondary">
-                Cancel
-              </NuxtLink>
-              <button type="submit" :disabled="saving || deleting" class="btn-primary">
-                <LoadingSpinner v-if="saving" size="sm" :use-icon="true" class="-ml-1 mr-3" />
-                {{ saving ? 'Saving...' : 'Update Cow' }}
-              </button>
-            </div>
+    <CowForm v-else v-model:form="form" :is-edit="true" @submit="handleSubmit">
+      <template #actions>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <UButton
+            type="button"
+            color="error"
+            variant="soft"
+            :loading="deleting"
+            :disabled="saving || deleting"
+            icon="i-lucide-trash-2"
+            @click="handleDelete"
+          >
+            Delete cow
+          </UButton>
+
+          <div class="flex flex-col gap-2 sm:flex-row">
+            <UButton :to="`/cow/${route.params.id}`" variant="outline" color="neutral" :disabled="saving || deleting">
+              Cancel
+            </UButton>
+            <UButton type="submit" color="primary" :loading="saving" :disabled="saving || deleting">
+              Update cow
+            </UButton>
           </div>
-        </template>
-      </CowForm>
-    </div>
-  </div>
+        </div>
+      </template>
+    </CowForm>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
@@ -43,7 +38,7 @@
 import type { CowFormData } from '~/types'
 
 const { $supabase } = useNuxtApp()
-const toast = useToast()
+const toast = useAppToast()
 const route = useRoute()
 
 const form = ref<CowFormData>({

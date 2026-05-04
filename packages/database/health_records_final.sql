@@ -115,7 +115,10 @@ CREATE TRIGGER update_health_records_updated_at
 
 -- View for upcoming health events
 -- SECURITY DEFINER removed for safety; default is SECURITY INVOKER
-CREATE OR REPLACE VIEW upcoming_health_events AS
+DROP VIEW IF EXISTS upcoming_health_events CASCADE;
+CREATE OR REPLACE VIEW upcoming_health_events
+WITH (security_invoker = true)
+AS
 SELECT 
   hr.id,
   hr.cow_id,

@@ -658,7 +658,7 @@ definePageMeta({
 })
 
 const { $supabase } = useNuxtApp()
-const toast = useToast()
+const toast = useAppToast()
 const { fetchCows, isMilkable } = useCows()
 
 // Form data

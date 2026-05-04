@@ -123,7 +123,7 @@ const cowIdProvided = computed(() => !!props.cowId)
 const onSubmit = async () => {
   const data = await op.execute()
   if (data) {
-    useToast().success('Heat event recorded successfully')
+    useAppToast().success('Heat event recorded successfully')
     // Trigger refresh of breeding windows and heat dropdowns
     refreshNuxtData('active-windows')
     // Also refresh the specific cow's heats in any BreedingForm

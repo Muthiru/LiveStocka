@@ -1,31 +1,21 @@
 <template>
-  <div class="py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-      <!-- Header -->
-      <div class="mb-6 flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">My Cows</h1>
-          <p class="mt-2 text-sm text-gray-600">Manage and track your cattle</p>
-        </div>
-        <NuxtLink
-          to="/add-cow"
-          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
+  <PageContainer size="wide">
+    <PageHeader title="My Cows" subtitle="Manage and track your cattle">
+      <template #actions>
+        <UButton to="/add-cow" class="w-full sm:w-auto" color="primary" icon="i-lucide-plus">
           Add New Cow
-        </NuxtLink>
-      </div>
+        </UButton>
+      </template>
+    </PageHeader>
 
       <!-- Search and Filters -->
-      <div class="mb-6 bg-white shadow rounded-lg p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div class="md:col-span-2">
             <label for="search" class="sr-only">Search</label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -34,7 +24,7 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search by name, tag ID, or breed..."
-                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                class="block w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
               >
             </div>
           </div>
@@ -43,7 +33,7 @@
             <select
               id="status"
               v-model="statusFilter"
-              class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              class="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
             >
               <option value="">All Status</option>
               <option v-for="status in cowStatuses" :key="status.value" :value="status.value">{{ status.label }}</option>
@@ -54,7 +44,7 @@
             <select
               id="breed"
               v-model="breedFilter"
-              class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              class="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
             >
               <option value="">All Breeds</option>
               <option v-for="breed in allBreeds" :key="breed" :value="breed">{{ breed }}</option>
@@ -64,34 +54,61 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"/>
-        <p class="mt-2 text-sm text-gray-500">Loading cows...</p>
-      </div>
+      <LoadingState v-if="loading" text="Loading cows..." />
 
       <!-- Empty State -->
-      <div v-else-if="cows.length === 0" class="text-center py-12 bg-white shadow rounded-lg">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No cows found</h3>
-        <p class="mt-1 text-sm text-gray-500">{{ searchQuery || statusFilter || breedFilter ? 'Try adjusting your filters.' : 'Get started by adding your first cow.' }}</p>
-        <div class="mt-6">
-          <NuxtLink
-            to="/add-cow"
-            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
+      <EmptyState
+        v-else-if="cows.length === 0"
+        icon="lucide:database"
+        title="No cows found"
+        :description="searchQuery || statusFilter || breedFilter ? 'Try adjusting your filters.' : 'Get started by adding your first cow.'"
+      >
+        <template #actions>
+          <UButton to="/add-cow" color="primary" icon="i-lucide-plus">
             Add Your First Cow
-          </NuxtLink>
-        </div>
-      </div>
+          </UButton>
+        </template>
+      </EmptyState>
 
-      <!-- Cows Table -->
-      <div v-else class="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div class="overflow-x-auto">
+      <div v-else>
+        <!-- Mobile list -->
+        <div class="space-y-3 md:hidden">
+          <button
+            v-for="cow in cows"
+            :key="cow.id"
+            type="button"
+            class="w-full rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
+            @click="navigateTo(`/cow/${cow.id}`)"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="truncate text-base font-semibold text-slate-900">{{ cow.name }}</p>
+                <p class="mt-1 text-sm text-slate-500">Tag: {{ cow.tag_id || 'N/A' }}</p>
+              </div>
+              <span
+                class="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                :class="getStatusClass(cow.status)"
+              >
+                {{ cow.status || 'active' }}
+              </span>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div class="rounded-xl bg-slate-50 px-3 py-2">
+                <p class="text-xs font-medium text-slate-500">Breed</p>
+                <p class="mt-0.5 truncate font-medium text-slate-900">{{ cow.breed || 'Unknown' }}</p>
+              </div>
+              <div class="rounded-xl bg-slate-50 px-3 py-2">
+                <p class="text-xs font-medium text-slate-500">Age / Weight</p>
+                <p class="mt-0.5 truncate font-medium text-slate-900">
+                  {{ cow.age || 'N/A' }} yrs · {{ cow.weight || 'N/A' }} kg
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Desktop/tablet table -->
+        <div class="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -128,8 +145,8 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 h-10 w-10">
-                      <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                        <span class="text-lg font-medium text-indigo-600">{{ cow.name.charAt(0) }}</span>
+                      <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <span class="text-lg font-medium text-emerald-700">{{ cow.name.charAt(0) }}</span>
                       </div>
                     </div>
                     <div class="ml-4">
@@ -160,7 +177,7 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <NuxtLink
                     :to="`/cow/${cow.id}`"
-                    class="text-indigo-600 hover:text-indigo-900"
+                    class="text-emerald-700 hover:text-emerald-900"
                     @click.stop
                   >
                     Details
@@ -218,7 +235,7 @@
                 v-for="page in displayedPages"
                 :key="page"
                 :class="[
-                  page === currentPage ? 'z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600' : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0',
+                  page === currentPage ? 'z-10 bg-emerald-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600' : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0',
                   'relative inline-flex items-center px-4 py-2 text-sm font-semibold'
                 ]"
                 @click="goToPage(page)"
@@ -240,12 +257,11 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup>
-const toast = useToast()
+const toast = useAppToast()
 const { fetchCowsPaginated, getStatusClass, fetchCows, cowStatuses } = useCows()
 
 // State

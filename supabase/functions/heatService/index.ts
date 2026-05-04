@@ -7,48 +7,16 @@
 
 import { serve } from "https://deno.land/std@0.170.0/http/server.ts";
 import { corsHeaders } from '../_shared/cors.ts';
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createEdgeSupabaseClient, getRequiredEnv, getUserAndFarm, jsonResponse } from '../_shared/http.ts';
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { persistSession: false }
-});
-
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
-}
-
-async function getUserAndFarm(req: Request) {
-  const authHeader = req.headers.get('authorization') || '';
-  const token = authHeader.replace(/^Bearer /i, '').trim();
-
-  if (!token) {
-    return { error: 'AUTH_HEADER_MISSING_OR_MALFORMED' };
-  }
-
-  try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-
-    if (error) {
-      return { error: `SUPABASE_AUTH_ERROR: ${error.message}` };
-    }
-
-    if (!user) {
-      return { error: 'SUPABASE_AUTH_NO_USER' };
-    }
-
-    return { user, farm_id: user.id };
-  } catch (err: any) {
-    return { error: `EDGE_FUNCTION_EXCEPTION: ${err.message}` };
-  }
-}
+const supabase = createEdgeSupabaseClient();
+const SUPABASE_URL = getRequiredEnv('SUPABASE_URL');
 
 // Route handlers
 async function handleValidateHeatEvent(req: Request) {
   const body = await req.json().catch((e) => { console.error('invalid json body', e); return null; });
   if (!body || !body.cow_id) return jsonResponse({ error: 'cow_id_required' }, 400);
-  const auth = await getUserAndFarm(req);
+  const auth = await getUserAndFarm(req, supabase);
   if ('error' in auth) return jsonResponse({ error: auth.error }, 401);
   const { farm_id } = auth as any;
 
@@ -68,7 +36,7 @@ async function handleValidateHeatEvent(req: Request) {
 async function handleCreateHeatEvent(req: Request) {
   const body = await req.json().catch((e) => { console.error('invalid json body', e); return null; });
   if (!body || !body.cow_id) return jsonResponse({ error: 'cow_id_required' }, 400);
-  const auth = await getUserAndFarm(req);
+  const auth = await getUserAndFarm(req, supabase);
   if ('error' in auth) return jsonResponse({ error: auth.error }, 401);
   const { farm_id } = auth as any;
 
@@ -76,37 +44,17 @@ async function handleCreateHeatEvent(req: Request) {
   if (cowErr) return jsonResponse({ error: 'db_error', detail: cowErr.message }, 500);
   if (!cows || cows.length === 0) return jsonResponse({ error: 'cow_not_found_or_no_access' }, 404);
 
-  const heatDetectedAt = body.event_time ? new Date(body.event_time) : new Date();
-  if (Number.isNaN(heatDetectedAt.getTime())) return jsonResponse({ error: 'invalid_event_time' }, 400);
+  const eventTime = body.event_time ? new Date(body.event_time) : new Date();
+  if (Number.isNaN(eventTime.getTime())) return jsonResponse({ error: 'invalid_event_time' }, 400);
 
-  const { data: existing } = await supabase.from('heat_events').select('id').eq('cow_id', body.cow_id).eq('heat_detected_at', heatDetectedAt.toISOString()).limit(1);
+  const { data: existing } = await supabase.from('heat_events').select('id').eq('cow_id', body.cow_id).eq('event_time', eventTime.toISOString()).limit(1);
   if (existing && existing.length > 0) return jsonResponse({ id: existing[0].id, already_existed: true });
 
-  const insert = { farm_id, cow_id: body.cow_id, heat_detected_at: heatDetectedAt.toISOString(), intensity: body.intensity || null, signs: body.signs || null, detected_by: body.detected_by || null, notes: body.notes || null };
+  const insert = { farm_id, cow_id: body.cow_id, event_time: eventTime.toISOString(), intensity: body.intensity || null, signs: body.signs || null, detected_by: body.detected_by || null, notes: body.notes || null };
   const { data, error: insertErr } = await supabase.from('heat_events').insert(insert).select('id').limit(1);
   if (insertErr) return jsonResponse({ error: 'insert_failed', detail: insertErr.message }, 500);
 
   const heatId = data?.[0]?.id;
-
-  // Synced Health Record
-  try {
-    const signsText = body.signs && body.signs.length > 0 ? ` Signs: ${body.signs.join(', ')}.` : '';
-    const healthInsert = {
-      farm_id,
-      cow_id: body.cow_id,
-      record_type: 'other',
-      title: 'Reproduction: Heat Detected',
-      description: `Heat intensity: ${body.intensity || 'unspecified'}.${signsText}`,
-      record_date: heatDetectedAt.toISOString().split('T')[0],
-      record_time: heatDetectedAt.toTimeString().split(' ')[0],
-      notes: body.notes || null,
-      created_at: new Date().toISOString()
-    };
-    await supabase.from('health_records').insert(healthInsert);
-  } catch (e) {
-    console.error('Failed to create synced health record for heat', e);
-  }
-
   try {
     await fetch(`${SUPABASE_URL}/functions/v1/heatService/schedule_breeding_alerts`, {
       method: 'POST',
@@ -123,19 +71,19 @@ async function handleCreateHeatEvent(req: Request) {
 async function handleScheduleBreedingAlerts(req: Request) {
   const body = await req.json().catch((e) => { console.error('invalid json body', e); return null; });
   if (!body || !body.heat_event_id) return jsonResponse({ error: 'heat_event_id_required' }, 400);
-  const auth = await getUserAndFarm(req);
+  const auth = await getUserAndFarm(req, supabase);
   if ('error' in auth) return jsonResponse({ error: auth.error }, 401);
   const { farm_id } = auth as any;
 
-  const { data: heats, error: heatErr } = await supabase.from('heat_events').select('id, cow_id, heat_detected_at').eq('id', body.heat_event_id).eq('farm_id', farm_id).limit(1);
+  const { data: heats, error: heatErr } = await supabase.from('heat_events').select('id, cow_id, event_time').eq('id', body.heat_event_id).eq('farm_id', farm_id).limit(1);
   if (heatErr) return jsonResponse({ error: 'db_error', detail: heatErr.message }, 500);
   if (!heats || heats.length === 0) return jsonResponse({ error: 'heat_event_not_found' }, 404);
 
   const heat = heats[0];
-  const heatDetectedAt = new Date(heat.heat_detected_at);
+  const eventTime = new Date(heat.event_time);
   const alerts = [
-    { alert_type: 'window_open', alert_time: heatDetectedAt.toISOString(), status: 'pending', related_event_id: heat.id },
-    { alert_type: 'window_close', alert_time: new Date(heatDetectedAt.getTime() + 3 * 24 * 3600 * 1000).toISOString(), status: 'pending', related_event_id: heat.id }
+    { alert_type: 'window_open', alert_time: eventTime.toISOString(), status: 'pending', related_event_id: heat.id },
+    { alert_type: 'window_close', alert_time: new Date(eventTime.getTime() + 3 * 24 * 3600 * 1000).toISOString(), status: 'pending', related_event_id: heat.id }
   ];
 
   for (const a of alerts) {

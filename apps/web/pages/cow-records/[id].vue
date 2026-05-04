@@ -1,54 +1,71 @@
 <template>
-  <div>
-    <div class="min-h-screen bg-gray-50 p-6 root">
-    <div class="max-w-7xl mx-auto">
-      <div class="flex justify-between items-start mb-6">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">{{ cow?.name || 'Cow' }}</h1>
-            <p class="text-sm text-gray-600">Tag: {{ cow?.tag_id || 'N/A' }}</p>
+  <PageContainer size="wide">
+    <HealthRecordModal v-model="showModal" :record="editing" :cows="cows" :preselected-cow-id="cow?.id" @save="refresh" />
 
-            <!-- Tabs bar similar to cow page -->
-            <nav class="mt-4 -mb-px flex space-x-8">
+    <PageHeader :subtitle="`Tag: ${cow?.tag_id || 'N/A'}`">
+      <template #title>
+        <div class="flex flex-wrap items-center gap-3">
+          <span>{{ cow?.name || 'Cow' }}</span>
+          <span
+            v-if="cow?.genetic_line === 'Pedigree'"
+            class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-900"
+          >
+            <Icon name="lucide:award" class="mr-1 h-3 w-3" />
+            Pedigree
+          </span>
+        </div>
+      </template>
+      <template #actions>
+        <div class="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-2 lg:grid-cols-4">
+          <UButton color="primary" icon="i-lucide-plus" @click="openAdd">
+            Add record
+          </UButton>
+          <UButton variant="outline" color="neutral" icon="i-lucide-download" @click="exportCSV">
+            Export CSV
+          </UButton>
+          <UButton v-if="cow" :to="`/family-tree?root=${cow.id}`" variant="soft" color="primary" icon="i-lucide-network">
+            Lineage
+          </UButton>
+          <UButton to="/health-records" variant="ghost" color="neutral" icon="i-lucide-arrow-left">
+            Back
+          </UButton>
+        </div>
+      </template>
+    </PageHeader>
+
+    <!-- Tabs bar similar to cow page -->
+    <div class="mb-6 border-b border-slate-200">
+      <nav class="-mb-px flex gap-6 overflow-x-auto">
               <button
-                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab === 'overview' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
+                :class="activeTab === 'overview' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
                 @click.prevent="goToCow('overview')"
               >
                 Overview
               </button>
               <button
-                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab === 'health' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
+                :class="activeTab === 'health' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
                 @click.prevent="activeTab = 'health'"
               >
                 Health
               </button>
               <button
-                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab === 'reproduction' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
+                :class="activeTab === 'reproduction' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
                 @click.prevent="activeTab = 'reproduction'"
               >
                 Breeding
               </button>
               <button
-                :class="'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ' + (activeTab === 'milk' ? 'border-gray-700 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')"
+                :class="activeTab === 'milk' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
+                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
                 @click.prevent="goToCow('milk')"
               >
                 Milk Production
               </button>
             </nav>
-
-          
-          </div>
-
-          <div class="flex items-center gap-2 mt-3">
-            <button class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700" @click="openAdd">
-              <Icon name="lucide:plus" class="w-4 h-4" />
-              Add Health Record
-            </button>
-            <button class="px-3 py-2 border rounded-md" @click="exportCSV">
-              Export CSV
-            </button>
-            <NuxtLink to="/health-records" class="px-3 py-2 border rounded-md">Back</NuxtLink>
-          </div>
-        </div>
+    </div>
 
         <div v-if="activeTab === 'health'" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <input v-model="search" type="text" placeholder="Search title or description" class="form-input">
@@ -71,9 +88,22 @@
           </select>
         </div>
 
-        <div v-if="activeTab === 'health'" class="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full table-auto divide-y divide-gray-200 text-sm">
+        <div v-if="activeTab === 'health'" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <LoadingState v-if="loading" text="Loading records..." />
+          <EmptyState
+            v-else-if="filtered.length === 0"
+            icon="lucide:heart-pulse"
+            title="No health records"
+            description="Add the first health record for this cow."
+          >
+            <template #actions>
+              <UButton color="primary" icon="i-lucide-plus" @click="openAdd">
+                Add record
+              </UButton>
+            </template>
+          </EmptyState>
+          <div v-else class="overflow-x-auto">
+            <table class="w-full table-auto divide-y divide-slate-200 text-sm">
               <thead class="bg-gray-50">
                   <tr>
                     <th class="pl-0 pr-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date / Time</th>
@@ -123,7 +153,7 @@
               </tfoot>
             </table>
           </div>
-          <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
+          <div v-if="!loading && filtered.length" class="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
             <div class="text-sm text-gray-700">
               <template v-if="filtered.length === 0">Showing <span class="font-medium">0</span> records</template>
               <template v-else>Showing <span class="font-medium">{{ displayStart }}</span> to <span class="font-medium">{{ displayEnd }}</span> of <span class="font-medium">{{ filtered.length }}</span> records</template>
@@ -160,11 +190,7 @@
         <div v-else-if="activeTab === 'reproduction'" class="space-y-6">
            <BreedingHistoryTable :cow-id="id" />
         </div>
-    </div>
-    <HealthRecordModal v-model="showModal" :record="editing" :cows="cows" :preselected-cow-id="cow?.id" @save="refresh" />
-    </div>
-    
-  </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
@@ -188,9 +214,15 @@ const perPage = ref(10)
 
 const showModal = ref(false)
 const editing = ref<HealthRecord | null>(null)
+const loading = ref(true)
 
 const load = async () => {
-  await Promise.all([fetchCows(), fetchHealthRecords()])
+  loading.value = true
+  try {
+    await Promise.all([fetchCows(), fetchHealthRecords()])
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(async () => {

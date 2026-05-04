@@ -16,13 +16,29 @@ export interface Cow {
   color?: string
   age?: number
   weight?: number
-  status: 'active' | 'sold' | 'deceased' | 'dry'
+  status: 'active' | 'sold' | 'deceased' | 'dry' | 'bull'
   birth_date?: string
   sire?: string
+  sire_id?: string
   dam?: string
+  dam_id?: string
+  genetic_line?: string
   notes?: string
   created_at: string
   updated_at: string
+}
+
+export interface Ancestor {
+  id: string
+  relation: 'sire' | 'dam'
+  depth: number
+  child_id: string
+}
+
+export interface Descendant {
+  id: string
+  via: 'sire' | 'dam'
+  depth: number
 }
 
 export interface HealthRecord {
@@ -73,9 +89,16 @@ export interface MilkProduction {
 
 export interface ToastMessage {
   id: string
+  title?: string
   message: string
   type: 'success' | 'error' | 'warning' | 'info'
   timeout?: number
+  createdAt?: number
+  dismissible?: boolean
+  action?: {
+    label: string
+    onClick: () => void
+  }
 }
 
 export interface SupabaseResponse<T> {
@@ -116,6 +139,7 @@ export interface CowFormData {
   birth_date?: string
   sire?: string
   dam?: string
+  genetic_line?: string
   notes?: string
 }
 
@@ -162,24 +186,6 @@ export interface MilkStats {
   averageDaily: number
   recordsCount: number
   lastRecordDate?: string
-}
-
-// Component prop types
-export interface BaseInputProps {
-  modelValue?: string | number
-  type?: string
-  placeholder?: string
-  required?: boolean
-  disabled?: boolean
-  error?: string
-}
-
-export interface BaseButtonProps {
-  variant?: 'primary' | 'secondary' | 'danger' | 'success'
-  size?: 'sm' | 'md' | 'lg'
-  disabled?: boolean
-  loading?: boolean
-  type?: 'button' | 'submit' | 'reset'
 }
 
 // Composable return types

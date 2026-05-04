@@ -5,7 +5,7 @@ import type { HealthRecord, HealthRecordFormData } from '~/types'
 
 export const useHealthRecords = () => {
   const { $supabase } = useNuxtApp()
-  const toast = useToast()
+  const toast = useAppToast()
 
   const healthRecords: Ref<HealthRecord[]> = ref([])
   const loading: Ref<boolean> = ref(false)
