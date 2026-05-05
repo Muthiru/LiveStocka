@@ -48,7 +48,7 @@
             <div class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700 shadow-sm backdrop-blur">
               LiveStocka
             </div>
-            <h1 class="mt-4 text-4xl font-black tracking-tight text-slate-950">See herd records, not a generic dashboard</h1>
+            <h1 class="mt-4 text-4xl font-black tracking-tight text-slate-950">Comprehensive cattle tracking & management</h1>
             <p class="mt-3 text-sm leading-6 text-slate-600">Login takes you straight to cows, breeding, milk production, and health tracking.</p>
           </div>
 

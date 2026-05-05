@@ -7,46 +7,8 @@
       <section class="relative hidden overflow-hidden border-r border-white/40 bg-[linear-gradient(160deg,#0b1220_0%,#0f766e_60%,#14b8a6_100%)] px-10 py-12 text-white lg:flex">
         <div class="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-emerald-300/20 blur-3xl" />
         <div class="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-sky-300/15 blur-3xl" />
-
-        <div class="relative flex w-full flex-col justify-between rounded-[36px] border border-white/10 bg-white/5 p-10 shadow-2xl shadow-emerald-950/20 backdrop-blur-xl">
-          <div>
-            <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-emerald-100/90">
-              LiveStocka
-            </div>
-            <p class="mt-10 max-w-md text-3xl font-extrabold tracking-tight text-white">
-              Start with the basics.
-            </p>
-            <p class="mt-4 max-w-md text-sm leading-6 text-emerald-50/80">
-              Create your account and begin tracking cows, treatments, breeding, and milk in one simple place.
-            </p>
-
-            <ul class="mt-8 space-y-3 text-sm text-emerald-50/85">
-              <li class="flex items-start gap-3">
-                <span class="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/10">
-                  <Icon name="lucide:check" class="h-4 w-4 text-emerald-100" />
-                </span>
-                <span>Set up in minutes</span>
-              </li>
-              <li class="flex items-start gap-3">
-                <span class="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/10">
-                  <Icon name="lucide:check" class="h-4 w-4 text-emerald-100" />
-                </span>
-                <span>Works on phone, iPad, and desktop</span>
-              </li>
-              <li class="flex items-start gap-3">
-                <span class="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/10">
-                  <Icon name="lucide:check" class="h-4 w-4 text-emerald-100" />
-                </span>
-                <span>Secure by default</span>
-              </li>
-            </ul>
-          </div>
-
-          <p class="text-xs text-emerald-50/60">
-            You can update your farm data any time.
-          </p>
-        </div>
       </section>
+    </div>
 
       <section class="flex items-center justify-center px-6 py-10 sm:px-8 lg:px-12">
         <div class="w-full max-w-xl">
@@ -168,7 +130,7 @@
         </div>
       </section>
     </div>
-  </div>
+  
 </template>
 
 <script setup lang="ts">
