@@ -13,7 +13,6 @@
     "@vue/runtime-dom": "3.5.27",
     "@vue/server-renderer": "3.5.27",
     "@vue/shared": "3.5.27",
-    "consola": "3.4.2",
     "devalue": "5.7.1",
     "entities": "7.0.1",
     "estree-walker": "2.0.2",

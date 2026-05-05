@@ -6,5 +6,7 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'node:crypto';
-import 'consola';;globalThis.__timing__.logEnd('Nitro Start');
+import 'node:util';
+import 'node:process';
+import 'node:tty';;globalThis.__timing__.logEnd('Nitro Start');
 //# sourceMappingURL=index.mjs.map
