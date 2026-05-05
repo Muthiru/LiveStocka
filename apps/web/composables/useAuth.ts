@@ -72,7 +72,7 @@ export const useAuth = () => {
       const { error: authError } = await $supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${getAppUrl()}/dashboard`
+          redirectTo: `${getAppUrl()}/auth/callback?next=/dashboard`
         }
       })
       if (authError) throw authError
