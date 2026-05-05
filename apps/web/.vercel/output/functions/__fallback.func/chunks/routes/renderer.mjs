@@ -10,7 +10,9 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'node:crypto';
-import 'consola';
+import 'node:util';
+import 'node:process';
+import 'node:tty';
 
 const VueResolver = (_, value) => {
   return isRef(value) ? toValue(value) : value;
