@@ -5,7 +5,6 @@
   "private": true,
   "dependencies": {
     "@babel/parser": "7.29.2",
-    "@iconify/utils": "3.1.0",
     "@vue/compiler-core": "3.5.27",
     "@vue/compiler-dom": "3.5.27",
     "@vue/compiler-ssr": "3.5.27",

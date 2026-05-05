@@ -1,0 +1,1 @@
+import{a5 as n,D as i,a6 as u,q as t}from"./BMW4JMPJ.js";const d=n(async c=>{let e,a;const{$supabase:s}=i();try{const{data:{session:r},error:o}=([e,a]=u(()=>s.auth.getSession()),e=await e,a(),e);if(o)return console.error("Auth middleware error:",o),t("/login");if(!r)return t("/login")}catch(r){return console.error("Auth middleware catch:",r),t("/login")}});export{d as default};

@@ -5,7 +5,6 @@ import { Buffer as Buffer$1 } from 'node:buffer';
 import { promises, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { createHash } from 'node:crypto';
-import { getIcons } from '@iconify/utils';
 import { consola } from 'consola';
 
 const suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
@@ -4336,7 +4335,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "25c317ec-a3d4-4875-a07f-45c1c763320c",
+    "buildId": "061e14dc-5352-414f-bc87-5750533f3149",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -4854,6 +4853,86 @@ const basename = function(p, extension) {
   }
   return extension && lastSegment.endsWith(extension) ? lastSegment.slice(0, -extension.length) : lastSegment;
 };
+
+/** Default values for dimensions */
+const defaultIconDimensions = Object.freeze({
+	left: 0,
+	top: 0,
+	width: 16,
+	height: 16
+});
+/** Default values for transformations */
+const defaultIconTransformations = Object.freeze({
+	rotate: 0,
+	vFlip: false,
+	hFlip: false
+});
+/** Default values for all optional IconifyIcon properties */
+const defaultIconProps = Object.freeze({
+	...defaultIconDimensions,
+	...defaultIconTransformations
+});
+/** Default values for all properties used in ExtendedIconifyIcon */
+Object.freeze({
+	...defaultIconProps,
+	body: "",
+	hidden: false
+});
+
+/**
+* Resolve icon set icons
+*
+* Returns parent icon for each icon
+*/
+function getIconsTree(data, names) {
+	const icons = data.icons;
+	const aliases = data.aliases || Object.create(null);
+	const resolved = Object.create(null);
+	function resolve(name) {
+		if (icons[name]) return resolved[name] = [];
+		if (!(name in resolved)) {
+			resolved[name] = null;
+			const parent = aliases[name] && aliases[name].parent;
+			const value = parent && resolve(parent);
+			if (value) resolved[name] = [parent].concat(value);
+		}
+		return resolved[name];
+	}
+	(names || Object.keys(icons).concat(Object.keys(aliases))).forEach(resolve);
+	return resolved;
+}
+
+/**
+* Optional properties that must be copied when copying icon set
+*/
+const propsToCopy = Object.keys(defaultIconDimensions).concat(["provider"]);
+/**
+* Extract icons from icon set
+*/
+function getIcons(data, names, not_found) {
+	const icons = Object.create(null);
+	const aliases = Object.create(null);
+	const result = {
+		prefix: data.prefix,
+		icons
+	};
+	const sourceIcons = data.icons;
+	const sourceAliases = data.aliases || Object.create(null);
+	if (data.lastModified) result.lastModified = data.lastModified;
+	const tree = getIconsTree(data, names);
+	let empty = true;
+	for (const name in tree) if (!tree[name]) ; else if (sourceIcons[name]) {
+		icons[name] = { ...sourceIcons[name] };
+		empty = false;
+	} else {
+		aliases[name] = { ...sourceAliases[name] };
+		result.aliases = aliases;
+	}
+	propsToCopy.forEach((attr) => {
+		if (attr in data) result[attr] = data[attr];
+	});
+	return empty && not_found !== true ? null : result;
+}
 
 function defineRenderHandler(render) {
   const runtimeConfig = useRuntimeConfig();
