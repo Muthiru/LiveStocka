@@ -19,8 +19,6 @@ export const useAuth = () => {
   const error: Ref<string | null> = ref(null)
 
   const getAppUrl = (): string => {
-    const configured = typeof config.public.appUrl === 'string' ? config.public.appUrl.trim() : ''
-
     const normalizeOrigin = (value: string): string => {
       const trimmed = value.trim().replace(/\/+$/, '')
       try {
@@ -31,28 +29,11 @@ export const useAuth = () => {
     }
 
     if (import.meta.client) {
-      const browserOrigin = normalizeOrigin(globalThis.location.origin)
-
-      if (!configured) return browserOrigin
-
-      const configuredOrigin = normalizeOrigin(configured)
-
-      // Guard against common misconfiguration where production env still points to localhost.
-      try {
-        const configuredHost = new URL(configuredOrigin).hostname
-        const browserHost = new URL(browserOrigin).hostname
-        const configuredIsLocalhost = configuredHost === 'localhost' || configuredHost === '127.0.0.1'
-        const browserIsLocalhost = browserHost === 'localhost' || browserHost === '127.0.0.1'
-
-        if (configuredIsLocalhost && !browserIsLocalhost) return browserOrigin
-      } catch {
-        // If URL parsing fails, fall back to browser origin on the client.
-        return browserOrigin
-      }
-
-      return configuredOrigin
+      // In the browser, always use the current origin to avoid env/config drift on hosting providers.
+      return normalizeOrigin(globalThis.location.origin)
     }
 
+    const configured = typeof config.public.appUrl === 'string' ? config.public.appUrl.trim() : ''
     return configured ? normalizeOrigin(configured) : ''
   }
 
