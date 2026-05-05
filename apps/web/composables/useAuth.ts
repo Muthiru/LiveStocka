@@ -19,9 +19,41 @@ export const useAuth = () => {
   const error: Ref<string | null> = ref(null)
 
   const getAppUrl = (): string => {
-    const appUrl = config.public.appUrl
-    if (typeof appUrl === 'string' && appUrl.trim()) return appUrl
-    return import.meta.client ? globalThis.location.origin : ''
+    const configured = typeof config.public.appUrl === 'string' ? config.public.appUrl.trim() : ''
+
+    const normalizeOrigin = (value: string): string => {
+      const trimmed = value.trim().replace(/\/+$/, '')
+      try {
+        return new URL(trimmed).origin
+      } catch {
+        return trimmed
+      }
+    }
+
+    if (import.meta.client) {
+      const browserOrigin = normalizeOrigin(globalThis.location.origin)
+
+      if (!configured) return browserOrigin
+
+      const configuredOrigin = normalizeOrigin(configured)
+
+      // Guard against common misconfiguration where production env still points to localhost.
+      try {
+        const configuredHost = new URL(configuredOrigin).hostname
+        const browserHost = new URL(browserOrigin).hostname
+        const configuredIsLocalhost = configuredHost === 'localhost' || configuredHost === '127.0.0.1'
+        const browserIsLocalhost = browserHost === 'localhost' || browserHost === '127.0.0.1'
+
+        if (configuredIsLocalhost && !browserIsLocalhost) return browserOrigin
+      } catch {
+        // If URL parsing fails, fall back to browser origin on the client.
+        return browserOrigin
+      }
+
+      return configuredOrigin
+    }
+
+    return configured ? normalizeOrigin(configured) : ''
   }
 
   const signInWithPassword = async (email: string, password: string): Promise<AuthResponse> => {
