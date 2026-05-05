@@ -1,11 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ref } from 'vue'
 import type { Ancestor, Descendant } from '~/types'
 
 export const useGeneticsService = () => {
     const { $supabase } = useNuxtApp()
+    const config = useRuntimeConfig()
     const loading = ref(false)
     const error = ref<string | null>(null)
+
+    const getProjectUrl = () => config.public.supabaseUrl
 
     const fetchAncestors = async (cowId: string, depth: number = 5): Promise<Ancestor[]> => {
         loading.value = true
@@ -22,7 +24,7 @@ export const useGeneticsService = () => {
             params.append('auth_token', token)
 
             const queryString = params.toString()
-            const projectUrl = ($supabase as any).supabaseUrl
+            const projectUrl = getProjectUrl()
             const fullUrl = `${projectUrl}/functions/v1/geneticsService/get_ancestors?${queryString}`
 
             const response = await fetch(fullUrl, {
@@ -44,8 +46,8 @@ export const useGeneticsService = () => {
             }
 
             return responseData?.ancestors || []
-        } catch (e: any) {
-            error.value = e.message
+        } catch (e: unknown) {
+            error.value = e instanceof Error ? e.message : 'Failed to fetch ancestors'
             return []
         } finally {
             loading.value = false
@@ -66,7 +68,7 @@ export const useGeneticsService = () => {
             params.append('auth_token', token)
 
             const queryString = params.toString()
-            const projectUrl = ($supabase as any).supabaseUrl
+            const projectUrl = getProjectUrl()
             const fullUrl = `${projectUrl}/functions/v1/geneticsService/get_descendants?${queryString}`
 
             const response = await fetch(fullUrl, {
@@ -88,8 +90,8 @@ export const useGeneticsService = () => {
             }
 
             return responseData?.descendants || []
-        } catch (e: any) {
-            error.value = e.message
+        } catch (e: unknown) {
+            error.value = e instanceof Error ? e.message : 'Failed to fetch descendants'
             return []
         } finally {
             loading.value = false
@@ -117,8 +119,8 @@ export const useGeneticsService = () => {
             if (responseData?.error) throw new Error(responseData.error)
 
             return responseData
-        } catch (e: any) {
-            error.value = e.message
+        } catch (e: unknown) {
+            error.value = e instanceof Error ? e.message : 'Failed to check compatibility'
             console.error('Error checking compatibility:', e)
             return null
         } finally {
