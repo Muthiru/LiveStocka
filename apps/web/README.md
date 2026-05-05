@@ -20,6 +20,15 @@ yarn install
 bun install
 ```
 
+## Environment Variables
+
+This app expects Supabase env vars (both locally and on Vercel):
+
+- `SUPABASE_URL` (or `NUXT_PUBLIC_SUPABASE_URL`)
+- `SUPABASE_ANON_KEY` (or `NUXT_PUBLIC_SUPABASE_ANON_KEY`)
+
+On Vercel, add them in **Project Settings → Environment Variables** (Vercel does not automatically load `apps/web/.env` into production).
+
 ## Development Server
 
 Start the development server on `http://localhost:3000`:
