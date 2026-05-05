@@ -22,7 +22,22 @@ export default defineNuxtConfig({
   nitro: {
     preset: process.env.VERCEL ? 'vercel' : undefined,
     externals: {
-      inline: ['@iconify/utils', 'consola']
+      inline: [
+        '@iconify/utils',
+        'consola',
+        'vue-bundle-renderer',
+        '@vue/shared',
+        '@vue/runtime-dom',
+        '@vue/runtime-core',
+        '@vue/reactivity',
+        '@vue/compiler-dom',
+        'devalue',
+        'unhead',
+        'vue',
+        'entities',
+        'estree-walker',
+        'source-map-js'
+      ]
     }
   },
   vite: {
