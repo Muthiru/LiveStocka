@@ -13,9 +13,16 @@ interface AuthResponse {
 }
 
 export const useAuth = () => {
+  const config = useRuntimeConfig()
   const { $supabase } = useNuxtApp()
   const loading: Ref<boolean> = ref(false)
   const error: Ref<string | null> = ref(null)
+
+  const getAppUrl = (): string => {
+    const appUrl = config.public.appUrl
+    if (typeof appUrl === 'string' && appUrl.trim()) return appUrl
+    return import.meta.client ? globalThis.location.origin : ''
+  }
 
   const signInWithPassword = async (email: string, password: string): Promise<AuthResponse> => {
     loading.value = true
@@ -65,7 +72,7 @@ export const useAuth = () => {
       const { error: authError } = await $supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: import.meta.client ? `${globalThis.location.origin}/dashboard` : '/dashboard'
+          redirectTo: `${getAppUrl()}/dashboard`
         }
       })
       if (authError) throw authError

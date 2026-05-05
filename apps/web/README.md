@@ -29,6 +29,8 @@ This app expects Supabase env vars (both locally and on Vercel):
 
 On Vercel, add them in **Project Settings → Environment Variables** (Vercel does not automatically load `apps/web/.env` into production).
 
+For OAuth login, also set `NUXT_PUBLIC_APP_URL` to the deployed site URL, for example `https://livestocka.vercel.app`, and add that exact URL to Supabase Auth redirect URLs alongside `http://localhost:3000` for local development.
+
 ## Development Server
 
 Start the development server on `http://localhost:3000`:
