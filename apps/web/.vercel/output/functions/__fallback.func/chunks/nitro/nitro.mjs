@@ -4337,7 +4337,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "b8af5014-1622-46ae-a910-ca4af1be08d8",
+    "buildId": "23880f4f-c680-4426-b1ae-c5fa8343d3d3",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -6672,5 +6672,5 @@ const listener = function(req, res) {
   return handler(req, res);
 };
 
-export { getResponseStatus as a, buildAssetsURL as b, defineRenderHandler as c, decodePath as d, getQuery as e, createError$1 as f, getResponseStatusText as g, destr as h, getRouteRules as i, joinURL as j, useNitroApp as k, listener as l, publicAssetsURL as p, useRuntimeConfig as u };;globalThis.__timing__.logEnd('Load chunks/nitro/nitro');
+export { getResponseStatus as a, buildAssetsURL as b, defineRenderHandler as c, decodePath as d, getQuery as e, createError$1 as f, getResponseStatusText as g, destr as h, getRouteRules as i, joinURL as j, useNitroApp as k, listener as l, publicAssetsURL as p, useRuntimeConfig as u, withLeadingSlash as w };;globalThis.__timing__.logEnd('Load chunks/nitro/nitro');
 //# sourceMappingURL=nitro.mjs.map
