@@ -20,7 +20,10 @@ export default defineNuxtConfig({
     }
   },
   nitro: {
-    preset: process.env.VERCEL ? 'vercel' : undefined
+    preset: process.env.VERCEL ? 'vercel' : undefined,
+    externals: {
+      inline: ['@iconify/utils']
+    }
   },
   vite: {
     vue: {

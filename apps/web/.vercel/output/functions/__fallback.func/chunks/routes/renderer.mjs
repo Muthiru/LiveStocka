@@ -10,7 +10,6 @@ import 'node:buffer';
 import 'node:fs';
 import 'node:path';
 import 'node:crypto';
-import '@iconify/utils';
 import 'consola';
 
 const VueResolver = (_, value) => {
