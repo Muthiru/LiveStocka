@@ -68,8 +68,17 @@
 
         <!-- Overview Tab -->
         <div v-if="activeTab === 'overview'" class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200">
+          <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
             <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+            <UButton
+              color="primary"
+              variant="solid"
+              icon="i-lucide-pencil"
+              size="sm"
+              @click="handleEdit"
+            >
+              Edit Cow
+            </UButton>
           </div>
           <div class="px-5 py-5">
             <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
