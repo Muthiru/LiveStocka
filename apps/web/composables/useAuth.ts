@@ -29,8 +29,19 @@ export const useAuth = () => {
     }
 
     if (import.meta.client) {
-      // In the browser, always use the current origin to avoid env/config drift on hosting providers.
-      return normalizeOrigin(globalThis.location.origin)
+      // In the browser, prefer the current origin (prevents env/config drift on hosting providers).
+      const currentOrigin = normalizeOrigin(globalThis.location.origin)
+      const configured = typeof config.public.appUrl === 'string' ? config.public.appUrl.trim() : ''
+      const configuredOrigin = configured ? normalizeOrigin(configured) : ''
+
+      // In local dev, always prefer the configured app URL when present.
+      // This prevents OAuth from redirecting to an unexpected origin (for example when you open
+      // the dev server via a LAN IP, or when Supabase "Site URL" is set to production).
+      if (import.meta.dev && configuredOrigin) {
+        return configuredOrigin
+      }
+
+      return currentOrigin
     }
 
     const configured = typeof config.public.appUrl === 'string' ? config.public.appUrl.trim() : ''
@@ -82,10 +93,17 @@ export const useAuth = () => {
     loading.value = true
     error.value = null
     try {
+      let redirectTo = `${getAppUrl()}/auth/callback?next=/dashboard`
+      // Safety net for local dev: never bounce users into production during OAuth.
+      // If local env vars are misconfigured (or not loaded), force localhost.
+      if (import.meta.dev && /livestocka\.vercel\.app/i.test(redirectTo)) {
+        redirectTo = 'http://localhost:3000/auth/callback?next=/dashboard'
+        console.warn('[auth] OAuth redirectTo was production; forced localhost for dev:', redirectTo)
+      }
       const { error: authError } = await $supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${getAppUrl()}/auth/callback?next=/dashboard`
+          redirectTo
         }
       })
       if (authError) throw authError

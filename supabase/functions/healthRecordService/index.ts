@@ -402,7 +402,8 @@ serve(async (req: Request) => {
     if (req.method === 'POST' && path.endsWith('/validate_health_record')) return handleValidateHealthRecord(req);
     if (req.method === 'POST' && path.endsWith('/create_health_record')) return handleCreateHealthRecord(req);
     if (req.method === 'POST' && path.endsWith('/update_health_record')) return handleUpdateHealthRecord(req);
-    if (req.method === 'DELETE' && path.endsWith('/delete_health_record')) return handleDeleteHealthRecord(req);
+    // Support both DELETE and POST for delete endpoints (DELETE with a JSON body can be flaky in some environments).
+    if ((req.method === 'DELETE' || req.method === 'POST') && path.endsWith('/delete_health_record')) return handleDeleteHealthRecord(req);
     if (req.method === 'GET' && path.endsWith('/health_records')) return handleGetHealthRecords(req);
     if (req.method === 'GET' && path.endsWith('/overdue_checkups')) return handleGetOverdueCheckups(req);
     if (req.method === 'GET' && path.endsWith('/upcoming_events')) return handleGetUpcomingEvents(req);

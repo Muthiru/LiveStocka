@@ -194,8 +194,9 @@ export const useHealthRecords = () => {
         throw new Error('User not authenticated')
       }
 
+      // Use POST for deletes: some proxies/browsers can be flaky with DELETE + JSON body.
       const { data, error: deleteError } = await $supabase.functions.invoke('healthRecordService/delete_health_record', {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -213,8 +214,26 @@ export const useHealthRecords = () => {
 
       return true
     } catch (err: any) {
+      // Fallback: if edge function call fails, attempt direct delete via PostgREST.
+      // This is useful in local dev when Edge Functions are not reachable.
+      try {
+        console.error('Failed to delete health record via edge function:', err)
+        const msg = String(err?.message || '')
+        if (msg.includes('Edge Function') || msg.includes('Functions')) {
+          const { error: directErr } = await $supabase.from('health_records').delete().eq('id', id)
+          if (directErr) throw directErr
+          toast.success('Health record deleted successfully')
+          await fetchHealthRecords()
+          return true
+        }
+      } catch (fallbackErr: any) {
+        console.error('Fallback direct delete failed:', fallbackErr)
+        error.value = fallbackErr.message || err.message
+        toast.error((fallbackErr?.message || err?.message) || 'Failed to delete health record')
+        return false
+      }
+
       error.value = err.message
-      console.error('Failed to delete health record:', err)
       toast.error(err.message || 'Failed to delete health record')
       return false
     } finally {

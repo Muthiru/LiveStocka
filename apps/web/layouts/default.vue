@@ -100,13 +100,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const { $supabase } = useNuxtApp()
 const route = useRoute()
 
 const userEmail = ref('')
 const mobileMenuOpen = ref(false)
+
+
+let desktopMql: MediaQueryList | null = null
+const syncMenuWithBreakpoint = () => {
+  if (desktopMql?.matches) mobileMenuOpen.value = false
+}
 const mobileMenuUi = {
   content: 'w-72 rounded-2xl bg-white/95 backdrop-blur p-1 shadow-xl ring-1 ring-slate-200/70',
   group: 'py-1',
@@ -188,7 +194,20 @@ watch(() => route.path, () => {
 })
 
 onMounted(async () => {
+  if (import.meta.client) {
+    if (typeof globalThis.matchMedia === 'function') {
+      desktopMql = globalThis.matchMedia('(min-width: 1024px)')
+    }
+    syncMenuWithBreakpoint()
+    desktopMql?.addEventListener('change', syncMenuWithBreakpoint)
+  }
+
   const { data: { user } } = await $supabase.auth.getUser()
   userEmail.value = user?.email || 'User'
+})
+
+onBeforeUnmount(() => {
+  if (desktopMql) desktopMql.removeEventListener('change', syncMenuWithBreakpoint)
+  desktopMql = null
 })
 </script>

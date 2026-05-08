@@ -1,5 +1,5 @@
 <template>
-  <div v-if="modelValue" class="fixed inset-0 z-50 overflow-y-auto">
+  <div v-if="modelValue" class="fixed inset-0 z-40 overflow-y-auto">
     <div class="flex items-start justify-center min-h-screen px-4 pt-12 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-30" @click="close"/>
 
@@ -11,10 +11,9 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <button class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" @click="$emit('add', cow)">
-              <Icon name="lucide:plus" class="w-4 h-4" />
-              Add Health Record
-            </button>
+            <UButton color="primary" icon="i-lucide-plus" @click="$emit('add', cow)">
+              Add record
+            </UButton>
             <button class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg" aria-label="Close" @click="close">
               <Icon name="lucide:x" class="w-5 h-5" />
             </button>
@@ -23,8 +22,8 @@
 
         <div class="px-6 py-3 border-b border-gray-100 bg-white">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-            <input v-model="localSearch" type="text" placeholder="Search records..." aria-label="Search records" class="w-full px-3 py-2 border border-gray-200 rounded-md">
-            <select v-model="typeFilter" class="w-full px-3 py-2 border border-gray-200 rounded-md">
+            <input v-model="localSearch" type="text" placeholder="Search title or description" aria-label="Search records" class="form-input">
+            <select v-model="typeFilter" class="form-select">
               <option value="">All types</option>
               <option value="vaccination">Vaccination</option>
               <option value="medication">Medication</option>
@@ -36,9 +35,9 @@
             </select>
             <div class="flex items-center gap-2">
               <label for="cow-records-date-from" class="text-sm text-gray-600">From</label>
-              <input id="cow-records-date-from" v-model="dateFrom" type="date" class="px-3 py-2 border border-gray-200 rounded-md">
+              <input id="cow-records-date-from" v-model="dateFrom" type="date" class="form-input">
               <label for="cow-records-date-to" class="text-sm text-gray-600">To</label>
-              <input id="cow-records-date-to" v-model="dateTo" type="date" class="px-3 py-2 border border-gray-200 rounded-md">
+              <input id="cow-records-date-to" v-model="dateTo" type="date" class="form-input">
             </div>
           </div>
         </div>
@@ -50,32 +49,62 @@
           </div>
 
           <div v-else class="space-y-4">
-            <div v-for="record in filteredRecords" :key="record.id" class="border border-gray-200 rounded-md p-4 hover:shadow-md transition-shadow bg-white">
-              <div class="flex justify-between items-start">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-2">
-                    <span :class="getTypeColor(record.record_type)" class="px-3 py-1 rounded-full text-xs font-medium">
+            <div v-for="record in filteredRecords" :key="record.id" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span :class="getTypeColor(record.record_type)" class="px-2 py-1 rounded-full text-xs font-medium">
                       {{ formatRecordType(record.record_type) }}
                     </span>
-                    <h4 class="font-semibold text-gray-900">{{ record.title }}</h4>
-                    <span class="text-sm text-gray-500">{{ formatDate(record.record_date) }}</span>
+                    <div class="text-xs text-slate-500">
+                      {{ formatDateOnly(record.record_date, record.record_time) }}
+                      <template v-if="record.record_time"> · {{ formatTimeOnly(record.record_date, record.record_time) }}</template>
+                    </div>
                   </div>
-                  <p v-if="record.description" class="text-gray-700 text-sm mb-2">{{ record.description }}</p>
-                  <div class="flex flex-wrap gap-4 text-sm text-gray-600">
-                    <span v-if="record.vaccine_name">{{ record.vaccine_name }}</span>
-                    <span v-if="record.medication_name">{{ record.medication_name }}</span>
-                    <span v-if="record.vet_name">{{ record.vet_name }}</span>
-                    <span v-if="record.cost">${{ record.cost }}</span>
-                  </div>
+
+                  <div class="mt-2 truncate text-base font-semibold text-slate-900">{{ record.title }}</div>
+                  <div v-if="record.description" class="mt-1 text-sm text-slate-600 line-clamp-2">{{ record.description }}</div>
                 </div>
 
-                <div class="flex gap-1">
-                  <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg" aria-label="Edit record" @click="$emit('edit', record)">
-                    <Icon name="lucide:edit" class="w-4 h-4" />
-                  </button>
-                  <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg" aria-label="Delete record" @click="$emit('delete', record)">
-                    <Icon name="lucide:trash-2" class="w-4 h-4" />
-                  </button>
+                <div class="flex items-center gap-1">
+                  <UButton
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    icon="i-lucide-pencil"
+                    title="Edit"
+                    aria-label="Edit record"
+                    @click="$emit('edit', record)"
+                  />
+                  <UButton
+                    size="xs"
+                    color="error"
+                    variant="ghost"
+                    icon="i-lucide-trash-2"
+                    title="Delete"
+                    aria-label="Delete record"
+                    @click="$emit('delete', record)"
+                  />
+                </div>
+              </div>
+
+              <div class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 sm:grid-cols-2">
+                <div v-if="record.vet_name" class="flex items-center gap-2">
+                  <Icon name="lucide:stethoscope" class="h-4 w-4 text-slate-400" />
+                  <span class="truncate">{{ record.vet_name }}</span>
+                </div>
+                <div v-if="record.cost !== null && record.cost !== undefined && String(record.cost).trim() !== ''" class="flex items-center gap-2">
+                  <Icon name="lucide:coins" class="h-4 w-4 text-slate-400" />
+                  <span>${{ record.cost }}</span>
+                </div>
+                <div v-if="record.vaccine_name" class="sm:col-span-2 text-slate-600">
+                  Vaccine: <span class="text-slate-800">{{ record.vaccine_name }}</span>
+                </div>
+                <div v-if="record.medication_name" class="sm:col-span-2 text-slate-600">
+                  Medication: <span class="text-slate-800">{{ record.medication_name }}</span>
+                </div>
+                <div v-if="record.notes" class="sm:col-span-2 text-slate-600">
+                  Notes: <span class="text-slate-800">{{ record.notes }}</span>
                 </div>
               </div>
             </div>
@@ -87,6 +116,8 @@
 </template>
 
 <script setup>
+import { formatDateOnly, formatTimeOnly } from '~/utils/formatDate'
+
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   cow: { type: Object, default: null },
@@ -112,11 +143,6 @@ const getTypeColor = (type) => {
 const formatRecordType = (t) => {
   if (!t) return 'Unknown'
   return t.charAt(0).toUpperCase() + t.slice(1)
-}
-
-const formatDate = (d) => {
-  if (!d) return 'N/A'
-  return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 const filteredRecords = computed(() => {

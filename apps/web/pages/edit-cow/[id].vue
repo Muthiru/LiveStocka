@@ -34,12 +34,11 @@
 </template>
 
 <script setup lang="ts">
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CowFormData } from '~/types'
 
-const { $supabase } = useNuxtApp()
 const toast = useAppToast()
 const route = useRoute()
+const { getCowById, updateCow, deleteCow } = useCows()
 
 const form = ref<CowFormData>({
   name: '',
@@ -70,22 +69,24 @@ watch(() => form.value.birth_date, (newDate) => {
 })
 
 onMounted(async () => {
-  const { data, error } = await ($supabase as any)
-    .from('cows')
-    .select('*')
-    .eq('id', route.params.id)
-    .single()
-
-  if (error) {
-    console.error('Error loading cow:', error)
+  const cow = await getCowById(String(route.params.id))
+  if (!cow) {
     toast.error('Failed to load cow details')
-    navigateTo('/cows')
-  } else {
-    form.value = {
-      ...data,
-      age: data.age?.toString() || '',
-      weight: data.weight?.toString() || ''
-    }
+    return navigateTo('/cows')
+  }
+
+  form.value = {
+    name: cow.name || '',
+    breed: cow.breed || '',
+    tag_id: cow.tag_id || '',
+    color: cow.color || '',
+    age: cow.age?.toString() || '',
+    weight: cow.weight?.toString() || '',
+    status: cow.status || 'active',
+    birth_date: cow.birth_date || '',
+    sire: cow.sire || '',
+    dam: cow.dam || '',
+    notes: cow.notes || ''
   }
   loading.value = false
 })
@@ -93,20 +94,15 @@ onMounted(async () => {
 const handleSubmit = async () => {
   saving.value = true
   try {
-    const updateData = {
+    const updated = await updateCow(String(route.params.id), {
       ...form.value,
       age: form.value.age ? Number.parseFloat(form.value.age) : null,
       weight: form.value.weight ? Number.parseFloat(form.value.weight) : null
-    }
+    })
 
-    const { error } = await ($supabase as any)
-      .from('cows')
-      .update(updateData)
-      .eq('id', route.params.id)
-
-    if (error) throw error
+    if (!updated) throw new Error('Failed to update cow')
     toast.success('Cow updated successfully')
-    navigateTo(`/cow/${route.params.id}`)
+    await navigateTo(`/cow/${route.params.id}`)
   } catch (error) {
     console.error('Update error:', error)
     toast.error((error as Error).message)
@@ -122,14 +118,10 @@ const handleDelete = async () => {
 
   deleting.value = true
   try {
-    const { error } = await ($supabase as any)
-      .from('cows')
-      .delete()
-      .eq('id', route.params.id)
-
-    if (error) throw error
+    const ok = await deleteCow(String(route.params.id))
+    if (!ok) throw new Error('Failed to delete cow')
     toast.success('Cow deleted successfully')
-    navigateTo('/cows')
+    await navigateTo('/cows')
   } catch (error) {
     console.error('Delete error:', error)
     toast.error((error as Error).message)
