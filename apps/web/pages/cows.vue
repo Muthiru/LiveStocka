@@ -78,7 +78,7 @@
             :key="cow.id"
             type="button"
             class="w-full rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
-            @click="navigateTo(`/cow/${cow.id}`)"
+            @click="navigateTo(`/cow/${encodeURIComponent(cow.name)}`)"
           >
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
@@ -140,7 +140,7 @@
                 v-for="cow in cows" 
                 :key="cow.id" 
                 class="hover:bg-gray-50 cursor-pointer"
-                @click="navigateTo(`/cow/${cow.id}`)"
+                @click="navigateTo(`/cow/${encodeURIComponent(cow.name)}`)"
               >
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
@@ -176,7 +176,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <NuxtLink
-                    :to="`/cow/${cow.id}`"
+                    :to="`/cow/${encodeURIComponent(cow.name)}`"
                     class="text-emerald-700 hover:text-emerald-900"
                     @click.stop
                   >
