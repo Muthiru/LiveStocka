@@ -73,12 +73,18 @@ async function handleGetCow(req: Request) {
 
     if (!id) return jsonResponse({ error: 'cow_id_required' }, 400);
 
-    const { data, error } = await supabase
-        .from('cows')
-        .select('*')
-        .eq('id', id)
-        .eq('farm_id', farm_id)
-        .single();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
+    let query = supabase.from('cows').select('*').eq('farm_id', farm_id);
+
+    if (isUuid) {
+        query = query.eq('id', id).single();
+    } else {
+        // Assume ID is actually the cow's name
+        query = query.eq('name', id).limit(1).maybeSingle();
+    }
+
+    const { data, error } = await query;
 
     if (error) return jsonResponse({ error: 'fetch_failed', detail: error.message }, 500);
     if (!data) return jsonResponse({ error: 'cow_not_found' }, 404);

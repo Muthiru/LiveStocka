@@ -122,7 +122,7 @@ export const useCows = () => {
       const token = await getAuthToken()
       if (!token) throw new Error('User not authenticated')
 
-      const { data, error: err } = await $supabase.functions.invoke(`cowService/get_cow?id=${id}`, {
+      const { data, error: err } = await $supabase.functions.invoke(`cowService/get_cow?id=${encodeURIComponent(id)}`, {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -137,7 +137,16 @@ export const useCows = () => {
         console.error('Error fetching cow via edge function:', e)
         const msg = String(e?.message || '')
         if (msg.includes('Edge Function') || msg.includes('Functions')) {
-          const { data, error: directErr } = await $supabase.from('cows').select('*').eq('id', id).single()
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
+          let query = $supabase.from('cows').select('*');
+          if (isUuid) {
+            query = query.eq('id', id).single();
+          } else {
+            query = query.eq('name', id).limit(1).maybeSingle();
+          }
+
+          const { data, error: directErr } = await query;
           if (directErr) throw directErr
           return (data as Cow) || null
         }

@@ -147,7 +147,7 @@
             <h3 class="text-lg font-medium text-gray-900">Health Records</h3>
             <div class="flex items-center gap-3">
               <NuxtLink
-                :to="`/cow/${cow.id}/health`"
+                :to="`/cow/${encodeURIComponent(cow.name)}/health`"
                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
               >
                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,7 +170,7 @@
               </svg>
               <p class="mt-2 text-sm text-gray-500">No health records yet.</p>
               <NuxtLink
-                :to="`/cow/${cow.id}/health`"
+                :to="`/cow/${encodeURIComponent(cow.name)}/health`"
                 class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
               >
                 Add Health Record
