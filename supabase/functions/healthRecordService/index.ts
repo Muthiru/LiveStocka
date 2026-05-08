@@ -170,31 +170,13 @@ async function handleValidateHealthRecord(req: Request) {
     if ('error' in auth) return jsonResponse({ error: auth.error }, 401);
     const { farm_id } = auth as any;
 
-    // Validate cow ownership
-    const { data: cows, error: cowErr } = await supabase
-        .from('cows')
-        .select('id')
-        .eq('id', body.cow_id)
-        .eq('farm_id', farm_id)
-        .limit(1);
-
-    if (cowErr) return jsonResponse({ error: 'db_error', detail: cowErr.message }, 500);
-    if (!cows || cows.length === 0) return jsonResponse({ error: 'cow_not_found_or_no_access' }, 404);
-
-    // Validate record type
-    const typeValidation = validateRecordType(body.record_type);
-    if (!typeValidation.valid) return jsonResponse({ error: typeValidation.error }, 400);
-
-    // Validate record date
-    const dateValidation = validateRecordDate(body.record_date);
-    if (!dateValidation.valid) return jsonResponse({ error: dateValidation.error }, 400);
-
-    // Validate cost if provided
-    const costValidation = validateCost(body.cost);
-    if (!costValidation.valid) return jsonResponse({ error: costValidation.error }, 400);
+    // Delegate to the shared validation helper (avoids duplicating the inline checks)
+    const validation = await validateHealthRecordInputs(body, farm_id);
+    if (!validation.valid) return validation.response;
 
     return jsonResponse({ valid: true });
 }
+
 
 async function handleCreateHealthRecord(req: Request) {
     const body = await req.json().catch((e) => { console.error('invalid json body', e); return null; });

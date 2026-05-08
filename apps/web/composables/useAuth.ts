@@ -1,11 +1,6 @@
 import { ref } from 'vue'
 import type { Ref } from 'vue'
-
-const getErrorMessage = (err: unknown): string => {
-  if (err instanceof Error) return err.message
-  if (typeof err === 'string') return err
-  return JSON.stringify(err)
-}
+import { getErrorMessage } from '~/composables/useAsyncOperation'
 
 interface AuthResponse {
   success: boolean
@@ -77,7 +72,7 @@ export const useAuth = () => {
         password,
       })
       if (authError) throw authError
-      
+
       // (e.g. show "check your email" message, stay on page, or redirect)
       return { success: true }
     } catch (err: unknown) {

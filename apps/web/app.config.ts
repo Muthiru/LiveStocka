@@ -1,8 +1,4 @@
 export default defineAppConfig({
-  ui: {
-    primary: 'emerald',
-    gray: 'slate',
-    error: 'red'
-  }
+  // Global app config goes here
+  // Note: Nuxt UI v3 theming is configured via CSS variables
 })
-

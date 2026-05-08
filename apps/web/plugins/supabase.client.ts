@@ -9,11 +9,7 @@ export default defineNuxtPlugin(() => {
   const supabaseAnonKey = config.public.supabaseAnonKey
 
   const createMissingEnvProxy = (): SupabaseClient<Database> => {
-    const missingEnvError = () => {
-      throw new Error(
-        'Supabase is not configured. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` (or `NUXT_PUBLIC_SUPABASE_URL` and `NUXT_PUBLIC_SUPABASE_ANON_KEY`) in your deployment environment.'
-      )
-    }
+    const missingEnvErrorMessage = 'Supabase is not configured. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` (or `NUXT_PUBLIC_SUPABASE_URL` and `NUXT_PUBLIC_SUPABASE_ANON_KEY`) in your deployment environment.'
 
     const proxyTarget = () => undefined
 
@@ -23,10 +19,10 @@ export default defineNuxtPlugin(() => {
           return createProxy()
         },
         apply() {
-          missingEnvError()
+          throw new Error(missingEnvErrorMessage)
         },
-        construct() {
-          missingEnvError()
+        construct(): object {
+          throw new Error(missingEnvErrorMessage)
         }
       }) as unknown as SupabaseClient<Database>
 
@@ -36,12 +32,12 @@ export default defineNuxtPlugin(() => {
   const supabase =
     supabaseUrl && supabaseAnonKey
       ? createClient<Database>(supabaseUrl, supabaseAnonKey, {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true
-          }
-        })
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      })
       : createMissingEnvProxy()
 
   return {

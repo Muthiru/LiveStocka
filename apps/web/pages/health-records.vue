@@ -230,7 +230,7 @@ const selectedRecord = ref<HealthRecord | null>(null)
 const preselectedCowId = ref<string | null>(null)
 
 // Computed
-const overdueVaccinations = computed(() => getOverdueVaccinations())
+const overdueVaccinations = ref<HealthRecord[]>([])
 
 const filteredCows = computed(() => {
   let result = [...cows.value]
@@ -354,10 +354,12 @@ watch([searchQuery, filterStatus, itemsPerPage], () => {
 
 // Fetch data on mount
 onMounted(async () => {
-  await Promise.all([
+  const [,, overdue] = await Promise.all([
     fetchCows(),
-    fetchHealthRecords()
+    fetchHealthRecords(),
+    getOverdueVaccinations()
   ])
+  overdueVaccinations.value = overdue || []
 
   // Open add modal if navigated with ?add=1 (optionally with ?cowId=<id>)
   if (route.query.add) {

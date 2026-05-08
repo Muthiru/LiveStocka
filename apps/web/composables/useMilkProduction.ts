@@ -36,12 +36,17 @@ export const useMilkProduction = () => {
     const loading = ref(false)
     const error = ref<string | null>(null)
 
+    // Helper to get auth token (consistent with all other composables)
+    const getAuthToken = async (): Promise<string | null> => {
+        const { data } = await $supabase.auth.getSession()
+        return data?.session?.access_token || null
+    }
+
     const fetchProduction = async (date?: string): Promise<ProductionRecord[]> => {
         loading.value = true
         error.value = null
         try {
-            const { data } = await $supabase.auth.getSession()
-            const token = data?.session?.access_token
+            const token = await getAuthToken()
             if (!token) throw new Error('User not authenticated')
 
             let query = 'milkProductionService/production_records'
@@ -71,8 +76,7 @@ export const useMilkProduction = () => {
         loading.value = true
         error.value = null
         try {
-            const { data } = await $supabase.auth.getSession()
-            const token = data?.session?.access_token
+            const token = await getAuthToken()
             if (!token) throw new Error('User not authenticated')
 
             const { data: responseData, error: err } = await $supabase.functions.invoke('milkProductionService/create_production', {
@@ -99,8 +103,7 @@ export const useMilkProduction = () => {
     const fetchStats = async () => {
         loading.value = true
         try {
-            const { data } = await $supabase.auth.getSession()
-            const token = data?.session?.access_token
+            const token = await getAuthToken()
             if (!token) throw new Error('User not authenticated')
 
             const { data: responseData, error: err } = await $supabase.functions.invoke('milkProductionService/production_stats', {
@@ -124,8 +127,7 @@ export const useMilkProduction = () => {
         loading.value = true
         error.value = null
         try {
-            const { data } = await $supabase.auth.getSession()
-            const token = data?.session?.access_token
+            const token = await getAuthToken()
             if (!token) throw new Error('User not authenticated')
 
             const { data: responseData, error: err } = await $supabase.functions.invoke('milkProductionService/bulk_create_production', {

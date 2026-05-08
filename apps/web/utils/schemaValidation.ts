@@ -29,7 +29,7 @@ export const rules = {
   }
 } as const
 
-export function validateSchema<T extends Record<string, unknown>>(schema: Schema<T>, values: T): SchemaResult<T> {
+export function validateSchema<T extends object>(schema: Schema<T>, values: T): SchemaResult<T> {
   const errors: Partial<Record<keyof T, string>> = {}
 
   for (const key of Object.keys(schema) as (keyof T)[]) {
