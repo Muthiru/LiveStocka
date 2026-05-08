@@ -48,11 +48,8 @@ export async function getUserAndFarm(req: Request, supabase: ReturnType<typeof c
   }
 
   if (!farm_id) {
-    const { data: farms } = await supabase.from('farms').select('id').limit(1);
-    if (!farms?.length) return { error: 'no_farm_access' };
-    const firstFarm = farms[0];
-    if (!firstFarm?.id) return { error: 'no_farm_access' };
-    farm_id = firstFarm.id;
+    // cows.farm_id references auth.users(id), so use the authenticated user's own ID as the farm identifier.
+    farm_id = data.user.id;
   }
 
   const resolvedFarmId = farm_id;
