@@ -217,7 +217,8 @@ serve(async (req: Request) => {
     if (req.method === 'GET' && path.endsWith('/get_stats')) return handleGetStats(req);
     if (req.method === 'POST' && path.endsWith('/create_cow')) return handleCreateCow(req);
     if (req.method === 'POST' && path.endsWith('/update_cow')) return handleUpdateCow(req);
-    if (req.method === 'DELETE' && path.endsWith('/delete_cow')) return handleDeleteCow(req);
+    // Support both DELETE and POST for delete endpoints (DELETE with a JSON body can be flaky in some environments).
+    if ((req.method === 'DELETE' || req.method === 'POST') && path.endsWith('/delete_cow')) return handleDeleteCow(req);
 
     return new Response('Not found', { status: 404, headers: corsHeaders });
 });

@@ -201,6 +201,7 @@
 </template>
 
 <script setup lang="ts">
+import { nextTick } from 'vue'
 import type { Cow, HealthRecord } from '~/types'
 import { getCowStatusColor } from '~/utils/statusHelpers'
 
@@ -315,13 +316,21 @@ const selectCow = (cow: Cow) => {
 const openAddModal = (cow: Cow) => {
   preselectedCowId.value = cow.id
   selectedRecord.value = null
-  showAddModal.value = true
+  // Avoid stacked modals (CowRecordsModal + HealthRecordModal)
+  showCowModal.value = false
+  nextTick(() => {
+    showAddModal.value = true
+  })
 }
 
 const editRecord = (record: HealthRecord) => {
   selectedRecord.value = { ...record }
   preselectedCowId.value = record.cow_id
-  showAddModal.value = true
+  // Avoid stacked modals (CowRecordsModal + HealthRecordModal)
+  showCowModal.value = false
+  nextTick(() => {
+    showAddModal.value = true
+  })
 }
 
 const confirmDelete = async (record: HealthRecord) => {

@@ -132,7 +132,19 @@ export const useCows = () => {
 
       return data?.cow || null
     } catch (e: any) {
-      console.error('Error fetching cow:', e)
+      // Fallback: in local dev, edge functions may not be reachable; try direct PostgREST.
+      try {
+        console.error('Error fetching cow via edge function:', e)
+        const msg = String(e?.message || '')
+        if (msg.includes('Edge Function') || msg.includes('Functions')) {
+          const { data, error: directErr } = await $supabase.from('cows').select('*').eq('id', id).single()
+          if (directErr) throw directErr
+          return (data as Cow) || null
+        }
+      } catch (fallbackErr) {
+        console.error('Fallback direct cow fetch failed:', fallbackErr)
+      }
+
       return null
     }
   }
@@ -161,6 +173,22 @@ export const useCows = () => {
       }
       return newCow
     } catch (e: any) {
+      // Fallback: try direct insert if edge functions are unreachable (local dev).
+      try {
+        console.error('Error adding cow via edge function:', e)
+        const msg = String(e?.message || '')
+        if (msg.includes('Edge Function') || msg.includes('Functions')) {
+          const { data, error: directErr } = await $supabase.from('cows').insert(cowData).select('*').single()
+          if (directErr) throw directErr
+          if (data) cows.value = [data as Cow, ...cows.value]
+          return data as Cow
+        }
+      } catch (fallbackErr: any) {
+        console.error('Fallback direct cow insert failed:', fallbackErr)
+        error.value = fallbackErr.message || e.message
+        throw fallbackErr
+      }
+
       error.value = e.message
       throw e
     } finally {
@@ -196,8 +224,25 @@ export const useCows = () => {
 
       return updatedCow
     } catch (e: any) {
+      // Fallback: try direct update if edge functions are unreachable (local dev).
+      try {
+        console.error('Error updating cow via edge function:', e)
+        const msg = String(e?.message || '')
+        if (msg.includes('Edge Function') || msg.includes('Functions')) {
+          const { data, error: directErr } = await $supabase.from('cows').update(updates).eq('id', id).select('*').single()
+          if (directErr) throw directErr
+          const updated = data as Cow
+          const index = cows.value.findIndex(cow => cow.id === id)
+          if (index !== -1 && updated) cows.value[index] = updated
+          return updated || null
+        }
+      } catch (fallbackErr: any) {
+        console.error('Fallback direct cow update failed:', fallbackErr)
+        error.value = fallbackErr.message || e.message
+        return null
+      }
+
       error.value = e.message
-      console.error('Error updating cow:', e)
       return null
     } finally {
       loading.value = false
@@ -211,7 +256,8 @@ export const useCows = () => {
       if (!token) throw new Error('User not authenticated')
 
       const { data, error: err } = await $supabase.functions.invoke('cowService/delete_cow', {
-        method: 'DELETE',
+        // Use POST for deletes: avoids issues with DELETE + body in some environments.
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -226,8 +272,23 @@ export const useCows = () => {
       cows.value = cows.value.filter(cow => cow.id !== id)
       return true
     } catch (e: any) {
+      // Fallback: attempt direct table delete if Edge Function invocation fails.
+      try {
+        console.error('Error deleting cow via edge function:', e)
+        const msg = String(e?.message || '')
+        if (msg.includes('Edge Function') || msg.includes('Functions')) {
+          const { error: directErr } = await $supabase.from('cows').delete().eq('id', id)
+          if (directErr) throw directErr
+          cows.value = cows.value.filter(cow => cow.id !== id)
+          return true
+        }
+      } catch (fallbackErr: any) {
+        console.error('Fallback direct cow delete failed:', fallbackErr)
+        error.value = fallbackErr.message || e.message
+        return false
+      }
+
       error.value = e.message
-      console.error('Error deleting cow:', e)
       return false
     } finally {
       loading.value = false

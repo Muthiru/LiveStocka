@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <UApp>
     <ToastContainer />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
-  </div>
+  </UApp>
 </template>
 
 <script setup>

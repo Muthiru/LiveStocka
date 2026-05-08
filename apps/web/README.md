@@ -29,7 +29,20 @@ This app expects Supabase env vars (both locally and on Vercel):
 
 On Vercel, add them in **Project Settings → Environment Variables** (Vercel does not automatically load `apps/web/.env` into production).
 
-For OAuth login, also set `NUXT_PUBLIC_APP_URL` to the deployed site URL, for example `https://livestocka.vercel.app`, and add `https://livestocka.vercel.app/auth/callback` plus `http://localhost:3000/auth/callback` to Supabase Auth redirect URLs for production and local development.
+For OAuth login:
+- In production, set `NUXT_PUBLIC_APP_URL` to the deployed site URL (for example `https://livestocka.vercel.app`).
+- In local development, set `NUXT_PUBLIC_APP_URL` to `http://localhost:3000` (especially if you access the dev server via a LAN IP).
+- In Supabase Auth settings, add both `https://livestocka.vercel.app/auth/callback` and `http://localhost:3000/auth/callback` to the redirect allowlist.
+
+### Edge Functions in local dev
+
+Most create/update/delete flows call Supabase Edge Functions. If Edge Functions are not deployed (or temporarily unreachable),
+the app will attempt a direct PostgREST fallback for deletes. For full functionality, deploy functions to your Supabase project:
+
+```bash
+supabase functions deploy cowService
+supabase functions deploy healthRecordService
+```
 
 ## Development Server
 

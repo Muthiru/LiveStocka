@@ -1,26 +1,44 @@
 <template>
-  <div v-if="modelValue" class="fixed inset-0 z-50 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-      <!-- Background overlay -->
-      <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="close"/>
+  <UModal
+    v-if="modelValue"
+    :open="modelValue"
+    fullscreen
+    portal="body"
+    :dismissible="!saving"
+    :close="false"
+    :ui="{
+      overlay: 'z-[1000] bg-slate-900/20',
+      content: 'z-[1001] bg-slate-50 flex flex-col',
+      body: 'flex-1 overflow-hidden p-4 sm:p-6'
+    }"
+    @update:open="setOpen"
+  >
+    <template #body>
+      <div class="mx-auto h-full w-full max-w-5xl">
+        <div class="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-6">
+            <div class="min-w-0">
+              <div class="text-base font-semibold text-slate-900 sm:text-lg">
+                {{ isEdit ? 'Edit health record' : 'Add health record' }}
+              </div>
+              <div class="mt-1 text-sm text-slate-500">
+                {{ isEdit ? 'Update details for this record.' : 'Record vaccinations, treatments, checkups, and more.' }}
+              </div>
+            </div>
 
-      <!-- Modal panel -->
-      <div class="inline-block w-full max-w-3xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-        <!-- Header -->
-        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900">
-              {{ isEdit ? 'Edit Health Record' : 'Add Health Record' }}
-            </h3>
-            <button class="text-gray-400 hover:text-gray-600 transition-colors" @click="close">
-              <Icon name="lucide:x" class="w-5 h-5" />
-            </button>
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-x"
+              square
+              :disabled="saving"
+              aria-label="Close"
+              @click="setOpen(false)"
+            />
           </div>
-        </div>
 
-        <!-- Form -->
-        <form class="px-6 py-4" @submit.prevent="handleSubmit">
-          <div class="space-y-6">
+          <div class="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+            <form id="health-record-form" class="space-y-6" @submit.prevent="handleSubmit">
             <!-- Cow Selection and Record Type -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -164,7 +182,8 @@
                 <div>
                   <label for="medication_name" class="block text-sm font-medium text-gray-700 mb-2">Medication Name</label>
                   <input
-id="medication_name"                    v-model="formData.medication_name"
+                    id="medication_name"
+                    v-model="formData.medication_name"
                     type="text"
                     placeholder="e.g., Antibiotics"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
@@ -319,32 +338,27 @@ id="medication_name"                    v-model="formData.medication_name"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+            </form>
           </div>
 
-          <!-- Footer -->
-          <div class="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
-            <button
-              type="button"
-              class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              @click="close"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              :disabled="saving"
-              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
-            >
-              {{ saving ? 'Saving...' : (isEdit ? 'Update Record' : 'Add Record') }}
-            </button>
+          <div class="border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div class="flex w-full justify-end gap-2">
+              <UButton type="button" color="neutral" variant="outline" :disabled="saving" @click="setOpen(false)">
+                Cancel
+              </UButton>
+              <UButton type="submit" form="health-record-form" color="primary" :loading="saving">
+                {{ isEdit ? 'Update record' : 'Add record' }}
+              </UButton>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
-    </div>
-  </div>
+    </template>
+  </UModal>
 </template>
 
 <script setup>
+
 const props = defineProps({
   modelValue: {
     type: Boolean,
@@ -364,14 +378,20 @@ const props = defineProps({
   }
 })
 
-console.log('HealthRecordModal component initializing')
-
 const emit = defineEmits(['update:modelValue', 'save'])
 
 const { addHealthRecord, updateHealthRecord } = useHealthRecords()
 
 const saving = ref(false)
 const isEdit = computed(() => !!props.record?.id)
+const setOpen = (value) => {
+  emit('update:modelValue', value)
+  if (!value) {
+    setTimeout(() => {
+      resetForm()
+    }, 300)
+  }
+}
 
 const todayDate = computed(() => new Date().toISOString().split('T')[0])
 
@@ -400,16 +420,13 @@ const formData = ref({
 
 // Watch for modal opening (modelValue changes)
 watch(() => props.modelValue, (isOpen) => {
-  console.log('=== MODAL OPEN/CLOSE ===', isOpen)
   if (isOpen) {
-    console.log('Modal is opening, record:', props.record)
     resetForm()
     // Pre-select cow if provided
     if (props.preselectedCowId) {
       formData.value.cow_id = props.preselectedCowId
     }
     if (props.record && Object.keys(props.record).length > 0) {
-      console.log('Populating form with record data')
       formData.value = {
         ...formData.value,
         ...props.record
@@ -420,9 +437,7 @@ watch(() => props.modelValue, (isOpen) => {
 
 // Watch for record changes while modal is open
 watch(() => props.record, (newRecord) => {
-  console.log('=== RECORD PROP CHANGED ===', newRecord)
   if (props.modelValue && newRecord && Object.keys(newRecord).length > 0) {
-    console.log('Updating form with new record')
     formData.value = {
       ...formData.value,
       ...newRecord
@@ -455,19 +470,7 @@ const resetForm = () => {
   }
 }
 
-const close = () => {
-  emit('update:modelValue', false)
-  // Don't reset immediately to avoid losing data during close animation
-  setTimeout(() => {
-    resetForm()
-  }, 300)
-}
-
 const handleSubmit = async () => {
-  console.log('=== FORM SUBMIT STARTED ===')
-  console.log('formData:', formData.value)
-  console.log('isEdit:', isEdit.value)
-  
   saving.value = true
   
   try {
@@ -479,30 +482,19 @@ const handleSubmit = async () => {
       return acc
     }, {})
 
-    console.log('cleanData to submit:', cleanData)
-
     let result
     if (isEdit.value) {
-      console.log('Updating health record with id:', props.record.id)
       result = await updateHealthRecord(props.record.id, cleanData)
     } else {
-      console.log('Adding new health record')
       result = await addHealthRecord(cleanData)
     }
 
-    console.log('Submit result:', result)
-
     if (result) {
-      console.log('Success! Emitting save and closing')
-      useAppToast().success(isEdit.value ? 'Health record updated successfully' : 'Health record added successfully')
       emit('save')
-      close()
-    } else {
-      console.log('Result was null/falsy')
+      setOpen(false)
     }
   } catch (err) {
     console.error('handleSubmit error:', err)
-    useAppToast().error('Failed to save health record')
   } finally {
     saving.value = false
   }

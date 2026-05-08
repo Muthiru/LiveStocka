@@ -1,6 +1,15 @@
 <template>
   <PageContainer size="wide">
     <HealthRecordModal v-model="showModal" :record="editing" :cows="cows" :preselected-cow-id="cow?.id" @save="refresh" />
+    <ConfirmModal
+      v-model="showDeleteModal"
+      title="Delete record?"
+      :description="deleteTarget ? `This will permanently delete “${deleteTarget.title || 'this record'}”.` : 'This will permanently delete this record.'"
+      confirm-text="Delete"
+      confirm-color="error"
+      :loading="deleting"
+      @confirm="confirmDelete"
+    />
 
     <PageHeader :subtitle="`Tag: ${cow?.tag_id || 'N/A'}`">
       <template #title>
@@ -22,6 +31,9 @@
           </UButton>
           <UButton variant="outline" color="neutral" icon="i-lucide-download" @click="exportCSV">
             Export CSV
+          </UButton>
+          <UButton v-if="cow" :to="`/edit-cow/${cow.id}`" variant="outline" color="neutral" icon="i-lucide-pencil">
+            Edit cow
           </UButton>
           <UButton v-if="cow" :to="`/family-tree?root=${cow.id}`" variant="soft" color="primary" icon="i-lucide-network">
             Lineage
@@ -102,56 +114,62 @@
               </UButton>
             </template>
           </EmptyState>
-          <div v-else class="overflow-x-auto">
-            <table class="w-full table-auto divide-y divide-slate-200 text-sm">
-              <thead class="bg-gray-50">
-                  <tr>
-                    <th class="pl-0 pr-3 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date / Time</th>
-                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Type</th>
-                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Title</th>
-                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Details</th>
-                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Vet</th>
-                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Cost</th>
-                      <th class="px-2 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Notes</th>
-                      <th class="px-2 py-2 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
-                  </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="rec in paginated" :key="rec.id">
-                  <td class="pl-0 pr-3 py-2 align-top">
-                    <div class="flex flex-col">
-                      <div class="font-medium">{{ formatDateOnly(rec.record_date, rec.record_time) }}</div>
-                      <div class="text-xs text-gray-600">{{ formatTimeOnly(rec.record_date, rec.record_time) }}</div>
+          <div v-else class="p-4">
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div v-for="rec in paginated" :key="rec.id" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span :class="getTypeColor(rec.record_type)" class="px-2 py-1 rounded-full text-xs font-medium">
+                        {{ formatRecordType(rec.record_type) }}
+                      </span>
+                      <div class="text-xs text-slate-500">
+                        {{ formatDateOnly(rec.record_date, rec.record_time) }} · {{ formatTimeOnly(rec.record_date, rec.record_time) }}
+                      </div>
                     </div>
-                  </td>
-                  <td class="px-2 py-2 whitespace-nowrap"><span :class="getTypeColor(rec.record_type)" class="px-2 py-1 rounded-full text-xs font-medium">{{ formatRecordType(rec.record_type) }}</span></td>
-                  <td class="px-2 py-2 whitespace-nowrap">{{ rec.title }}</td>
-                  <td class="px-2 py-2 whitespace-nowrap">
-                    <div v-if="rec.vaccine_name">Vaccine: {{ rec.vaccine_name }}</div>
-                    <div v-if="rec.medication_name">Medication: {{ rec.medication_name }}</div>
-                    <div v-if="rec.disease_name">Disease: {{ rec.disease_name }}</div>
-                    <div v-if="rec.treatment_plan">Treatment: {{ rec.treatment_plan }}</div>
-                    <div v-if="rec.dosage">Dosage: {{ rec.dosage }}</div>
-                    <div v-if="rec.administered_by">By: {{ rec.administered_by }}</div>
-                  </td>
-                  <td class="px-2 py-2 whitespace-nowrap">{{ rec.vet_name || '-' }}</td>
-                  <td class="px-2 py-2 whitespace-nowrap">{{ formatCost(rec.cost) }}</td>
-                  <td class="px-2 py-2 whitespace-nowrap">{{ rec.notes || '-' }}</td>
-                  <td class="px-2 py-2 whitespace-nowrap text-right">
-                    <button class="p-2 text-gray-500 hover:text-indigo-600" @click="onEdit(rec)"><Icon name="lucide:edit" class="w-4 h-4" /></button>
-                    <button class="p-2 text-gray-500 hover:text-red-600" @click="onDelete(rec)"><Icon name="lucide:trash-2" class="w-4 h-4" /></button>
-                  </td>
-                </tr>
-              </tbody>
-              <tfoot v-if="filtered.length">
-                <tr class="bg-gray-50 font-semibold">
-                  <td colspan="5" class="px-2 py-2 text-right">Total</td>
-                  <td class="px-2 py-2">{{ totalCost }}</td>
-                  <td class="px-2 py-2">{{ filtered.length }} records</td>
-                  <td/>
-                </tr>
-              </tfoot>
-            </table>
+                    <div class="mt-2 truncate text-base font-semibold text-slate-900">{{ rec.title }}</div>
+                    <div v-if="rec.description" class="mt-1 text-sm text-slate-600 line-clamp-2">{{ rec.description }}</div>
+                  </div>
+
+                  <div class="flex items-center gap-1">
+                    <UButton
+                      size="xs"
+                      color="neutral"
+                      variant="ghost"
+                      icon="i-lucide-pencil"
+                      title="Edit"
+                      aria-label="Edit record"
+                      @click="onEdit(rec)"
+                    />
+                    <UButton
+                      size="xs"
+                      color="error"
+                      variant="ghost"
+                      icon="i-lucide-trash-2"
+                      title="Delete"
+                      aria-label="Delete record"
+                      @click="onDelete(rec)"
+                    />
+                  </div>
+                </div>
+
+                <div class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 sm:grid-cols-2">
+                  <div v-if="rec.vet_name" class="flex items-center gap-2">
+                    <Icon name="lucide:stethoscope" class="h-4 w-4 text-slate-400" />
+                    <span class="truncate">{{ rec.vet_name }}</span>
+                  </div>
+                  <div v-if="rec.cost !== null && rec.cost !== undefined && String(rec.cost).trim() !== ''" class="flex items-center gap-2">
+                    <Icon name="lucide:coins" class="h-4 w-4 text-slate-400" />
+                    <span>{{ formatCost(rec.cost) }}</span>
+                  </div>
+                  <div v-if="rec.vaccine_name" class="sm:col-span-2 text-slate-600">Vaccine: <span class="text-slate-800">{{ rec.vaccine_name }}</span></div>
+                  <div v-if="rec.medication_name" class="sm:col-span-2 text-slate-600">Medication: <span class="text-slate-800">{{ rec.medication_name }}</span></div>
+                  <div v-if="rec.disease_name" class="sm:col-span-2 text-slate-600">Disease: <span class="text-slate-800">{{ rec.disease_name }}</span></div>
+                  <div v-if="rec.treatment_plan" class="sm:col-span-2 text-slate-600">Treatment: <span class="text-slate-800">{{ rec.treatment_plan }}</span></div>
+                  <div v-if="rec.notes" class="sm:col-span-2 text-slate-600">Notes: <span class="text-slate-800">{{ rec.notes }}</span></div>
+                </div>
+              </div>
+            </div>
           </div>
           <div v-if="!loading && filtered.length" class="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
             <div class="text-sm text-gray-700">
@@ -194,6 +212,7 @@
 </template>
 
 <script setup lang="ts">
+import { nextTick } from 'vue'
 import type { HealthRecord, Cow } from '~/types'
 import { formatDateOnly, formatTimeOnly } from '~/utils/formatDate'
 const route = useRoute()
@@ -215,6 +234,13 @@ const perPage = ref(10)
 const showModal = ref(false)
 const editing = ref<HealthRecord | null>(null)
 const loading = ref(true)
+const showDeleteModal = ref(false)
+const deleteTarget = ref<HealthRecord | null>(null)
+const deleting = ref(false)
+
+watch(showDeleteModal, (open) => {
+  if (!open && !deleting.value) deleteTarget.value = null
+})
 
 const load = async () => {
   loading.value = true
@@ -278,10 +304,6 @@ const paginated = computed(() => filtered.value.slice(start.value, end.value))
 const displayStart = computed(() => filtered.value.length === 0 ? 0 : start.value + 1)
 const displayEnd = computed(() => filtered.value.length === 0 ? 0 : Math.min(end.value, filtered.value.length))
 
-const totalCost = computed(() => filtered.value.reduce((sum, r) => sum + (Number(r.cost) || 0), 0))
-
-
-
 const goToCow = (tab = 'overview') => {
   try {
     const idKey = route.params.id
@@ -337,18 +359,34 @@ const getTypeColor = (type) => {
 
 const openAdd = () => {
   editing.value = null
-  showModal.value = true
+  nextTick(() => {
+    showModal.value = true
+  })
 }
 
-const onEdit = (rec) => {
+const onEdit = async (rec) => {
   editing.value = { ...rec }
+  await nextTick()
   showModal.value = true
 }
 
 const onDelete = async (rec) => {
-  if (confirm('Delete this record?')) {
-    await deleteHealthRecord(rec.id)
+  deleteTarget.value = rec
+  showDeleteModal.value = true
+}
+
+const confirmDelete = async () => {
+  if (!deleteTarget.value?.id || deleting.value) return
+  deleting.value = true
+  try {
+    await deleteHealthRecord(deleteTarget.value.id)
     await fetchHealthRecords()
+    showDeleteModal.value = false
+    deleteTarget.value = null
+  } catch (e) {
+    console.error('Delete record error:', e)
+  } finally {
+    deleting.value = false
   }
 }
 
