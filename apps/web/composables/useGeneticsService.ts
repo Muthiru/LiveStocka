@@ -3,51 +3,46 @@ import type { Ancestor, Descendant } from '~/types'
 
 export const useGeneticsService = () => {
     const { $supabase } = useNuxtApp()
-    const config = useRuntimeConfig()
     const loading = ref(false)
     const error = ref<string | null>(null)
 
-    const getProjectUrl = () => config.public.supabaseUrl
+    // Helper to get auth token (consistent with all other composables)
+    const getAuthToken = async (): Promise<string | null> => {
+        const { data } = await $supabase.auth.getSession()
+        return data?.session?.access_token || null
+    }
 
     const fetchAncestors = async (cowId: string, depth: number = 5): Promise<Ancestor[]> => {
         loading.value = true
         error.value = null
         try {
-            const { data } = await $supabase.auth.getSession()
-            const token = data?.session?.access_token
+            const token = await getAuthToken()
             if (!token) throw new Error('User not authenticated')
 
             const params = new URLSearchParams()
             params.append('cow_id', cowId)
             params.append('depth', String(depth))
-            // Add token to query param as fallback for header stripping issues
-            params.append('auth_token', token)
 
-            const queryString = params.toString()
-            const projectUrl = getProjectUrl()
-            const fullUrl = `${projectUrl}/functions/v1/geneticsService/get_ancestors?${queryString}`
-
-            const response = await fetch(fullUrl, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+            const { data: responseData, error: err } = await $supabase.functions.invoke(
+                `geneticsService/get_ancestors?${params.toString()}`,
+                {
+                    method: 'GET',
+                    headers: { Authorization: `Bearer ${token}` }
                 }
-            })
+            )
 
-            const responseData = await response.json()
-
-            if (!response.ok) {
-                console.error('Genetics Service Fetch Error (Ancestors):', response.status, responseData)
-                if (response.status === 401) {
+            if (err) {
+                if ((err as { status?: number }).status === 401) {
                     throw new Error('Unauthorized (401). Please sign out and sign in again.')
                 }
-                throw new Error(responseData?.error || responseData?.message || 'Failed to fetch ancestors')
+                throw err
             }
+            if (responseData?.error) throw new Error(responseData.error)
 
             return responseData?.ancestors || []
         } catch (e: unknown) {
             error.value = e instanceof Error ? e.message : 'Failed to fetch ancestors'
+            console.error('Genetics Service Fetch Error (Ancestors):', e)
             return []
         } finally {
             loading.value = false
@@ -58,40 +53,33 @@ export const useGeneticsService = () => {
         loading.value = true
         error.value = null
         try {
-            const { data } = await $supabase.auth.getSession()
-            const token = data?.session?.access_token
+            const token = await getAuthToken()
             if (!token) throw new Error('User not authenticated')
 
             const params = new URLSearchParams()
             params.append('cow_id', cowId)
             params.append('depth', String(depth))
-            params.append('auth_token', token)
 
-            const queryString = params.toString()
-            const projectUrl = getProjectUrl()
-            const fullUrl = `${projectUrl}/functions/v1/geneticsService/get_descendants?${queryString}`
-
-            const response = await fetch(fullUrl, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+            const { data: responseData, error: err } = await $supabase.functions.invoke(
+                `geneticsService/get_descendants?${params.toString()}`,
+                {
+                    method: 'GET',
+                    headers: { Authorization: `Bearer ${token}` }
                 }
-            })
+            )
 
-            const responseData = await response.json()
-
-            if (!response.ok) {
-                console.error('Genetics Service Fetch Error (Descendants):', response.status, responseData)
-                if (response.status === 401) {
+            if (err) {
+                if ((err as { status?: number }).status === 401) {
                     throw new Error('Unauthorized (401). Please sign out and sign in again.')
                 }
-                throw new Error(responseData?.error || responseData?.message || 'Failed to fetch descendants')
+                throw err
             }
+            if (responseData?.error) throw new Error(responseData.error)
 
             return responseData?.descendants || []
         } catch (e: unknown) {
             error.value = e instanceof Error ? e.message : 'Failed to fetch descendants'
+            console.error('Genetics Service Fetch Error (Descendants):', e)
             return []
         } finally {
             loading.value = false
@@ -102,8 +90,7 @@ export const useGeneticsService = () => {
         loading.value = true
         error.value = null
         try {
-            const { data } = await $supabase.auth.getSession()
-            const token = data?.session?.access_token
+            const token = await getAuthToken()
             if (!token) throw new Error('User not authenticated')
 
             const { data: responseData, error: err } = await $supabase.functions.invoke('geneticsService/check_breeding_compatibility', {

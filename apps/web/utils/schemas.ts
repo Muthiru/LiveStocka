@@ -25,6 +25,4 @@ export const loginSchema: Schema<LoginValues> = {
   password: [rules.required('Password is required'), rules.minLength(6, 'Password must be at least 6 characters')]
 }
 
-export type RegisterValues = LoginValues
-export const registerSchema = loginSchema
-
+export const registerSchema: Schema<LoginValues> = loginSchema

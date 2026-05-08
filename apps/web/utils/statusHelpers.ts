@@ -141,5 +141,3 @@ export const updateArrayState = <T extends { id: string }>(
     array.value = array.value.filter(x => x.id !== item.id)
   }
 }
-
-// Note: isOverdue and isToday are available from formatDate.ts

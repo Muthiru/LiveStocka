@@ -195,6 +195,7 @@ async function handleGetStats(req: Request) {
 
     let activeCount = 0;
     if (allCows) {
+        // NOTE: Keep this list in sync with isMilkable() in apps/web/composables/useCows.ts
         activeCount = allCows.filter((cow: { status?: string | null }) => {
             const s = (cow.status || 'active').toLowerCase();
             return s !== 'bull' && s !== 'calf' && s !== 'dry' && s !== 'sold' && s !== 'deceased';

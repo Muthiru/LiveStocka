@@ -96,8 +96,8 @@ const handleSubmit = async () => {
   try {
     const updated = await updateCow(String(route.params.id), {
       ...form.value,
-      age: form.value.age ? Number.parseFloat(form.value.age) : null,
-      weight: form.value.weight ? Number.parseFloat(form.value.weight) : null
+      age: form.value.age ? Number.parseFloat(form.value.age).toString() : null,
+      weight: form.value.weight ? Number.parseFloat(form.value.weight).toString() : null
     })
 
     if (!updated) throw new Error('Failed to update cow')

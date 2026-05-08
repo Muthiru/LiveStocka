@@ -178,7 +178,7 @@ export const useCows = () => {
         console.error('Error adding cow via edge function:', e)
         const msg = String(e?.message || '')
         if (msg.includes('Edge Function') || msg.includes('Functions')) {
-          const { data, error: directErr } = await $supabase.from('cows').insert(cowData).select('*').single()
+          const { data, error: directErr } = await ($supabase.from('cows') as any).insert(cowData).select('*').single()
           if (directErr) throw directErr
           if (data) cows.value = [data as Cow, ...cows.value]
           return data as Cow
@@ -193,6 +193,21 @@ export const useCows = () => {
       throw e
     } finally {
       loading.value = false
+    }
+  }
+
+  const tryFallbackUpdateCow = async (id: string, updates: Partial<CowFormData>, originalErrorMsg: string): Promise<Cow | null> => {
+    try {
+      const { data, error: directErr } = await ($supabase.from('cows') as any).update(updates).eq('id', id).select('*').single()
+      if (directErr) throw directErr
+      const updated = data as Cow
+      const index = cows.value.findIndex(cow => cow.id === id)
+      if (index !== -1 && updated) cows.value[index] = updated
+      return updated || null
+    } catch (fallbackErr: any) {
+      console.error('Fallback direct cow update failed:', fallbackErr)
+      error.value = fallbackErr.message || originalErrorMsg
+      return null
     }
   }
 
@@ -224,24 +239,11 @@ export const useCows = () => {
 
       return updatedCow
     } catch (e: any) {
-      // Fallback: try direct update if edge functions are unreachable (local dev).
-      try {
-        console.error('Error updating cow via edge function:', e)
-        const msg = String(e?.message || '')
-        if (msg.includes('Edge Function') || msg.includes('Functions')) {
-          const { data, error: directErr } = await $supabase.from('cows').update(updates).eq('id', id).select('*').single()
-          if (directErr) throw directErr
-          const updated = data as Cow
-          const index = cows.value.findIndex(cow => cow.id === id)
-          if (index !== -1 && updated) cows.value[index] = updated
-          return updated || null
-        }
-      } catch (fallbackErr: any) {
-        console.error('Fallback direct cow update failed:', fallbackErr)
-        error.value = fallbackErr.message || e.message
-        return null
+      console.error('Error updating cow via edge function:', e)
+      const msg = String(e?.message || '')
+      if (msg.includes('Edge Function') || msg.includes('Functions')) {
+        return await tryFallbackUpdateCow(id, updates, e.message)
       }
-
       error.value = e.message
       return null
     } finally {
