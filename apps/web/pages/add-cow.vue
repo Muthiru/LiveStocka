@@ -4,13 +4,19 @@
 
     <CowForm v-model:form="form" @submit="handleSubmit">
       <template #actions>
-        <div class="flex flex-col justify-end gap-2 sm:flex-row">
-          <UButton to="/cows" variant="outline" color="neutral">
-            Cancel
-          </UButton>
-          <UButton type="submit" :loading="loading" color="primary">
-            Save cow
-          </UButton>
+        <div class="mt-2 space-y-3 sm:mt-4">
+          <div class="flex flex-row justify-between gap-3">
+            <UButton to="/cows" variant="outline" color="neutral">
+              Cancel
+            </UButton>
+            <UButton
+              type="submit"
+              class="bg-green-600 hover:bg-green-700 text-white"
+              :loading="loading"
+            >
+              Save cow
+            </UButton>
+          </div>
         </div>
       </template>
     </CowForm>

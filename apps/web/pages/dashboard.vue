@@ -8,7 +8,7 @@
       @save="handleSave"
     />
 
-    <div class="max-w-7xl mx-auto px-4">
+    <div class="mx-auto w-full max-w-4xl px-4 sm:px-6">
       <PageHeader title="Dashboard" subtitle="Overview of your cattle management">
         <template #actions>
           <UButton class="w-full sm:w-auto" color="primary" icon="i-lucide-plus" @click="showAddModal = true">
@@ -18,16 +18,16 @@
       </PageHeader>
 
       <!-- Stats Grid -->
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8 mt-6">
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8 mt-6 justify-items-center">
+        <div class="w-full bg-white overflow-hidden shadow-sm rounded-lg">
           <div class="p-3 sm:p-4">
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex flex-col items-center gap-2 text-center sm:flex-row sm:items-center sm:gap-3 sm:text-left">
               <div class="flex-shrink-0">
                 <svg class="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                 </svg>
               </div>
-              <div class="min-w-0 flex-1">
+              <div class="min-w-0 flex-1 text-center sm:text-left">
                 <dl>
                   <dt class="text-xs font-medium text-gray-500 truncate">Total Cows</dt>
                   <dd class="text-xl font-semibold text-gray-900">{{ cowsCount }}</dd>
@@ -35,22 +35,22 @@
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg">
+          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg text-center sm:text-left">
             <div class="text-xs">
               <NuxtLink to="/cows" class="font-medium text-gray-700 hover:text-gray-900">View all →</NuxtLink>
             </div>
           </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+        <div class="w-full bg-white overflow-hidden shadow-sm rounded-lg">
           <div class="p-3 sm:p-4">
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex flex-col items-center gap-2 text-center sm:flex-row sm:items-center sm:gap-3 sm:text-left">
               <div class="flex-shrink-0">
                 <svg class="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <div class="min-w-0 flex-1">
+              <div class="min-w-0 flex-1 text-center sm:text-left">
                 <dl>
                   <dt class="text-xs font-medium text-gray-500 truncate">Active Cows</dt>
                   <dd class="text-xl font-semibold text-gray-900">{{ activeCowsCount }}</dd>
@@ -58,20 +58,20 @@
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg">
+          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg text-center sm:text-left">
             <div class="text-xs text-gray-500">Healthy and Productive</div>
           </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+        <div class="w-full bg-white overflow-hidden shadow-sm rounded-lg">
           <div class="p-3 sm:p-4">
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex flex-col items-center gap-2 text-center sm:flex-row sm:items-center sm:gap-3 sm:text-left">
               <div class="flex-shrink-0">
                 <svg class="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <div class="min-w-0 flex-1">
+              <div class="min-w-0 flex-1 text-center sm:text-left">
                 <dl>
                   <dt class="text-xs font-medium text-gray-500 truncate">Health Alerts</dt>
                   <dd class="text-xl font-semibold text-gray-900">{{ healthAlertsCount }}</dd>
@@ -79,22 +79,22 @@
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg">
+          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg text-center sm:text-left">
             <div class="text-xs">
               <NuxtLink to="/health-records" class="font-medium text-gray-700 hover:text-gray-900">View alerts →</NuxtLink>
             </div>
           </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+        <div class="w-full bg-white overflow-hidden shadow-sm rounded-lg">
           <div class="p-3 sm:p-4">
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex flex-col items-center gap-2 text-center sm:flex-row sm:items-center sm:gap-3 sm:text-left">
               <div class="flex-shrink-0">
                 <svg class="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <div class="min-w-0 flex-1">
+              <div class="min-w-0 flex-1 text-center sm:text-left">
                 <dl>
                   <dt class="text-xs font-medium text-gray-500 truncate">Milk Production</dt>
                   <dd class="text-xl font-semibold text-gray-900">{{ totalMilkProduction }}L</dd>
@@ -102,7 +102,7 @@
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg">
+          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg text-center sm:text-left">
             <div class="text-xs">
               <NuxtLink to="/milk-production" class="font-medium text-gray-700 hover:text-gray-900">View details →</NuxtLink>
             </div>
@@ -112,7 +112,7 @@
 
       <!-- Quick Actions -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 mb-8">
-        <div class="bg-white shadow-sm rounded-lg">
+        <div class="w-full bg-white shadow-sm rounded-lg">
           <div class="px-3 sm:px-4 py-3 border-b border-gray-200">
             <h3 class="text-sm sm:text-base font-medium text-gray-900">Quick Actions</h3>
           </div>
@@ -122,45 +122,35 @@
                 to="/add-cow"
                 class="flex items-center justify-center px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100"
               >
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
+                <Icon name="lucide:square-plus" class="mr-2 h-4 w-4" />
                 Add Cow
               </NuxtLink>
               <NuxtLink
                 to="/cows"
                 class="flex items-center justify-center px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100"
               >
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <Icon name="lucide:clipboard-list" class="mr-2 h-4 w-4" />
                 Search Cows
               </NuxtLink>
               <NuxtLink
                 to="/milk-production"
                 class="flex items-center justify-center px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100"
               >
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
+                <Icon name="lucide:milk" class="mr-2 h-4 w-4" />
                 Milk Production
               </NuxtLink>
               <NuxtLink
                 to="/health-records"
                 class="flex items-center justify-center px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100"
               >
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <Icon name="lucide:heart-pulse" class="mr-2 h-4 w-4" />
                 Health Records
               </NuxtLink>
               <NuxtLink
                 to="/breeding"
                 class="flex items-center justify-center px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100"
               >
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+                <Icon name="lucide:repeat-2" class="mr-2 h-4 w-4" />
                 Breeding
               </NuxtLink>
             </div>
@@ -168,7 +158,7 @@
         </div>
 
         <!-- Today's Herd Production Summary -->
-        <div class="bg-white shadow-sm rounded-lg">
+        <div class="w-full bg-white shadow-sm rounded-lg">
           <div class="px-3 sm:px-4 py-3 border-b border-gray-200 flex items-center justify-between">
             <h3 class="text-sm sm:text-base font-medium text-gray-900">Today's Herd Production</h3>
             <span class="text-xs text-gray-500">Auto-updated</span>
@@ -238,7 +228,7 @@
       </div>
 
       <!-- Upcoming Events -->
-      <div class="bg-white shadow-sm rounded-lg">
+      <div class="w-full bg-white shadow-sm rounded-lg">
         <div class="px-3 sm:px-4 py-3 border-b border-gray-200">
           <h3 class="text-sm sm:text-base font-medium text-gray-900">Upcoming Events & Alerts</h3>
         </div>

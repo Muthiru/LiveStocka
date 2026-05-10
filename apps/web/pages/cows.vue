@@ -11,8 +11,8 @@
     <div class="mx-auto w-[calc(100%-1.5rem)] space-y-6">
       <!-- Search and Filters -->
       <div class="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
-        <div class="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-4">
-          <div class="md:col-span-2">
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+          <div class="col-span-2 md:col-span-2">
             <label for="search" class="sr-only">Search</label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

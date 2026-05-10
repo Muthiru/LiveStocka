@@ -2,7 +2,6 @@
   <div class="mx-auto w-[calc(100%-1.5rem)] max-w-7xl py-4 sm:w-full sm:py-6">
     <div class="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold mb-2">Milk Production Tracking</h1>
         <p class="text-gray-600 text-sm md:text-base">Record and monitor daily milk yields for your herd</p>
       </div>
       <NuxtLink
@@ -638,7 +637,7 @@
                   Edit
                 </button>
                 <button
-                  class="text-red-600 hover:text-red-800 font-medium"
+                  class="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 font-medium text-white transition hover:bg-red-700"
                   @click="deleteRecord(record.id)"
                 >
                   Delete

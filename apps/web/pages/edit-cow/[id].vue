@@ -1,5 +1,15 @@
 <template>
   <PageContainer size="wide">
+    <ConfirmModal
+      v-model="showDeleteModal"
+      title="Delete cow?"
+      description="This will permanently remove the cow and all associated records. This action cannot be undone."
+      confirm-text="Delete cow"
+      confirm-color="error"
+      :loading="deleting"
+      @confirm="confirmDelete"
+    />
+
     <div class="mx-auto w-[calc(100%-1.5rem)] max-w-5xl">
       <PageHeader title="Edit Cow" :subtitle="form.name ? `Update details for ${form.name}` : 'Update cow details'" />
 
@@ -10,17 +20,15 @@
           <div class="mt-2 space-y-3 sm:mt-4">
             <!-- Delete button section -->
             <div class="flex justify-start">
-              <UButton
+              <button
                 type="button"
-                color="error"
-                variant="soft"
-                :loading="deleting"
+                class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                 :disabled="saving || deleting"
-                icon="i-lucide-trash-2"
-                @click="handleDelete"
+                @click="showDeleteModal = true"
               >
+                <Icon name="lucide:trash-2" class="h-4 w-4" />
                 Delete cow
-              </UButton>
+              </button>
             </div>
 
             <!-- Action buttons -->
@@ -69,6 +77,7 @@ const cowId = ref<string>('')
 const loading = ref(true)
 const saving = ref(false)
 const deleting = ref(false)
+const showDeleteModal = ref(false)
 
 // Automatically calculate age when birth date changes
 watch(() => form.value.birth_date, (newDate) => {
@@ -126,10 +135,8 @@ const handleSubmit = async () => {
   }
 }
 
-const handleDelete = async () => {
-  if (!confirm('Are you sure you want to delete this cow? This action cannot be undone.')) {
-    return
-  }
+const confirmDelete = async () => {
+  if (deleting.value) return
 
   deleting.value = true
   try {
@@ -142,6 +149,7 @@ const handleDelete = async () => {
     toast.error((error as Error).message)
   } finally {
     deleting.value = false
+    showDeleteModal.value = false
   }
 }
 </script>

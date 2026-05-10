@@ -2,15 +2,15 @@
   <PageContainer size="wide">
     <PageHeader title="Breeding" subtitle="Record heats, schedule breeding, and view windows" />
 
-    <div class="mx-auto w-[calc(100%-1.5rem)] space-y-6 md:w-full">
+    <div class="mx-auto max-w-7xl px-4 pt-4 space-y-6">
     <!-- Info banner -->
-    <div class="mb-6 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+    <div class="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm sm:px-5 sm:py-4">
       <div class="text-sm font-semibold text-slate-900">Optimal Breeding Windows</div>
       <div class="mt-1 text-sm text-slate-600">Breeding windows are calculated 12–18 hours after heat detection for best conception rates.</div>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <main class="lg:col-span-2 space-y-6">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+        <main class="space-y-6">
           <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
             <div class="border-b border-slate-200 px-3 py-3 sm:px-4 sm:py-4">
               <h2 class="text-sm sm:text-base font-semibold text-slate-900">Record Heat Event</h2>
@@ -68,7 +68,7 @@
           </section>
         </main>
 
-        <aside class="space-y-6">
+        <aside class="space-y-6 lg:sticky lg:top-4 lg:self-start">
           <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
             <div class="border-b border-slate-200 px-3 py-3 sm:px-4">
               <h3 class="text-sm font-semibold text-slate-900">Active Breeding Windows</h3>
@@ -82,20 +82,20 @@
             <div class="border-b border-slate-200 px-3 py-3 sm:px-4">
               <h3 class="text-sm font-semibold text-slate-900">Upcoming Events</h3>
             </div>
-              <div class="space-y-3 p-3 text-sm text-gray-700 sm:p-4">
-                <div v-if="(pregnancyChecks || []).length === 0 && (expectedHeats || []).length === 0" class="p-3 border rounded text-gray-500">No upcoming events.</div>
+              <div class="space-y-3 p-3 text-sm text-slate-700 sm:p-4">
+                <div v-if="(pregnancyChecks || []).length === 0 && (expectedHeats || []).length === 0" class="rounded-lg border border-slate-200 bg-slate-50 p-3 text-slate-500">No upcoming events.</div>
                 <template v-if="(pregnancyChecks || []).length > 0">
-                  <div v-for="pc in pregnancyChecks" :key="pc.id" class="p-3 border rounded">
-                    <div class="font-medium text-gray-900">Pregnancy Check Due</div>
-                    <div class="text-xs text-gray-500 italic">{{ (pc as any).cow_name || pc.cow_id }}</div>
-                    <div class="text-xs text-indigo-600 font-medium">Due: {{ pc.due_in || 'now' }}</div>
+                  <div v-for="pc in pregnancyChecks" :key="pc.id" class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+                    <div class="font-medium text-slate-900">Pregnancy Check Due</div>
+                    <div class="text-xs italic text-slate-500">{{ (pc as any).cow_name || pc.cow_id }}</div>
+                    <div class="mt-1 text-xs font-medium text-indigo-600">Due: {{ pc.due_in || 'now' }}</div>
                   </div>
                 </template>
                 <template v-if="(expectedHeats || []).length > 0">
-                  <div v-for="eh in expectedHeats" :key="eh.id" class="p-3 border rounded">
-                    <div class="font-medium text-gray-900">Expected Heat</div>
-                    <div class="text-xs text-gray-500 italic">{{ (eh as any).cow_name || eh.cow_id }}</div>
-                    <div class="text-xs text-orange-600 font-medium">Expected in {{ eh.days_until ?? eh.expected_in_days ?? '' }} days</div>
+                  <div v-for="eh in expectedHeats" :key="eh.id" class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+                    <div class="font-medium text-slate-900">Expected Heat</div>
+                    <div class="text-xs italic text-slate-500">{{ (eh as any).cow_name || eh.cow_id }}</div>
+                    <div class="mt-1 text-xs font-medium text-orange-600">Expected in {{ eh.days_until ?? eh.expected_in_days ?? '' }} days</div>
                   </div>
                 </template>
               </div>

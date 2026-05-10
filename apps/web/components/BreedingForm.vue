@@ -1,81 +1,111 @@
 <template>
-  <form class="space-y-4 p-4 bg-white rounded shadow" @submit.prevent="onSubmit">
-    <div class="mb-3 flex items-center justify-between">
+  <form class="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" @submit.prevent="onSubmit">
+    <div class="flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
       <div class="flex items-center gap-3">
-        <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
-        <h4 class="text-sm font-semibold">Record Breeding</h4>
+          </svg>
+        </div>
+        <h4 class="text-sm font-semibold text-slate-900">Record Breeding</h4>
       </div>
-      <div v-if="!props.cowId" class="text-sm text-gray-500">Select a cow to enable breeding</div>
+      <div v-if="!props.cowId" class="text-sm text-slate-500">Select a cow to enable breeding</div>
     </div>
 
     <div v-if="!props.cowId || heatsPending || bullsPending" class="space-y-2">
-      <div class="h-8 bg-gray-100 rounded animate-pulse" />
-      <div class="h-8 bg-gray-100 rounded animate-pulse" />
-      <div class="h-16 bg-gray-100 rounded animate-pulse" />
+      <div class="h-10 rounded-lg bg-slate-100 animate-pulse" />
+      <div class="h-10 rounded-lg bg-slate-100 animate-pulse" />
+      <div class="h-16 rounded-lg bg-slate-100 animate-pulse" />
       <div class="flex items-center">
-        <div class="h-8 w-32 bg-gray-200 rounded animate-pulse" />
+        <div class="h-10 w-32 rounded-lg bg-slate-200 animate-pulse" />
       </div>
     </div>
 
     <div v-else>
-      <div class="grid grid-cols-1 gap-4">
+      <div class="space-y-4">
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <h5 class="text-sm font-semibold text-slate-900">Breeding Details</h5>
+              <p class="text-xs text-slate-500">Pick the heat event and breeding method first.</p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label for="heat_event_id" class="mb-1.5 block text-sm font-medium text-slate-700">Heat Event *</label>
+              <div class="relative">
+                <select id="heat_event_id" v-model="heat_event_id" class="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15">
+                  <option value="" disabled>Select from recent heat events...</option>
+                  <option v-for="h in heats" :key="h.id" :value="h.id">{{ h.cow_name || h.cow_id }} — {{ new Date(h.event_time).toLocaleString() }}</option>
+                </select>
+                <Icon name="lucide:chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label for="method" class="mb-1.5 block text-sm font-medium text-slate-700">Breeding Method *</label>
+                <div class="relative">
+                  <select id="method" v-model="method" class="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15">
+                    <option value="ai">Artificial Insemination</option>
+                    <option value="natural">Natural</option>
+                  </select>
+                  <Icon name="lucide:chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+              </div>
+              <div>
+                <label for="sire_id" class="mb-1.5 block text-sm font-medium text-slate-700">Sire / Bull *</label>
+                <div class="relative">
+                  <select id="sire_id" v-model="sire_id" class="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15">
+                    <option value="" disabled>Select sire...</option>
+                    <option v-for="c in bulls" :key="c.id" :value="c.id">{{ c.name || c.tag_id }}</option>
+                  </select>
+                  <Icon name="lucide:chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <h5 class="text-sm font-semibold text-slate-900">Operational Details</h5>
+              <p class="text-xs text-slate-500">Optional tracking fields for semen, staff, and cost.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label for="semen_batch" class="mb-1.5 block text-sm font-medium text-slate-700">Semen Batch Number</label>
+              <input id="semen_batch" v-model="semen_batch" placeholder="e.g., SEM-2024-001" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15">
+            </div>
+            <div>
+              <label for="technician" class="mb-1.5 block text-sm font-medium text-slate-700">Technician Name</label>
+              <input id="technician" v-model="technician" placeholder="Name of person performing AI" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15">
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label for="bcs" class="mb-1.5 block text-sm font-medium text-slate-700">Body Condition Score (1-5)</label>
+              <input id="bcs" v-model="bcs" placeholder="e.g., 3.5" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15">
+            </div>
+            <div>
+              <label for="cost" class="mb-1.5 block text-sm font-medium text-slate-700">Cost</label>
+              <input id="cost" v-model.number="cost" type="number" step="0.01" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15">
+            </div>
+          </div>
+        </div>
+
         <div>
-          <label for="heat_event_id" class="block text-sm font-medium text-gray-700">Heat Event *</label>
-          <select id="heat_event_id" v-model="heat_event_id" class="mt-1 block w-full rounded border-gray-300 shadow-sm">
-            <option value="" disabled>Select from recent heat events...</option>
-            <option v-for="h in heats" :key="h.id" :value="h.id">{{ h.cow_name || h.cow_id }} — {{ new Date(h.event_time).toLocaleString() }}</option>
-          </select>
+          <label for="notes" class="mb-1.5 block text-sm font-medium text-slate-700">Notes</label>
+          <textarea id="notes" v-model="notes" rows="3" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15" />
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="method" class="block text-sm font-medium text-gray-700">Breeding Method *</label>
-            <select id="method" v-model="method" class="mt-1 block w-full rounded border-gray-300 shadow-sm">
-              <option value="ai">Artificial Insemination</option>
-              <option value="natural">Natural</option>
-            </select>
-          </div>
-          <div>
-            <label for="sire_id" class="block text-sm font-medium text-gray-700">Sire / Bull *</label>
-            <select id="sire_id" v-model="sire_id" class="mt-1 block w-full rounded border-gray-300 shadow-sm">
-              <option value="" disabled>Select sire...</option>
-              <option v-for="c in bulls" :key="c.id" :value="c.id">{{ c.name || c.tag_id }}</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="semen_batch" class="block text-sm font-medium text-gray-700">Semen Batch Number</label>
-            <input id="semen_batch" v-model="semen_batch" placeholder="e.g., SEM-2024-001" class="mt-1 block w-full rounded border-gray-300 shadow-sm">
-          </div>
-          <div>
-            <label for="technician" class="block text-sm font-medium text-gray-700">Technician Name</label>
-            <input id="technician" v-model="technician" placeholder="Name of person performing AI" class="mt-1 block w-full rounded border-gray-300 shadow-sm">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label for="bcs" class="block text-sm font-medium text-gray-700">Body Condition Score (1-5)</label>
-            <input id="bcs" v-model="bcs" placeholder="e.g., 3.5" class="mt-1 block w-full rounded border-gray-300 shadow-sm">
-          </div>
-          <div>
-            <label for="cost" class="block text-sm font-medium text-gray-700">Cost</label>
-            <input id="cost" v-model.number="cost" type="number" step="0.01" class="mt-1 block w-full rounded border-gray-300 shadow-sm">
-          </div>
-          <div />
-        </div>
-
-        <div>
-          <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
-          <textarea id="notes" v-model="notes" rows="3" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
-        </div>
-
-        <div class="flex items-center justify-between">
-          <button :disabled="loading" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50">
+        <div class="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <button :disabled="loading" class="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50">
             <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             <span v-if="!loading">Record Breeding</span>
             <span v-else>Saving...</span>
