@@ -18,7 +18,10 @@
         </template>
 
         <template #actions>
-          <div class="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-3">
+          <div class="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-4">
+            <UButton variant="ghost" color="neutral" icon="i-lucide-arrow-left" class="justify-start" @click="goBack">
+              Back
+            </UButton>
             <UButton :to="`/family-tree?root=${cow.id}`" variant="soft" color="primary" icon="i-lucide-git-branch">
               Lineage
             </UButton>
@@ -32,33 +35,34 @@
         </template>
       </PageHeader>
 
+      <div class="mx-auto w-[calc(100%-1.5rem)] space-y-6 md:w-full">
         <!-- Tabs -->
-      <div class="mb-6 border-b border-slate-200">
-        <nav class="-mb-px flex gap-6 overflow-x-auto">
+      <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <nav class="flex gap-2 overflow-x-auto px-3 py-2 sm:px-4">
             <button
-              :class="activeTab === 'overview' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
-              class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+              :class="activeTab === 'overview' ? 'bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+              class="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition"
               @click="activeTab = 'overview'"
             >
               Overview
             </button>
             <button
-              :class="activeTab === 'health' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
-              class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+              :class="activeTab === 'health' ? 'bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+              class="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition"
               @click="goToRecords('health')"
             >
               Health
             </button>
             <button
-              :class="activeTab === 'reproduction' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
-              class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+              :class="activeTab === 'reproduction' ? 'bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+              class="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition"
               @click="activeTab = 'reproduction'"
             >
                 Breeding
             </button>
             <button
-              :class="activeTab === 'milk' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
-              class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+              :class="activeTab === 'milk' ? 'bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+              class="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition"
               @click="activeTab = 'milk'"
             >
               Milk Production
@@ -67,9 +71,9 @@
         </div>
 
         <!-- Overview Tab -->
-        <div v-if="activeTab === 'overview'" class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+        <div v-if="activeTab === 'overview'" class="rounded-lg bg-white shadow-sm">
+          <div class="flex items-center justify-between border-b border-gray-200 px-3 py-3 sm:px-4 sm:py-4">
+            <h3 class="text-sm font-medium text-gray-900 sm:text-base">Basic Information</h3>
             <UButton
               color="primary"
               variant="solid"
@@ -80,133 +84,77 @@
               Edit Cow
             </UButton>
           </div>
-          <div class="px-5 py-5">
-            <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-              <div>
-                <dt class="text-sm font-medium text-gray-500">Name</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ cow.name || 'N/A' }}</dd>
-              </div>
-              <div>
-                <dt class="text-sm font-medium text-gray-500">Tag ID</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ cow.tag_id || 'N/A' }}</dd>
-              </div>
-              <div>
-                <dt class="text-sm font-medium text-gray-500">Breed</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ cow.breed || 'N/A' }}</dd>
-              </div>
-              <div>
-                <dt class="text-sm font-medium text-gray-500">Genetic Line</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ cow.genetic_line || 'N/A' }}</dd>
-              </div>
-              <div>
-                <dt class="text-sm font-medium text-gray-500">Color</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ cow.color || 'N/A' }}</dd>
-              </div>
-              <div>
-                <dt class="text-sm font-medium text-gray-500">Age</dt>
-                  <dd class="mt-1 text-sm text-gray-900">{{ formatAge(cow.birth_date) }}</dd>
-              </div>
-              <div>
-                <dt class="text-sm font-medium text-gray-500">Weight</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ cow.weight ? `${cow.weight} kg` : 'N/A' }}</dd>
-              </div>
-              <div>
-                <dt class="text-sm font-medium text-gray-500">Status</dt>
+          <div class="p-3 sm:p-4">
+            <div class="grid grid-cols-2 gap-2 sm:gap-4">
+              <dl class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Name</dt>
+                <dd class="mt-1 text-base font-semibold text-gray-900 sm:text-lg">{{ cow.name || 'N/A' }}</dd>
+              </dl>
+              <dl v-if="cow.birth_date" class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Birth Date</dt>
+                <dd class="mt-1 text-base font-semibold text-gray-900">{{ formatDate(cow.birth_date) }}</dd>
+              </dl>
+              <dl class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Tag ID</dt>
+                <dd class="mt-1 text-sm font-semibold text-gray-900">{{ cow.tag_id || 'N/A' }}</dd>
+              </dl>
+              <dl class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Status</dt>
                 <dd class="mt-1">
                   <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
                     :class="getStatusClass(cow.status)"
                   >
                     {{ cow.status || 'active' }}
                   </span>
                 </dd>
-              </div>
-              <div v-if="cow.birth_date">
-                <dt class="text-sm font-medium text-gray-500">Birth Date</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ formatDate(cow.birth_date) }}</dd>
-              </div>
-              <div v-if="cow.sire">
-                <dt class="text-sm font-medium text-gray-500">Sire (Father)</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ cow.sire }}</dd>
-              </div>
-              <div v-if="cow.dam">
-                <dt class="text-sm font-medium text-gray-500">Dam (Mother)</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ cow.dam }}</dd>
-              </div>
-            </dl>
-            <dl v-if="cow.notes" class="mt-6">
-              <dt class="text-sm font-medium text-gray-500">Notes</dt>
+              </dl>
+              <dl class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Breed</dt>
+                <dd class="mt-1 text-sm font-semibold text-gray-900">{{ cow.breed || 'N/A' }}</dd>
+              </dl>
+              <dl class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Genetic Line</dt>
+                <dd class="mt-1 text-sm font-semibold text-gray-900">{{ cow.genetic_line || 'N/A' }}</dd>
+              </dl>
+              <dl class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Color</dt>
+                <dd class="mt-1 text-sm font-semibold text-gray-900">{{ cow.color || 'N/A' }}</dd>
+              </dl>
+              <dl class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Age</dt>
+                <dd class="mt-1 text-sm font-semibold text-gray-900">{{ formatAge(cow.birth_date) }}</dd>
+              </dl>
+              <dl v-if="cow.sire" class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Sire (Father)</dt>
+                <dd class="mt-1 text-sm font-semibold text-gray-900">{{ cow.sire }}</dd>
+              </dl>
+              <dl v-if="cow.dam" class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Dam (Mother)</dt>
+                <dd class="mt-1 text-sm font-semibold text-gray-900">{{ cow.dam }}</dd>
+              </dl>
+              <dl class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200/70 sm:p-4">
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Weight</dt>
+                <dd class="mt-1 text-sm font-semibold text-gray-900">{{ cow.weight ? `${cow.weight} kg` : 'N/A' }}</dd>
+              </dl>
+            </div>
+
+            <dl v-if="cow.notes" class="mt-4 rounded-lg bg-slate-50 p-3 sm:mt-6 sm:p-4">
+              <dt class="text-xs font-medium uppercase tracking-wide text-gray-500">Notes</dt>
               <dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ cow.notes }}</dd>
             </dl>
           </div>
         </div>
 
-        <!-- Health Tab -->
-        <div v-if="activeTab === 'health'" class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 class="text-lg font-medium text-gray-900">Health Records</h3>
-            <div class="flex items-center gap-3">
-              <NuxtLink
-                :to="`/cow/${encodeURIComponent(cow.name)}/health`"
-                class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
-              >
-                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Add Record
-              </NuxtLink>
-              <button
-                class="text-sm font-medium text-green-600 hover:text-green-800"
-                @click="goToRecords('health')"
-              >
-                View All →
-              </button>
-            </div>
-          </div>
-          <div class="px-5 py-5">
-            <div v-if="healthRecords.length === 0" class="text-center py-8">
-              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              <p class="mt-2 text-sm text-gray-500">No health records yet.</p>
-              <NuxtLink
-                :to="`/cow/${encodeURIComponent(cow.name)}/health`"
-                class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
-              >
-                Add Health Record
-              </NuxtLink>
-            </div>
-            <ul v-else class="divide-y divide-gray-200">
-              <li v-for="record in healthRecords.slice(0, 5)" :key="record.id" class="py-4">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <span :class="getRecordTypeColor(record.record_type)" class="px-2 py-0.5 rounded-full text-xs font-medium capitalize">
-                        {{ record.record_type }}
-                      </span>
-                      <p class="text-sm font-medium text-gray-900">{{ record.title }}</p>
-                    </div>
-                    <p v-if="record.description" class="text-sm text-gray-500 mt-1">{{ record.description }}</p>
-                  </div>
-                  <div class="text-right">
-                    <p class="text-sm text-gray-500">{{ formatDate(record.record_date) }}</p>
-                    <p v-if="record.next_checkup_date" class="text-xs text-blue-600 mt-1">
-                      Next: {{ formatDate(record.next_checkup_date) }}
-                    </p>
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <!-- Health records now live on /cow-records/:id (Health tab navigates there) -->
 
         <!-- Breeding Tab -->
-        <div v-if="activeTab === 'reproduction'" class="space-y-6">
+        <div v-if="activeTab === 'reproduction'" class="space-y-4 sm:space-y-6">
           <BreedingHistoryTable :cow-id="cow.id" />
           
           <!-- Optional: Add a quick record breeding button or form if needed, 
                but the history table is the priority here -->
-          <div class="bg-white shadow rounded-lg p-5">
+          <div class="rounded-lg bg-white p-3 shadow-sm sm:p-4">
              <div class="flex items-center justify-between">
                 <div>
                    <h4 class="text-sm font-medium text-gray-900">Record New Attempt</h4>
@@ -220,116 +168,116 @@
         <!-- Milk Production Tab -->
         <div v-if="activeTab === 'milk'">
           <!-- Stats Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div class="bg-white shadow rounded-lg p-5">
+          <div class="mb-6 grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
+            <div class="rounded-lg bg-white p-3 shadow-sm sm:p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm text-gray-600">Last 7 Days</p>
                   <p class="text-2xl font-bold text-gray-900">{{ milkStats.last7Days }} L</p>
                 </div>
-                <Icon name="lucide:calendar-days" class="w-10 h-10 text-gray-600" />
+                <Icon name="lucide:calendar-days" class="h-6 w-6 text-gray-600 sm:h-8 sm:w-8" />
               </div>
             </div>
 
-            <div class="bg-white shadow rounded-lg p-5">
+            <div class="rounded-lg bg-white p-3 shadow-sm sm:p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm text-gray-600">Last 30 Days</p>
                   <p class="text-2xl font-bold text-gray-900">{{ milkStats.last30Days }} L</p>
                 </div>
-                <Icon name="lucide:calendar" class="w-10 h-10 text-gray-600" />
+                <Icon name="lucide:calendar" class="h-6 w-6 text-gray-600 sm:h-8 sm:w-8" />
               </div>
             </div>
 
-            <div class="bg-white shadow rounded-lg p-5">
+            <div class="rounded-lg bg-white p-3 shadow-sm sm:p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm text-gray-600">Daily Average</p>
                   <p class="text-2xl font-bold text-gray-900">{{ milkStats.average }} L</p>
                 </div>
-                <Icon name="lucide:trending-up" class="w-10 h-10 text-gray-600" />
+                <Icon name="lucide:trending-up" class="h-6 w-6 text-gray-600 sm:h-8 sm:w-8" />
               </div>
             </div>
           </div>
 
           <!-- Production History -->
-          <div class="bg-white shadow rounded-lg">
-            <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 class="text-lg font-medium text-gray-900">Production Records</h3>
+          <div class="rounded-lg bg-white shadow-sm">
+            <div class="flex items-center justify-between border-b border-gray-200 px-3 py-3 sm:px-4 sm:py-4">
+              <h3 class="text-sm font-medium text-gray-900 sm:text-base">Production Records</h3>
               <NuxtLink
                 to="/milk-production"
-                class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-700 hover:bg-gray-800"
+                class="inline-flex items-center rounded-md border border-transparent bg-gray-700 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800"
               >
                 Add Record
               </NuxtLink>
             </div>
-            <div class="px-5 py-5">
-              <div v-if="loadingMilk" class="text-center py-8">
+            <div class="p-3 sm:p-4">
+              <div v-if="loadingMilk" class="py-6 text-center sm:py-8">
                 <p class="text-sm text-gray-500">Loading production records...</p>
               </div>
-              <div v-else-if="milkRecords.length === 0" class="text-center py-8">
-                <Icon name="lucide:milk-off" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <div v-else-if="milkRecords.length === 0" class="py-6 text-center sm:py-8">
+                <Icon name="lucide:milk-off" class="mx-auto mb-3 h-12 w-12 text-gray-300" />
                 <p class="text-sm text-gray-500">No production records yet</p>
                 <NuxtLink
                   to="/milk-production"
-                  class="mt-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-700 hover:bg-gray-800"
+                  class="mt-3 inline-flex items-center rounded-md border border-transparent bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
                 >
                   Add First Record
                 </NuxtLink>
               </div>
               <div v-else>
                 <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                  <thead class="bg-gray-50">
-                    <tr>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div class="flex items-center gap-1">
-                          <Icon name="lucide:sunrise" class="w-4 h-4" />
-                          Morning
-                        </div>
-                      </th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div class="flex items-center gap-1">
-                          <Icon name="lucide:sun" class="w-4 h-4" />
-                          Midday
-                        </div>
-                      </th>
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        <div class="flex items-center gap-1">
-                          <Icon name="lucide:sunset" class="w-4 h-4" />
-                          Evening
-                        </div>
-                      </th>
-                      <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="record in milkRecords" :key="record.id" class="hover:bg-gray-50">
-                      <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {{ formatDate(record.production_date) }}
-                      </td>
-                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                        {{ record.morning_yield || 0 }} L
-                      </td>
-                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                        {{ record.midday_yield || 0 }} L
-                      </td>
-                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                        {{ record.evening_yield || 0 }} L
-                      </td>
-                      <td class="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900">
-                        {{ record.total_yield }} L
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Date</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                          <div class="flex items-center gap-1">
+                            <Icon name="lucide:sunrise" class="h-4 w-4" />
+                            Morning
+                          </div>
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                          <div class="flex items-center gap-1">
+                            <Icon name="lucide:sun" class="h-4 w-4" />
+                            Midday
+                          </div>
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                          <div class="flex items-center gap-1">
+                            <Icon name="lucide:sunset" class="h-4 w-4" />
+                            Evening
+                          </div>
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-bold uppercase text-gray-500">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                      <tr v-for="record in milkRecords" :key="record.id" class="hover:bg-gray-50">
+                        <td class="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
+                          {{ formatDate(record.production_date) }}
+                        </td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                          {{ record.morning_yield || 0 }} L
+                        </td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                          {{ record.midday_yield || 0 }} L
+                        </td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                          {{ record.evening_yield || 0 }} L
+                        </td>
+                        <td class="whitespace-nowrap px-4 py-3 text-sm font-bold text-gray-900">
+                          {{ record.total_yield }} L
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
     </div>
 
     <EmptyState
@@ -348,12 +296,12 @@
 </template>
 
 <script setup>
-import { getHealthRecordTypeColor as getRecordTypeColor } from '~/utils/statusHelpers'
 import { getAgeParts } from '~/utils/formatDate'
 
 const { $supabase } = useNuxtApp()
 const { getCowById, getStatusClass } = useCows()
 const route = useRoute()
+const router = useRouter()
 const cow = ref(null)
 
 // Restore last active tab if user navigated back from reports page
@@ -406,7 +354,6 @@ const formatAge = (birth) => {
   }
 }
 
-const healthRecords = ref([])
 const milkRecords = ref([])
 const loading = ref(true)
 const loadingMilk = ref(false)
@@ -488,16 +435,25 @@ const handleEdit = () => {
   navigateTo(`/edit-cow/${route.params.id}`)
 }
 
+const goBack = () => {
+  router.back()
+}
+
 
 async function loadMilkProduction() {
   loadingMilk.value = true
   
   try {
+    const cowId = cow.value?.id
+    if (!cowId) {
+      milkRecords.value = []
+      return
+    }
     // Fetch milk production records
     const { data: records } = await $supabase
       .from('milk_production')
       .select('*')
-      .eq('cow_id', route.params.id)
+      .eq('cow_id', cowId)
       .order('production_date', { ascending: false })
       .limit(30)
 
@@ -541,15 +497,7 @@ onMounted(async () => {
     globalThis.window.addEventListener('pageshow', restoreTab)
   }
 
-  // Fetch recent health records
-  const { data: records } = await $supabase
-    .from('health_records')
-    .select('*')
-    .eq('cow_id', route.params.id)
-    .order('record_date', { ascending: false })
-    .limit(5)
-
-  healthRecords.value = records || []
+  // Health records live on /cow-records/:id (see goToRecords('health'))
   
   // Load milk production data
   await loadMilkProduction()
@@ -565,7 +513,8 @@ const goToRecords = (tab = 'health') => {
   } catch (e) {
     console.warn('goToRecords: sessionStorage set failed', e)
   }
-  return navigateTo(`/cow-records/${route.params.id}`)
+  const key = (cow.value?.name ? encodeURIComponent(cow.value.name) : String(route.params.id))
+  return navigateTo(`/cow-records/${key}`)
 }
 
 onBeforeUnmount(() => {

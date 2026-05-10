@@ -1,35 +1,46 @@
 <template>
-  <PageContainer size="narrow">
-    <PageHeader title="Edit Cow" :subtitle="form.name ? `Update details for ${form.name}` : 'Update cow details'" />
+  <PageContainer size="wide">
+    <div class="mx-auto w-[calc(100%-1.5rem)] max-w-5xl">
+      <PageHeader title="Edit Cow" :subtitle="form.name ? `Update details for ${form.name}` : 'Update cow details'" />
 
-    <LoadingState v-if="loading" text="Loading cow details..." />
+      <LoadingState v-if="loading" text="Loading cow details..." />
 
-    <CowForm v-else v-model:form="form" :is-edit="true" @submit="handleSubmit">
-      <template #actions>
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <UButton
-            type="button"
-            color="error"
-            variant="soft"
-            :loading="deleting"
-            :disabled="saving || deleting"
-            icon="i-lucide-trash-2"
-            @click="handleDelete"
-          >
-            Delete cow
-          </UButton>
+      <CowForm v-else v-model:form="form" :is-edit="true" @submit="handleSubmit">
+        <template #actions>
+          <div class="mt-2 space-y-3 sm:mt-4">
+            <!-- Delete button section -->
+            <div class="flex justify-start">
+              <UButton
+                type="button"
+                color="error"
+                variant="soft"
+                :loading="deleting"
+                :disabled="saving || deleting"
+                icon="i-lucide-trash-2"
+                @click="handleDelete"
+              >
+                Delete cow
+              </UButton>
+            </div>
 
-          <div class="flex flex-col gap-2 sm:flex-row">
-            <UButton :to="`/cow/${route.params.id}`" variant="outline" color="neutral" :disabled="saving || deleting">
-              Cancel
-            </UButton>
-            <UButton type="submit" color="primary" :loading="saving" :disabled="saving || deleting">
-              Update cow
-            </UButton>
+            <!-- Action buttons -->
+            <div class="flex flex-row justify-between gap-3">
+              <UButton :to="`/cow/${cowId}`" variant="outline" color="neutral" :disabled="saving || deleting">
+                Cancel
+              </UButton>
+              <UButton
+                type="submit"
+                class="bg-green-600 hover:bg-green-700 text-white"
+                :loading="saving"
+                :disabled="saving || deleting"
+              >
+                Update cow
+              </UButton>
+            </div>
           </div>
-        </div>
-      </template>
-    </CowForm>
+        </template>
+      </CowForm>
+    </div>
   </PageContainer>
 </template>
 
@@ -51,8 +62,10 @@ const form = ref<CowFormData>({
   birth_date: '',
   sire: '',
   dam: '',
+  genetic_line: '',
   notes: ''
 })
+const cowId = ref<string>('')
 const loading = ref(true)
 const saving = ref(false)
 const deleting = ref(false)
@@ -75,6 +88,7 @@ onMounted(async () => {
     return navigateTo('/cows')
   }
 
+  cowId.value = cow.id
   form.value = {
     name: cow.name || '',
     breed: cow.breed || '',
@@ -86,6 +100,7 @@ onMounted(async () => {
     birth_date: cow.birth_date || '',
     sire: cow.sire || '',
     dam: cow.dam || '',
+    genetic_line: cow.genetic_line || '',
     notes: cow.notes || ''
   }
   loading.value = false
@@ -94,7 +109,7 @@ onMounted(async () => {
 const handleSubmit = async () => {
   saving.value = true
   try {
-    const updated = await updateCow(String(route.params.id), {
+    const updated = await updateCow(cowId.value, {
       ...form.value,
       age: form.value.age ? Number.parseFloat(form.value.age).toString() : null,
       weight: form.value.weight ? Number.parseFloat(form.value.weight).toString() : null
@@ -102,7 +117,7 @@ const handleSubmit = async () => {
 
     if (!updated) throw new Error('Failed to update cow')
     toast.success('Cow updated successfully')
-    await navigateTo(`/cow/${route.params.id}`)
+    await navigateTo(`/cow/${cowId.value}`)
   } catch (error) {
     console.error('Update error:', error)
     toast.error((error as Error).message)
@@ -118,7 +133,7 @@ const handleDelete = async () => {
 
   deleting.value = true
   try {
-    const ok = await deleteCow(String(route.params.id))
+    const ok = await deleteCow(cowId.value)
     if (!ok) throw new Error('Failed to delete cow')
     toast.success('Cow deleted successfully')
     await navigateTo('/cows')

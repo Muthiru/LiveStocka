@@ -1,13 +1,13 @@
 <template>
-  <div class="container mx-auto p-4 md:p-6">
-    <div class="mb-6 md:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+  <div class="mx-auto w-[calc(100%-1.5rem)] max-w-7xl py-4 sm:w-full sm:py-6">
+    <div class="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <h1 class="text-2xl md:text-3xl font-bold mb-2">Milk Production Tracking</h1>
         <p class="text-gray-600 text-sm md:text-base">Record and monitor daily milk yields for your herd</p>
       </div>
       <NuxtLink
         to="/bulk-milk-entry"
-        class="inline-flex items-center justify-center px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition font-medium text-sm md:text-base"
+        class="inline-flex items-center justify-center rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800 sm:text-base"
       >
         <Icon name="lucide:clipboard-list" class="w-5 h-5 mr-2" />
         Bulk Entry
@@ -15,8 +15,8 @@
     </div>
 
     <!-- Add New Entry Form -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-      <h2 class="text-xl font-semibold mb-4">Record Milk Production</h2>
+    <div class="mb-8 rounded-lg bg-white p-3 shadow-sm sm:p-4">
+      <h2 class="mb-4 text-base font-semibold text-gray-900 sm:text-lg">Record Milk Production</h2>
       
       <form class="space-y-4" @submit.prevent="addProduction">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -190,72 +190,72 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="mb-8 grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-4">
+      <div class="rounded-lg bg-white p-3 shadow-sm sm:p-4">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600 mb-1">Today's Total</p>
             <p class="text-2xl font-bold text-gray-900">{{ stats.todayTotal }} L</p>
           </div>
-          <Icon name="lucide:droplets" class="w-10 h-10 text-gray-600" />
+          <Icon name="lucide:droplets" class="h-6 w-6 text-gray-600 sm:h-8 sm:w-8" />
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="rounded-lg bg-white p-3 shadow-sm sm:p-4">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600 mb-1">This Week</p>
             <p class="text-2xl font-bold text-gray-900">{{ stats.weekTotal }} L</p>
           </div>
-          <Icon name="lucide:calendar-days" class="w-10 h-10 text-gray-600" />
+          <Icon name="lucide:calendar-days" class="h-6 w-6 text-gray-600 sm:h-8 sm:w-8" />
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="rounded-lg bg-white p-3 shadow-sm sm:p-4">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600 mb-1">This Month</p>
             <p class="text-2xl font-bold text-gray-900">{{ stats.monthTotal }} L</p>
           </div>
-          <Icon name="lucide:calendar" class="w-10 h-10 text-gray-600" />
+          <Icon name="lucide:calendar" class="h-6 w-6 text-gray-600 sm:h-8 sm:w-8" />
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="rounded-lg bg-white p-3 shadow-sm sm:p-4">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600 mb-1">Avg. per Cow</p>
             <p class="text-2xl font-bold text-gray-900">{{ stats.avgPerCow }} L</p>
           </div>
-          <Icon name="lucide:trending-up" class="w-10 h-10 text-gray-600" />
+          <Icon name="lucide:trending-up" class="h-6 w-6 text-gray-600 sm:h-8 sm:w-8" />
         </div>
       </div>
     </div>
 
     <!-- Daily Totals Summary (All Cows) -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-      <h2 class="text-xl font-semibold mb-4">Today's Herd Production Summary</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
-          <Icon name="lucide:sunrise" class="w-8 h-8 text-amber-600 mx-auto mb-2" />
+    <div class="mb-8 rounded-lg bg-white p-3 shadow-sm sm:p-4">
+      <h2 class="mb-4 text-base font-semibold text-gray-900 sm:text-lg">Today's Herd Production Summary</h2>
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-4 sm:gap-4">
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-center sm:p-4">
+          <Icon name="lucide:sunrise" class="mx-auto mb-2 h-6 w-6 text-amber-600 sm:h-8 sm:w-8" />
           <p class="text-sm text-gray-600 mb-1">Morning Total</p>
           <p class="text-xl font-bold text-amber-700">{{ dailyTotals.morning }} L</p>
           <p class="text-xs text-gray-500 mt-1">{{ dailyTotals.morningCount }} cows</p>
         </div>
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-          <Icon name="lucide:sun" class="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+        <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-3 text-center sm:p-4">
+          <Icon name="lucide:sun" class="mx-auto mb-2 h-6 w-6 text-yellow-600 sm:h-8 sm:w-8" />
           <p class="text-sm text-gray-600 mb-1">Midday Total</p>
           <p class="text-xl font-bold text-yellow-700">{{ dailyTotals.midday }} L</p>
           <p class="text-xs text-gray-500 mt-1">{{ dailyTotals.middayCount }} cows</p>
         </div>
-        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
-          <Icon name="lucide:sunset" class="w-8 h-8 text-orange-600 mx-auto mb-2" />
+        <div class="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center sm:p-4">
+          <Icon name="lucide:sunset" class="mx-auto mb-2 h-6 w-6 text-orange-600 sm:h-8 sm:w-8" />
           <p class="text-sm text-gray-600 mb-1">Evening Total</p>
           <p class="text-xl font-bold text-orange-700">{{ dailyTotals.evening }} L</p>
           <p class="text-xs text-gray-500 mt-1">{{ dailyTotals.eveningCount }} cows</p>
         </div>
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-          <Icon name="lucide:milk" class="w-8 h-8 text-green-600 mx-auto mb-2" />
+        <div class="rounded-lg border border-green-200 bg-green-50 p-3 text-center sm:p-4">
+          <Icon name="lucide:milk" class="mx-auto mb-2 h-6 w-6 text-green-600 sm:h-8 sm:w-8" />
           <p class="text-sm text-gray-600 mb-1">Grand Total</p>
           <p class="text-xl font-bold text-green-700">{{ dailyTotals.total }} L</p>
           <p class="text-xs text-gray-500 mt-1">All sessions</p>

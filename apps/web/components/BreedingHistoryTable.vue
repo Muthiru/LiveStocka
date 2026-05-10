@@ -93,6 +93,37 @@ interface SupabaseAttempt {
   cow_id?: string | null
 }
 
+interface CowIdRow {
+  id: string
+}
+
+const isUuid = (val?: string | null) => {
+  if (!val) return false
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val)
+}
+
+const resolveCowId = async (rawId: string) => {
+  if (isUuid(rawId)) return rawId
+  // Try to resolve by name or tag
+  try {
+    const query = $supabase
+      .from('cows')
+      .select('id')
+      .or(`name.eq.${rawId},tag_id.eq.${rawId}`)
+      .limit(1) as unknown as {
+        maybeSingle: () => Promise<{ data: CowIdRow | null; error: unknown }>
+      }
+
+    const { data, error: qErr } = await query.maybeSingle()
+    if (qErr) throw qErr
+    const row = data as CowIdRow | null
+    if (row?.id) return row.id
+  } catch (err) {
+    console.debug('Failed to resolve cow id from name/tag:', err)
+  }
+  return rawId
+}
+
 const fetchHistory = async () => {
   if (!props.cowId) {
     rows.value = []
@@ -104,8 +135,9 @@ const fetchHistory = async () => {
   loading.value = true
   error.value = null
   try {
+    const cowIdResolved = await resolveCowId(props.cowId)
     const base = useRuntimeConfig().public.supabaseUrl
-    const url = `${base}/functions/v1/readService/breeding_history?cow_id=${props.cowId}`
+    const url = `${base}/functions/v1/readService/breeding_history?cow_id=${cowIdResolved}`
     const res = await $fetch<{ attempts?: ApiAttempt[] }>(url)
     const attempts = (res?.attempts || []) as ApiAttempt[]
     rows.value = attempts.map(r => ({

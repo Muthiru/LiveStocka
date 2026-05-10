@@ -9,16 +9,16 @@
     :ui="{
       overlay: 'z-[1000] bg-slate-900/20',
       content: 'z-[1001] bg-slate-50 flex flex-col',
-      body: 'flex-1 overflow-hidden p-4 sm:p-6'
+      body: 'flex-1 overflow-hidden p-3 sm:p-6'
     }"
     @update:open="setOpen"
   >
     <template #body>
       <div class="mx-auto h-full w-full max-w-5xl">
-        <div class="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-6">
+        <div class="flex h-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-3 py-3 sm:px-4 sm:py-4">
             <div class="min-w-0">
-              <div class="text-base font-semibold text-slate-900 sm:text-lg">
+              <div class="text-sm font-semibold text-slate-900 sm:text-base">
                 {{ isEdit ? 'Edit health record' : 'Add health record' }}
               </div>
               <div class="mt-1 text-sm text-slate-500">
@@ -37,10 +37,10 @@
             />
           </div>
 
-          <div class="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
-            <form id="health-record-form" class="space-y-6" @submit.prevent="handleSubmit">
+          <div class="flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-5">
+            <form id="health-record-form" class="space-y-4 sm:space-y-6" @submit.prevent="handleSubmit">
             <!-- Cow Selection and Record Type -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label for="cow_id" class="block text-sm font-medium text-gray-700 mb-2">
                   Cow <span class="text-red-500">*</span>
@@ -82,8 +82,8 @@
             </div>
 
             <!-- Title and Date/Time -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+              <div class="col-span-2 md:col-span-1">
                 <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
                   Title <span class="text-red-500">*</span>
                 </label>
@@ -139,9 +139,9 @@
             </div>
 
             <!-- Type-specific fields: Vaccination -->
-            <div v-if="formData.record_type === 'vaccination'" class="space-y-4 p-4 bg-blue-50 rounded-lg">
+            <div v-if="formData.record_type === 'vaccination'" class="space-y-3 rounded-lg bg-blue-50 p-3 sm:space-y-4 sm:p-4">
               <h4 class="font-medium text-gray-900">Vaccination Details</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label for="vaccine_name" class="block text-sm font-medium text-gray-700 mb-2">Vaccine Name</label>
                   <input
@@ -162,7 +162,7 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   >
                 </div>
-                <div>
+                <div class="col-span-2">
                   <label for="administered_by_vacc" class="block text-sm font-medium text-gray-700 mb-2">Administered By</label>
                   <input
                     id="administered_by_vacc"
@@ -176,10 +176,10 @@
             </div>
 
             <!-- Type-specific fields: Medication -->
-            <div v-if="formData.record_type === 'medication'" class="space-y-4 p-4 bg-purple-50 rounded-lg">
+            <div v-if="formData.record_type === 'medication'" class="space-y-3 rounded-lg bg-purple-50 p-3 sm:space-y-4 sm:p-4">
               <h4 class="font-medium text-gray-900">Medication Details</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                <div class="col-span-2 md:col-span-1">
                   <label for="medication_name" class="block text-sm font-medium text-gray-700 mb-2">Medication Name</label>
                   <input
                     id="medication_name"
@@ -199,7 +199,7 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   >
                 </div>
-                <div>
+                <div class="col-span-2">
                   <label for="administered_by_med" class="block text-sm font-medium text-gray-700 mb-2">Administered By</label>
                   <input
                     id="administered_by_med"
@@ -213,9 +213,9 @@
             </div>
 
             <!-- Type-specific fields: Disease/Treatment -->
-            <div v-if="['disease', 'treatment'].includes(formData.record_type)" class="space-y-4 p-4 bg-red-50 rounded-lg">
+            <div v-if="['disease', 'treatment'].includes(formData.record_type)" class="space-y-3 rounded-lg bg-red-50 p-3 sm:space-y-4 sm:p-4">
               <h4 class="font-medium text-gray-900">{{ formData.record_type === 'disease' ? 'Disease' : 'Treatment' }} Details</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label for="disease_name" class="block text-sm font-medium text-gray-700 mb-2">Disease Name</label>
                   <input
@@ -240,7 +240,7 @@
                     <option value="critical">Critical</option>
                   </select>
                 </div>
-                <div class="md:col-span-2">
+                <div class="col-span-2 md:col-span-2">
                   <label for="symptoms" class="block text-sm font-medium text-gray-700 mb-2">Symptoms</label>
                   <textarea
                     id="symptoms"
@@ -250,7 +250,7 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
-                <div class="md:col-span-2">
+                <div class="col-span-2 md:col-span-2">
                   <label for="diagnosis" class="block text-sm font-medium text-gray-700 mb-2">Diagnosis</label>
                   <textarea
                     id="diagnosis"
@@ -260,7 +260,7 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
-                <div class="md:col-span-2">
+                <div class="col-span-2 md:col-span-2">
                   <label for="treatment_plan" class="block text-sm font-medium text-gray-700 mb-2">Treatment Plan</label>
                   <textarea
                     id="treatment_plan"
@@ -276,7 +276,7 @@
             <!-- Veterinarian Information -->
             <div class="space-y-4 p-4 bg-gray-50 rounded-lg">
               <h4 class="font-medium text-gray-900">Veterinarian Information (Optional)</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label for="vet_name" class="block text-sm font-medium text-gray-700 mb-2">Vet Name</label>
                   <input
@@ -297,7 +297,7 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                   >
                 </div>
-                <div>
+                <div class="col-span-2">
                   <label for="next_checkup_date" class="block text-sm font-medium text-gray-700 mb-2">
                     Next Checkup Date
                     <span class="text-gray-400 font-normal text-xs ml-1">(for follow-up alerts)</span>
@@ -313,8 +313,8 @@
             </div>
 
             <!-- Cost and Notes -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="col-span-2 md:col-span-1">
                 <label for="cost" class="block text-sm font-medium text-gray-700 mb-2">Cost</label>
                 <input
                   id="cost"
@@ -346,7 +346,13 @@
               <UButton type="button" color="neutral" variant="outline" :disabled="saving" @click="setOpen(false)">
                 Cancel
               </UButton>
-              <UButton type="submit" form="health-record-form" color="primary" :loading="saving">
+              <UButton
+                type="submit"
+                form="health-record-form"
+                color="neutral"
+                :loading="saving"
+                class="bg-green-600 text-white hover:bg-green-700"
+              >
                 {{ isEdit ? 'Update record' : 'Add record' }}
               </UButton>
             </div>

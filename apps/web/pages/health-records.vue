@@ -2,11 +2,12 @@
   <PageContainer size="wide">
     <PageHeader title="Health Records" subtitle="Select a cow to view and manage health records" />
 
+    <div class="mx-auto w-[calc(100%-1.5rem)] space-y-6 md:w-full">
       <!-- Alerts Section -->
       <div v-if="overdueVaccinations.length > 0" class="mb-6">
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="rounded-lg border border-red-200 bg-red-50 p-3 sm:p-4 shadow-sm">
           <div class="flex items-start gap-3">
-            <Icon name="lucide:alert-circle" class="w-5 h-5 text-red-600 mt-0.5" />
+            <Icon name="lucide:alert-circle" class="mt-0.5 h-5 w-5 text-red-600" />
             <div class="flex-1">
               <h3 class="font-semibold text-red-900">Overdue Checkups</h3>
               <p class="text-sm text-red-700 mt-1">
@@ -23,35 +24,58 @@
       </div>
 
       <!-- Search and Filter -->
-      <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search by name or tag..."
-            class="form-input"
-          >
-          <select v-model="filterStatus" class="form-select">
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="pregnant">Pregnant</option>
-            <option value="dry">Dry</option>
-            <option value="sold">Sold</option>
-          </select>
-          <select v-model="itemsPerPage" class="form-select">
-            <option :value="5">5 per page</option>
-            <option :value="10">10 per page</option>
-            <option :value="25">25 per page</option>
-            <option :value="50">50 per page</option>
-          </select>
+      <div class="mb-6 rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+        <div class="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-4 items-end">
+          <div>
+            <label for="hr-search" class="sr-only">Search</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+	              <input
+	                id="hr-search"
+	                v-model="searchQuery"
+	                type="text"
+	                placeholder="Search title or description"
+	                class="block w-full rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
+	              >
+	            </div>
+	          </div>
+
+          <div>
+            <label for="hr-type" class="sr-only">Type</label>
+            <select id="hr-type" v-model="filterStatus" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15">
+              <option value="">All types</option>
+              <option value="vaccine">Vaccination</option>
+              <option value="treatment">Treatment</option>
+              <option value="checkup">Checkup</option>
+            </select>
+          </div>
+
+	          <div>
+	            <label for="hr-from" class="sr-only">From date</label>
+	            <input id="hr-from" type="date" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15">
+	          </div>
+
+          <div>
+            <label for="hr-perpage" class="sr-only">Per page</label>
+            <select id="hr-perpage" v-model="itemsPerPage" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15">
+              <option :value="5">5 per page</option>
+              <option :value="10">10 per page</option>
+              <option :value="25">25 per page</option>
+              <option :value="50">50 per page</option>
+            </select>
+          </div>
         </div>
       </div>
 
       <!-- Cows Data Table -->
-      <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="overflow-hidden rounded-lg bg-white shadow-sm">
         <LoadingState v-if="loading" text="Loading cows..." />
 
-        <div v-else-if="filteredCows.length === 0" class="p-6">
+        <div v-else-if="filteredCows.length === 0" class="p-3 sm:p-4">
           <EmptyState
             title="No cows found"
             description="Try adjusting your search or filter criteria."
@@ -138,7 +162,7 @@
           </div>
 
           <!-- Pagination -->
-          <div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
+          <div class="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-3 py-3 sm:px-4 sm:py-4">
             <div class="text-sm text-gray-700">
               Showing <span class="font-medium">{{ startIndex + 1 }}</span> to
               <span class="font-medium">{{ Math.min(endIndex, filteredCows.length) }}</span> of
@@ -197,6 +221,7 @@
       :preselected-cow-id="preselectedCowId"
       @save="handleSave"
     />
+    </div>
   </PageContainer>
 </template>
 

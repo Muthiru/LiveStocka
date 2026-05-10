@@ -118,7 +118,30 @@ export const useCows = () => {
   }
 
   const getCowById = async (id: string): Promise<Cow | null> => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
     try {
+      // If the route uses a name key, prefer direct PostgREST (edge function expects UUID).
+      if (!isUuid) {
+        // Use a list query (not `single/maybeSingle`) to avoid hard-failing when duplicates exist.
+        const tryTag = await ($supabase.from('cows') as any)
+          .select('*')
+          .eq('tag_id', id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+        if (tryTag?.error) throw tryTag.error
+        if (Array.isArray(tryTag?.data) && tryTag.data[0]) return tryTag.data[0] as Cow
+
+        const tryName = await ($supabase.from('cows') as any)
+          .select('*')
+          .ilike('name', id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+        if (tryName?.error) throw tryName.error
+        if (Array.isArray(tryName?.data) && tryName.data[0]) return tryName.data[0] as Cow
+
+        return null
+      }
+
       const token = await getAuthToken()
       if (!token) throw new Error('User not authenticated')
 
@@ -132,24 +155,14 @@ export const useCows = () => {
 
       return data?.cow || null
     } catch (e: any) {
-      // Fallback: in local dev, edge functions may not be reachable; try direct PostgREST.
       try {
+        // Fallback: if edge functions are unreachable, try direct PostgREST.
         console.error('Error fetching cow via edge function:', e)
-        const msg = String(e?.message || '')
-        if (msg.includes('Edge Function') || msg.includes('Functions')) {
-          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
-
-          let query = $supabase.from('cows').select('*');
-          if (isUuid) {
-            query = query.eq('id', id).single();
-          } else {
-            query = query.eq('name', id).limit(1).maybeSingle();
-          }
-
-          const { data, error: directErr } = await query;
-          if (directErr) throw directErr
-          return (data as Cow) || null
-        }
+        const { data, error: directErr } = isUuid
+          ? await ($supabase.from('cows') as any).select('*').eq('id', id).single()
+          : await ($supabase.from('cows') as any).select('*').eq('name', id).limit(1).maybeSingle()
+        if (directErr) throw directErr
+        return (data as Cow) || null
       } catch (fallbackErr) {
         console.error('Fallback direct cow fetch failed:', fallbackErr)
       }

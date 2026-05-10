@@ -153,6 +153,11 @@ function buildHealthRecordUpdates(body: any) {
         updates.next_due_date = body.next_checkup_date || null;
     }
 
+    // Also handle next_due_date directly for consistency
+    if (body.next_due_date !== undefined) {
+        updates.next_due_date = body.next_due_date || null;
+    }
+
     // Add type-specific fields
     addTypeSpecificUpdates(updates, body);
 

@@ -26,9 +26,6 @@
       </template>
       <template #actions>
         <div class="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-2 lg:grid-cols-4">
-          <UButton color="primary" icon="i-lucide-plus" @click="openAdd">
-            Add record
-          </UButton>
           <UButton variant="outline" color="neutral" icon="i-lucide-download" @click="exportCSV">
             Export CSV
           </UButton>
@@ -45,78 +42,89 @@
       </template>
     </PageHeader>
 
-    <!-- Tabs bar similar to cow page -->
-    <div class="mb-6 border-b border-slate-200">
-      <nav class="-mb-px flex gap-6 overflow-x-auto">
-              <button
-                :class="activeTab === 'overview' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
-                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
-                @click.prevent="goToCow('overview')"
-              >
-                Overview
-              </button>
-              <button
-                :class="activeTab === 'health' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
-                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
-                @click.prevent="activeTab = 'health'"
-              >
-                Health
-              </button>
-              <button
-                :class="activeTab === 'reproduction' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
-                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
-                @click.prevent="activeTab = 'reproduction'"
-              >
-                Breeding
-              </button>
-              <button
-                :class="activeTab === 'milk' ? 'border-emerald-600 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'"
-                class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
-                @click.prevent="goToCow('milk')"
-              >
-                Milk Production
-              </button>
-            </nav>
+    <div class="mx-auto w-[calc(100%-1.5rem)] space-y-6 md:w-full">
+    <!-- Tabs bar (unified pill style) -->
+    <div class="rounded-lg border border-slate-200 bg-white shadow-sm mb-6">
+      <nav class="flex gap-2 overflow-x-auto px-3 py-2 sm:px-4">
+        <button
+          :class="activeTab === 'overview' ? 'bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+          class="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition"
+          @click.prevent="goToCow('overview')"
+        >
+          Overview
+        </button>
+        <button
+          :class="activeTab === 'health' ? 'bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+          class="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition"
+          @click.prevent="activeTab = 'health'"
+        >
+          Health
+        </button>
+        <button
+          :class="activeTab === 'reproduction' ? 'bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+          class="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition"
+          @click.prevent="activeTab = 'reproduction'"
+        >
+          Breeding
+        </button>
+        <button
+          :class="activeTab === 'milk' ? 'bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+          class="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition"
+          @click.prevent="goToCow('milk')"
+        >
+          Milk Production
+        </button>
+      </nav>
     </div>
 
-        <div v-if="activeTab === 'health'" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          <input v-model="search" type="text" placeholder="Search title or description" class="form-input">
-          <select v-model="typeFilter" class="form-select">
-            <option value="">All types</option>
-            <option value="vaccination">Vaccination</option>
-            <option value="medication">Medication</option>
-            <option value="disease">Disease</option>
-            <option value="treatment">Treatment</option>
-            <option value="checkup">Checkup</option>
-            <option value="injury">Injury</option>
-          </select>
-          <input v-model="dateFrom" type="date" class="form-input">
-          <input v-model="dateTo" type="date" class="form-input">
-          <select v-model.number="perPage" class="form-select">
-            <option :value="5">5 per page</option>
-            <option :value="10">10 per page</option>
-            <option :value="20">20 per page</option>
-            <option :value="50">50 per page</option>
-          </select>
+        <div v-if="activeTab === 'health'" class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h3 class="text-base font-semibold text-slate-900">Health Records</h3>
+            <UButton
+              type="button"
+              color="neutral"
+              variant="solid"
+              icon="i-lucide-plus"
+              class="w-full bg-green-600 text-white hover:bg-green-700 sm:w-auto"
+              @click.prevent.stop="openAdd"
+            >
+              Add record
+            </UButton>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-5">
+            <input v-model="search" type="text" placeholder="Search title or description" class="form-input">
+            <select v-model="typeFilter" class="form-select">
+              <option value="">All types</option>
+              <option value="vaccination">Vaccination</option>
+              <option value="medication">Medication</option>
+              <option value="disease">Disease</option>
+              <option value="treatment">Treatment</option>
+              <option value="checkup">Checkup</option>
+              <option value="injury">Injury</option>
+            </select>
+            <input v-model="dateFrom" type="date" class="form-input">
+            <input v-model="dateTo" type="date" class="form-input">
+            <select v-model.number="perPage" class="form-select">
+              <option :value="5">5 per page</option>
+              <option :value="10">10 per page</option>
+              <option :value="20">20 per page</option>
+              <option :value="50">50 per page</option>
+            </select>
+          </div>
         </div>
 
-        <div v-if="activeTab === 'health'" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div v-if="activeTab === 'health'" class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm p-4">
           <LoadingState v-if="loading" text="Loading records..." />
           <EmptyState
             v-else-if="filtered.length === 0"
             icon="lucide:heart-pulse"
             title="No health records"
             description="Add the first health record for this cow."
-          >
-            <template #actions>
-              <UButton color="primary" icon="i-lucide-plus" @click="openAdd">
-                Add record
-              </UButton>
-            </template>
-          </EmptyState>
-          <div v-else class="p-4">
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div v-for="rec in paginated" :key="rec.id" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          />
+            <div v-else>
+            <div class="grid grid-cols-1 gap-3 lg:grid-cols-2 sm:gap-4">
+              <div v-for="rec in paginated" :key="rec.id" class="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2">
@@ -171,7 +179,7 @@
               </div>
             </div>
           </div>
-          <div v-if="!loading && filtered.length" class="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
+          <div v-if="!loading && filtered.length" class="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-3 py-3 sm:px-4 sm:py-4">
             <div class="text-sm text-gray-700">
               <template v-if="filtered.length === 0">Showing <span class="font-medium">0</span> records</template>
               <template v-else>Showing <span class="font-medium">{{ displayStart }}</span> to <span class="font-medium">{{ displayEnd }}</span> of <span class="font-medium">{{ filtered.length }}</span> records</template>
@@ -206,8 +214,9 @@
 
         <!-- Reproduction Tab -->
         <div v-else-if="activeTab === 'reproduction'" class="space-y-6">
-           <BreedingHistoryTable :cow-id="id" />
+           <BreedingHistoryTable :cow-id="cowId" />
         </div>
+    </div>
   </PageContainer>
 </template>
 
@@ -219,8 +228,19 @@ const route = useRoute()
 const { healthRecords, fetchHealthRecords, deleteHealthRecord } = useHealthRecords()
 const { cows, fetchCows } = useCows()
 
-const id = String(route.params.id)
-const cow = computed(() => cows.value.find(c => c.id === id) as Cow | undefined)
+const safeDecode = (value: string): string => {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
+}
+
+const cowKey = computed(() => String(Array.isArray(route.params.id) ? route.params.id[0] : route.params.id))
+const decodedKey = computed(() => safeDecode(cowKey.value))
+const cow = computed(() => cows.value.find(c => c.id === decodedKey.value || c.name === decodedKey.value) as Cow | undefined)
+const cowId = computed(() => cow.value?.id || decodedKey.value)
+const cowRouteParam = computed(() => (cow.value?.name ? encodeURIComponent(cow.value.name) : cowKey.value))
 
 const search = ref('')
 const typeFilter = ref('')
@@ -269,7 +289,7 @@ onMounted(async () => {
     
     // Redirect to main cow profile for overview and milk tabs
     if (targetTab === 'overview' || targetTab === 'milk') {
-      return navigateTo(`/cow/${id}?tab=${targetTab}`)
+      return navigateTo(`/cow/${cowRouteParam.value}?tab=${targetTab}`)
     }
     
     activeTab.value = targetTab
@@ -285,7 +305,7 @@ onMounted(async () => {
 })
 
 const filtered = computed(() => {
-  let r = healthRecords.value.filter(h => h.cow_id === id)
+  let r = healthRecords.value.filter(h => h.cow_id === cowId.value)
   if (search.value) {
     const q = search.value.toLowerCase()
     r = r.filter(x => (x.title || '').toLowerCase().includes(q) || (x.description || '').toLowerCase().includes(q))
@@ -311,7 +331,7 @@ const goToCow = (tab = 'overview') => {
   } catch (e) {
     console.warn('goToCow: sessionStorage set failed', e)
   }
-  return navigateTo(`/cow/${route.params.id}`)
+  return navigateTo(`/cow/${cowRouteParam.value}`)
 }
 
 const formatCost = (c) => {
@@ -340,7 +360,7 @@ const exportCSV = () => {
   const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  const safeName = (cow?.value?.name || id).replaceAll(/[^a-z0-9-_]/gi, '_')
+  const safeName = (cow?.value?.name || cowId.value).replaceAll(/[^a-z0-9-_]/gi, '_')
   a.href = url
   a.setAttribute('download', `cow-${safeName}-records.csv`)
   document.body.appendChild(a)

@@ -2,19 +2,20 @@
   <PageContainer size="wide">
     <PageHeader title="Breeding" subtitle="Record heats, schedule breeding, and view windows" />
 
+    <div class="mx-auto w-[calc(100%-1.5rem)] space-y-6 md:w-full">
     <!-- Info banner -->
-    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div class="mb-6 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
       <div class="text-sm font-semibold text-slate-900">Optimal Breeding Windows</div>
       <div class="mt-1 text-sm text-slate-600">Breeding windows are calculated 12–18 hours after heat detection for best conception rates.</div>
     </div>
 
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <main class="lg:col-span-2 space-y-6">
-          <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-4">
-              <h2 class="text-base font-semibold text-slate-900">Record Heat Event</h2>
+          <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-3 py-3 sm:px-4 sm:py-4">
+              <h2 class="text-sm sm:text-base font-semibold text-slate-900">Record Heat Event</h2>
             </div>
-            <div class="p-5">
+            <div class="p-3 sm:p-4">
               <div class="mb-4">
                 <label for="cow_select" class="block text-sm font-medium text-slate-700">Select Cow *</label>
                 <LoadingState v-if="cowsLoading" :boxed="false" text="Loading cows..." size="sm" />
@@ -35,7 +36,7 @@
                   v-else
                   id="cow_select"
                   v-model="selectedCowId"
-                  class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
+                  class="mt-2 block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
                 >
                   <option value="" disabled>Choose a cow...</option>
                   <option v-for="c in breedingCows" :key="c.id" :value="c.id">{{ c.name || c.tag_id }}</option>
@@ -48,40 +49,40 @@
             </div>
           </section>
 
-          <section id="breeding-form" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-4">
-              <h2 class="text-base font-semibold text-slate-900">Record Breeding Attempt</h2>
+          <section id="breeding-form" class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-3 py-3 sm:px-4 sm:py-4">
+              <h2 class="text-sm sm:text-base font-semibold text-slate-900">Record Breeding Attempt</h2>
             </div>
-            <div class="p-5">
+            <div class="p-3 sm:p-4">
               <BreedingForm :cow-id="selectedCowId" />
             </div>
           </section>
 
-          <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-5 py-4">
-              <h2 class="text-base font-semibold text-slate-900">Breeding History</h2>
+          <section class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-3 py-3 sm:px-4 sm:py-4">
+              <h2 class="text-sm sm:text-base font-semibold text-slate-900">Breeding History</h2>
             </div>
-            <div class="p-5">
+            <div class="p-3 sm:p-4">
               <BreedingHistoryTable :cow-id="selectedCowId" />
             </div>
           </section>
         </main>
 
         <aside class="space-y-6">
-          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-4 py-3">
+          <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-3 py-3 sm:px-4">
               <h3 class="text-sm font-semibold text-slate-900">Active Breeding Windows</h3>
             </div>
-            <div class="p-4">
+            <div class="p-3 sm:p-4">
               <ActiveBreedingWindows />
             </div>
           </div>
 
-          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 px-4 py-3">
+          <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div class="border-b border-slate-200 px-3 py-3 sm:px-4">
               <h3 class="text-sm font-semibold text-slate-900">Upcoming Events</h3>
             </div>
-              <div class="p-4 space-y-3 text-sm text-gray-700">
+              <div class="space-y-3 p-3 text-sm text-gray-700 sm:p-4">
                 <div v-if="(pregnancyChecks || []).length === 0 && (expectedHeats || []).length === 0" class="p-3 border rounded text-gray-500">No upcoming events.</div>
                 <template v-if="(pregnancyChecks || []).length > 0">
                   <div v-for="pc in pregnancyChecks" :key="pc.id" class="p-3 border rounded">
@@ -101,6 +102,7 @@
           </div>
         </aside>
       </div>
+    </div>
   </PageContainer>
 </template>
 

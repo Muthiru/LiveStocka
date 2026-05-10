@@ -8,9 +8,10 @@
       </template>
     </PageHeader>
 
+    <div class="mx-auto w-[calc(100%-1.5rem)] space-y-6">
       <!-- Search and Filters -->
-      <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <div class="rounded-lg border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+        <div class="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-4">
           <div class="md:col-span-2">
             <label for="search" class="sr-only">Search</label>
             <div class="relative">
@@ -24,7 +25,7 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search by name, tag ID, or breed..."
-                class="block w-full rounded-xl border border-slate-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
+                class="block w-full rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-400 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
               >
             </div>
           </div>
@@ -33,7 +34,7 @@
             <select
               id="status"
               v-model="statusFilter"
-              class="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
+              class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
             >
               <option value="">All Status</option>
               <option v-for="status in cowStatuses" :key="status.value" :value="status.value">{{ status.label }}</option>
@@ -44,7 +45,7 @@
             <select
               id="breed"
               v-model="breedFilter"
-              class="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
+              class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
             >
               <option value="">All Breeds</option>
               <option v-for="breed in allBreeds" :key="breed" :value="breed">{{ breed }}</option>
@@ -72,13 +73,13 @@
 
       <div v-else>
         <!-- Mobile list -->
-        <div class="space-y-3 md:hidden">
+        <div class="space-y-4 md:hidden">
           <button
             v-for="cow in cows"
             :key="cow.id"
             type="button"
-            class="w-full rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-emerald-500/15"
-            @click="navigateTo(`/cow/${encodeURIComponent(cow.name)}`)"
+            class="w-full rounded-lg border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-slate-300 hover:shadow-soft focus:outline-none focus:ring-4 focus:ring-emerald-500/15 sm:p-4"
+              @click="navigateTo(`/cow/${encodeURIComponent(cow.name)}`)"
           >
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
@@ -86,18 +87,18 @@
                 <p class="mt-1 text-sm text-slate-500">Tag: {{ cow.tag_id || 'N/A' }}</p>
               </div>
               <span
-                class="shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                class="shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
                 :class="getStatusClass(cow.status)"
               >
                 {{ cow.status || 'active' }}
               </span>
             </div>
-            <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div class="rounded-xl bg-slate-50 px-3 py-2">
+            <div class="mt-4 grid grid-cols-2 gap-3 text-sm sm:gap-4">
+              <div class="rounded-lg bg-slate-50 px-3 py-3">
                 <p class="text-xs font-medium text-slate-500">Breed</p>
                 <p class="mt-0.5 truncate font-medium text-slate-900">{{ cow.breed || 'Unknown' }}</p>
               </div>
-              <div class="rounded-xl bg-slate-50 px-3 py-2">
+              <div class="rounded-lg bg-slate-50 px-3 py-3">
                 <p class="text-xs font-medium text-slate-500">Age / Weight</p>
                 <p class="mt-0.5 truncate font-medium text-slate-900">
                   {{ cow.age || 'N/A' }} yrs · {{ cow.weight || 'N/A' }} kg
@@ -108,7 +109,7 @@
         </div>
 
         <!-- Desktop/tablet table -->
-        <div class="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
+        <div class="hidden overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm md:block">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -176,7 +177,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <NuxtLink
-                    :to="`/cow/${encodeURIComponent(cow.name)}`"
+                      :to="`/cow/${encodeURIComponent(cow.name)}`"
                     class="text-emerald-700 hover:text-emerald-900"
                     @click.stop
                   >
@@ -189,7 +190,7 @@
         </div>
       </div>
       <!-- Pagination -->
-      <div v-if="totalCount > 0" class="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg shadow">
+      <div v-if="totalCount > 0" class="mt-6 flex items-center justify-between rounded-lg border-t border-gray-200 bg-white px-3 py-3 shadow-sm sm:px-4 sm:py-4">
         <div class="flex flex-1 justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -257,6 +258,7 @@
           </div>
         </div>
       </div>
+    </div>
   </PageContainer>
 </template>
 
