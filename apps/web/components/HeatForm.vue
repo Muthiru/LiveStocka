@@ -1,61 +1,69 @@
 <template>
-  <form class="space-y-4 p-4 bg-white rounded shadow" @submit.prevent="onSubmit">
-    <div class="mb-3 flex items-center justify-between">
+  <form class="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" @submit.prevent="onSubmit">
+    <div class="flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div class="flex items-center gap-3">
-          <h4 class="text-sm font-semibold">Record Heat</h4>
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h4 class="text-sm font-semibold text-slate-900">Record Heat</h4>
         </div>
-      <div v-if="!cowIdProvided" class="text-sm text-gray-500">Select a cow to enable recording</div>
+      <div v-if="!cowIdProvided" class="text-sm text-slate-500">Select a cow to enable recording</div>
     </div>
 
     <div v-if="!cowIdProvided" class="space-y-2">
-      <div class="h-8 bg-gray-100 rounded animate-pulse" />
-      <div class="h-8 bg-gray-100 rounded animate-pulse" />
-      <div class="h-16 bg-gray-100 rounded animate-pulse" />
+      <div class="h-10 rounded-lg bg-slate-100 animate-pulse" />
+      <div class="h-10 rounded-lg bg-slate-100 animate-pulse" />
+      <div class="h-16 rounded-lg bg-slate-100 animate-pulse" />
       <div class="flex items-center">
-        <div class="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+        <div class="h-10 w-28 rounded-lg bg-slate-200 animate-pulse" />
       </div>
     </div>
 
     <div v-else>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <label for="event_time" class="block text-sm font-medium text-gray-700">Heat Detected At *</label>
-          <input id="event_time" v-model="event_time" type="datetime-local" class="mt-1 block w-full rounded border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+          <label for="event_time" class="mb-1.5 block text-sm font-medium text-slate-700">Heat Detected At *</label>
+          <input id="event_time" v-model="event_time" type="datetime-local" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15">
         </div>
 
         <div>
-          <label for="intensity" class="block text-sm font-medium text-gray-700">Heat Intensity</label>
-          <select id="intensity" v-model="intensity" class="mt-1 block w-full rounded border-gray-300 shadow-sm">
-            <option value="low">Low</option>
-            <option value="moderate">Moderate</option>
-            <option value="strong">Strong</option>
-          </select>
+          <label for="intensity" class="mb-1.5 block text-sm font-medium text-slate-700">Heat Intensity</label>
+          <div class="relative">
+            <select id="intensity" v-model="intensity" class="block w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15">
+              <option value="low">Low</option>
+              <option value="moderate">Moderate</option>
+              <option value="strong">Strong</option>
+            </select>
+            <Icon name="lucide:chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </div>
         </div>
       </div>
 
-      <div class="mt-4">
-        <div class="text-sm font-medium text-gray-700 mb-2">Heat Signs Observed</div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <label v-for="s in signsList" :key="s" class="flex items-center gap-2 p-2 border rounded text-sm bg-white">
-            <input v-model="signs" type="checkbox" :value="s" class="form-checkbox">
-            <span class="text-sm text-gray-700">{{ s }}</span>
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+        <div class="mb-3 text-sm font-medium text-slate-700">Heat Signs Observed</div>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <label v-for="s in signsList" :key="s" class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50/40">
+            <input v-model="signs" type="checkbox" :value="s" class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+            <span>{{ s }}</span>
           </label>
         </div>
       </div>
 
-      <div class="mt-4">
-        <label for="detected_by" class="block text-sm font-medium text-gray-700">Detected By</label>
-        <input id="detected_by" v-model="detected_by" type="text" placeholder="Observer name or tag" class="mt-1 block w-full rounded border-gray-300 shadow-sm">
+      <div>
+        <label for="detected_by" class="mb-1.5 block text-sm font-medium text-slate-700">Detected By</label>
+        <input id="detected_by" v-model="detected_by" type="text" placeholder="Observer name or tag" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15">
       </div>
 
-      <div class="mt-4">
-        <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
-        <textarea id="notes" v-model="notes" rows="3" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
+      <div>
+        <label for="notes" class="mb-1.5 block text-sm font-medium text-slate-700">Notes</label>
+        <textarea id="notes" v-model="notes" rows="3" class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15" />
       </div>
 
-      <div class="flex items-center justify-between mt-4">
+      <div class="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <button :disabled="loading || !cowIdProvided" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50">
+            <button :disabled="loading || !cowIdProvided" class="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50">
             <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             <span v-if="!loading">Record Heat</span>
             <span v-else>Saving...</span>

@@ -19,7 +19,7 @@
 
         <template #actions>
           <div class="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-4">
-            <UButton variant="ghost" color="neutral" icon="i-lucide-arrow-left" class="justify-start" @click="goBack">
+            <UButton variant="ghost" color="neutral" icon="i-lucide-arrow-left" class="hidden justify-start sm:inline-flex" @click="goBack">
               Back
             </UButton>
             <UButton :to="`/family-tree?root=${cow.id}`" variant="soft" color="primary" icon="i-lucide-git-branch">
@@ -287,7 +287,7 @@
       description="We couldn't find this cow. It may have been deleted or you may not have access."
     >
       <template #actions>
-        <UButton to="/cows" variant="outline" color="neutral" icon="i-lucide-arrow-left">
+        <UButton to="/cows" variant="outline" color="neutral" icon="i-lucide-arrow-left" class="hidden sm:inline-flex">
           Back to cows
         </UButton>
       </template>

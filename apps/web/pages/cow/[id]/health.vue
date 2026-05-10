@@ -11,7 +11,7 @@
     <PageHeader title="Health Records" :subtitle="cow ? `for ${cow.name}` : undefined">
       <template #actions>
         <div class="grid w-full grid-cols-1 gap-2 sm:w-auto sm:grid-cols-2">
-          <UButton :to="`/cow/${route.params.id}`" variant="outline" color="neutral" icon="i-lucide-arrow-left">
+          <UButton :to="`/cow/${route.params.id}`" variant="outline" color="neutral" icon="i-lucide-arrow-left" class="hidden sm:inline-flex">
             Back to cow
           </UButton>
           <UButton
@@ -109,7 +109,7 @@
                     </button>
                     <button
                       type="button"
-                      class="inline-flex rounded-xl p-2 text-slate-500 transition hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+                      class="inline-flex rounded-xl p-2 text-red-600 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                       title="Delete"
                       @click="confirmDelete(record)"
                     >

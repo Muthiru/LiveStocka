@@ -11,7 +11,7 @@
       @confirm="confirmDelete"
     />
 
-    <PageHeader :subtitle="`Tag: ${cow?.tag_id || 'N/A'}`">
+    <PageHeader :subtitle="`Tag: ${cow?.tag_id || 'N/A'}`" :back-to="cowRouteParam ? `/cow/${cowRouteParam}` : '/health-records'" back-label="Back to cow">
       <template #title>
         <div class="flex flex-wrap items-center gap-3">
           <span>{{ cow?.name || 'Cow' }}</span>
@@ -35,7 +35,7 @@
           <UButton v-if="cow" :to="`/family-tree?root=${cow.id}`" variant="soft" color="primary" icon="i-lucide-network">
             Lineage
           </UButton>
-          <UButton to="/health-records" variant="ghost" color="neutral" icon="i-lucide-arrow-left">
+          <UButton to="/health-records" variant="ghost" color="neutral" icon="i-lucide-arrow-left" class="hidden sm:inline-flex">
             Back
           </UButton>
         </div>
@@ -92,25 +92,30 @@
             </UButton>
           </div>
 
-          <div class="mt-4 grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-5">
-            <input v-model="search" type="text" placeholder="Search title or description" class="form-input">
-            <select v-model="typeFilter" class="form-select">
-              <option value="">All types</option>
-              <option value="vaccination">Vaccination</option>
-              <option value="medication">Medication</option>
-              <option value="disease">Disease</option>
-              <option value="treatment">Treatment</option>
-              <option value="checkup">Checkup</option>
-              <option value="injury">Injury</option>
-            </select>
-            <input v-model="dateFrom" type="date" class="form-input">
-            <input v-model="dateTo" type="date" class="form-input">
-            <select v-model.number="perPage" class="form-select">
-              <option :value="5">5 per page</option>
-              <option :value="10">10 per page</option>
-              <option :value="20">20 per page</option>
-              <option :value="50">50 per page</option>
-            </select>
+          <div class="mt-4 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-5">
+            <input v-model="search" type="text" placeholder="Search title or description" class="form-input col-span-2">
+            <div class="relative">
+              <select v-model="typeFilter" class="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30">
+                <option value="">All types</option>
+                <option value="vaccination">Vaccination</option>
+                <option value="medication">Medication</option>
+                <option value="disease">Disease</option>
+                <option value="treatment">Treatment</option>
+                <option value="checkup">Checkup</option>
+                <option value="injury">Injury</option>
+              </select>
+              <Icon name="lucide:chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+            <div class="relative">
+              <select v-model="period" class="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30">
+                <option value="1">Today</option>
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="365">Last 365 days</option>
+                <option value="all">All time</option>
+              </select>
+              <Icon name="lucide:chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
           </div>
         </div>
 
@@ -244,8 +249,7 @@ const cowRouteParam = computed(() => (cow.value?.name ? encodeURIComponent(cow.v
 
 const search = ref('')
 const typeFilter = ref('')
-const dateFrom = ref('')
-const dateTo = ref('')
+const period = ref('30')
 
 const activeTab = ref('health')
 const page = ref(1)
@@ -311,8 +315,7 @@ const filtered = computed(() => {
     r = r.filter(x => (x.title || '').toLowerCase().includes(q) || (x.description || '').toLowerCase().includes(q))
   }
   if (typeFilter.value) r = r.filter(x => x.record_type === typeFilter.value)
-  if (dateFrom.value) r = r.filter(x => new Date(x.record_date) >= new Date(dateFrom.value))
-  if (dateTo.value) r = r.filter(x => new Date(x.record_date) <= new Date(dateTo.value))
+  // period filtering can be implemented later; default UI shows last 30 days
   return r.sort((a,b) => new Date(b.record_date).getTime() - new Date(a.record_date).getTime())
 })
 

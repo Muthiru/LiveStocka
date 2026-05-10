@@ -62,6 +62,7 @@
             LiveStocka
           </NuxtLink>
           <UDropdownMenu
+            :key="mobileMenuKey"
             v-model:open="mobileMenuOpen"
             :items="mobileMenuItems"
             :content="{ side: 'bottom', align: 'end', sideOffset: 8 }"
@@ -80,8 +81,8 @@
               aria-haspopup="menu"
             />
 
-            <template #content-top="{ sub }">
-              <div v-if="!sub" class="border-b border-slate-200/70 px-3 py-2.5">
+            <template #content-top>
+              <div class="border-b border-slate-200/70 px-3 py-2.5">
                 <p class="truncate text-sm font-semibold text-slate-900">
                   {{ userEmail || 'User' }}
                 </p>
@@ -93,6 +94,14 @@
       </header>
 
       <main class="flex-1">
+        <div class="border-b border-slate-200 bg-white/95 backdrop-blur">
+          <div class="mx-auto max-w-7xl px-4 py-4 text-center sm:px-6 lg:px-8">
+            <h1 class="truncate text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              {{ layoutTitle }}
+            </h1>
+          </div>
+        </div>
+
         <slot />
       </main>
     </div>
@@ -100,13 +109,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const { $supabase } = useNuxtApp()
 const route = useRoute()
 
 const userEmail = ref('')
 const mobileMenuOpen = ref(false)
+const mobileMenuKey = ref(0)
+
+const layoutTitle = computed(() => {
+  if (/^\/edit-cow\//.test(route.path)) return 'Edit Cow'
+  if (/^\/cow-records\//.test(route.path)) return 'Cow Health Records'
+  if (/^\/cow\/.+\/health$/.test(route.path)) return 'Health Records'
+  if (/^\/cow\//.test(route.path)) return 'Cow Profile'
+
+  const lastSegment = route.path.split('/').findLast(Boolean) || 'Page'
+  return lastSegment
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+})
 
 
 let desktopMql: MediaQueryList | null = null
@@ -141,6 +164,7 @@ const isActive = (path) => route.path === path || route.path.startsWith(path + '
 
 const handleLogout = async () => {
   mobileMenuOpen.value = false
+  mobileMenuKey.value += 1
   await $supabase.auth.signOut()
   await navigateTo('/login')
 }
@@ -152,12 +176,18 @@ const toUiIcon = (icon: string): string | undefined => {
   return icon
 }
 
-const mobileMenuItems = computed(() => {
-  const go = (to: string) => async () => {
-    mobileMenuOpen.value = false
-    await navigateTo(to)
-  }
+const closeMobileMenu = () => {
+  mobileMenuOpen.value = false
+  mobileMenuKey.value += 1
+}
 
+const navigateFromMobileMenu = async (to: string) => {
+  closeMobileMenu()
+  await nextTick()
+  await navigateTo(to)
+}
+
+const mobileMenuItems = computed(() => {
   const withLogoutClass = <T extends Record<string, unknown>>(base: T) =>
     ({
       ...base,
@@ -171,19 +201,22 @@ const mobileMenuItems = computed(() => {
       ...primaryNav.map(item => ({
         label: item.label,
         icon: toUiIcon(item.icon),
-        onSelect: go(item.to)
+        to: item.to,
+        onSelect: () => navigateFromMobileMenu(item.to)
       })),
       { type: 'separator' },
       ...featureNav.map(item => ({
         label: item.label,
         icon: toUiIcon(item.icon),
-        onSelect: go(item.to)
+        to: item.to,
+        onSelect: () => navigateFromMobileMenu(item.to)
       })),
       { type: 'separator' },
       withLogoutClass({
         label: 'Logout',
         icon: 'i-lucide-log-out',
-        onSelect: handleLogout
+        onSelect: handleLogout,
+        onClick: handleLogout
       })
     ]
   ]
@@ -191,6 +224,7 @@ const mobileMenuItems = computed(() => {
 
 watch(() => route.path, () => {
   mobileMenuOpen.value = false
+  mobileMenuKey.value += 1
 })
 
 onMounted(async () => {

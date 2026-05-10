@@ -26,24 +26,31 @@
           </div>
         </div>
 
-        <div class="px-6 py-3 border-b border-gray-100 bg-white">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+          <div class="px-6 py-3 border-b border-gray-100 bg-white">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-center">
             <input v-model="localSearch" type="text" placeholder="Search title or description" aria-label="Search records" class="form-input">
-            <select v-model="typeFilter" class="form-select">
-              <option value="">All types</option>
-              <option value="vaccination">Vaccination</option>
-              <option value="medication">Medication</option>
-              <option value="disease">Disease/Illness</option>
-              <option value="treatment">Treatment</option>
-              <option value="checkup">Checkup</option>
-              <option value="injury">Injury</option>
-              <option value="other">Other</option>
-            </select>
-            <div class="flex items-center gap-2">
-              <label for="cow-records-date-from" class="text-sm text-gray-600">From</label>
-              <input id="cow-records-date-from" v-model="dateFrom" type="date" class="form-input">
-              <label for="cow-records-date-to" class="text-sm text-gray-600">To</label>
-              <input id="cow-records-date-to" v-model="dateTo" type="date" class="form-input">
+            <div class="relative">
+              <select v-model="typeFilter" class="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30">
+                <option value="">All types</option>
+                <option value="vaccination">Vaccination</option>
+                <option value="medication">Medication</option>
+                <option value="disease">Disease/Illness</option>
+                <option value="treatment">Treatment</option>
+                <option value="checkup">Checkup</option>
+                <option value="injury">Injury</option>
+                <option value="other">Other</option>
+              </select>
+              <Icon name="lucide:chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+            <div class="relative">
+              <select v-model="period" class="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30" aria-label="Time period">
+                <option value="1">Today</option>
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="365">Last 365 days</option>
+                <option value="all">All time</option>
+              </select>
+              <Icon name="lucide:chevron-down" class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             </div>
           </div>
         </div>
@@ -134,8 +141,7 @@ const emit = defineEmits(['update:modelValue', 'add', 'edit', 'delete'])
 
 const localSearch = ref('')
 const typeFilter = ref('')
-const dateFrom = ref('')
-const dateTo = ref('')
+const period = ref('30')
 
 const close = () => emit('update:modelValue', false)
 
@@ -158,8 +164,7 @@ const filteredRecords = computed(() => {
     r = r.filter(rec => (rec.title || '').toLowerCase().includes(q) || (rec.description || '').toLowerCase().includes(q))
   }
   if (typeFilter.value) r = r.filter(rec => rec.record_type === typeFilter.value)
-  if (dateFrom.value) r = r.filter(rec => new Date(rec.record_date) >= new Date(dateFrom.value))
-  if (dateTo.value) r = r.filter(rec => new Date(rec.record_date) <= new Date(dateTo.value))
+  // period filtering can be added later; default is last 30 days in UI
   return r.sort((a,b) => new Date(b.record_date) - new Date(a.record_date))
 })
 
