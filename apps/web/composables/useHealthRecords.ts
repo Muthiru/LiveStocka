@@ -163,8 +163,14 @@ export const useHealthRecords = () => {
         }
       })
 
-      if (updateError) throw updateError
-      if (data?.error) throw new Error(data.error)
+      if (updateError) {
+        console.error('Update error:', updateError)
+        throw updateError
+      }
+      if (data?.error) {
+        console.error('Response error:', data.error, data.detail)
+        throw new Error(`${data.error}${data.detail ? ': ' + data.detail : ''}`)
+      }
 
       toast.success('Health record updated successfully')
 

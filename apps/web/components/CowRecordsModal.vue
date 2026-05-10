@@ -11,7 +11,13 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <UButton color="primary" icon="i-lucide-plus" @click="$emit('add', cow)">
+            <UButton
+              color="neutral"
+              variant="solid"
+              icon="i-lucide-plus"
+              class="bg-green-600 text-white hover:bg-green-700"
+              @click="$emit('add', cow)"
+            >
               Add record
             </UButton>
             <button class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg" aria-label="Close" @click="close">

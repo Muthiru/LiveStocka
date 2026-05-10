@@ -20,7 +20,7 @@
               <select
                 id="root-select"
                 v-model="rootCowId"
-                class="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 sm:w-72"
+                class="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-900 shadow-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 sm:w-72"
                 :disabled="loadingCows"
               >
                 <option value="" disabled>
@@ -40,7 +40,7 @@
 
         <div class="flex items-center justify-end gap-2">
           <button
-            class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
             type="button"
             @click="refresh"
           >
@@ -55,7 +55,7 @@
     <!-- Main Content -->
     <div class="relative flex flex-1 overflow-hidden">
       <!-- Canvas Area -->
-      <div class="relative flex-1 overflow-auto bg-slate-50 p-4 sm:p-8">
+      <div class="relative flex-1 overflow-auto bg-slate-50 p-3 sm:p-6">
         <ClientOnly>
           <FamilyTreeCanvas 
             v-if="rootCowId"
@@ -63,8 +63,8 @@
             :selected-id="selectedId"
             @node-click="handleNodeClick"
           />
-          <div v-else class="mx-auto flex h-full max-w-md flex-col items-center justify-center px-6 text-center text-slate-500">
-            <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+          <div v-else class="mx-auto flex h-full max-w-md flex-col items-center justify-center px-4 text-center text-slate-500 sm:px-6">
+            <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200">
               <Icon name="lucide:arrow-up-circle" class="h-8 w-8 text-slate-400" />
             </div>
             <p class="text-base font-semibold text-slate-700 sm:text-lg">Select a root cow</p>

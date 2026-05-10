@@ -8,101 +8,102 @@
       @save="handleSave"
     />
 
-    <PageHeader title="Dashboard" subtitle="Overview of your cattle management">
-      <template #actions>
-        <UButton class="w-full sm:w-auto" color="primary" icon="i-lucide-plus" @click="showAddModal = true">
-          Quick Report
-        </UButton>
-      </template>
-    </PageHeader>
+    <div class="max-w-7xl mx-auto px-4">
+      <PageHeader title="Dashboard" subtitle="Overview of your cattle management">
+        <template #actions>
+          <UButton class="w-full sm:w-auto" color="primary" icon="i-lucide-plus" @click="showAddModal = true">
+            Quick Report
+          </UButton>
+        </template>
+      </PageHeader>
 
       <!-- Stats Grid -->
-      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-        <div class="bg-white overflow-hidden shadow-sm rounded-xl relative">
-          <div class="p-6">
-            <div class="flex items-center">
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8 mt-6">
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+          <div class="p-3 sm:p-4">
+            <div class="flex items-center gap-2 sm:gap-3">
               <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                 </svg>
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="min-w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Total Cows</dt>
-                  <dd class="text-2xl font-semibold text-gray-900">{{ cowsCount }}</dd>
+                  <dt class="text-xs font-medium text-gray-500 truncate">Total Cows</dt>
+                  <dd class="text-xl font-semibold text-gray-900">{{ cowsCount }}</dd>
                 </dl>
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-5 py-3 rounded-b-xl">
-            <div class="text-sm">
+          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg">
+            <div class="text-xs">
               <NuxtLink to="/cows" class="font-medium text-gray-700 hover:text-gray-900">View all →</NuxtLink>
             </div>
           </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow-sm rounded-xl relative">
-          <div class="p-6">
-            <div class="flex items-center">
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+          <div class="p-3 sm:p-4">
+            <div class="flex items-center gap-2 sm:gap-3">
               <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="min-w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Active Cows</dt>
-                  <dd class="text-2xl font-semibold text-gray-900">{{ activeCowsCount }}</dd>
+                  <dt class="text-xs font-medium text-gray-500 truncate">Active Cows</dt>
+                  <dd class="text-xl font-semibold text-gray-900">{{ activeCowsCount }}</dd>
                 </dl>
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-5 py-3 rounded-b-xl">
-            <div class="text-sm text-gray-500">Healthy and Productive</div>
+          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg">
+            <div class="text-xs text-gray-500">Healthy and Productive</div>
           </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow-sm rounded-xl relative">
-          <div class="p-6">
-            <div class="flex items-center">
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+          <div class="p-3 sm:p-4">
+            <div class="flex items-center gap-2 sm:gap-3">
               <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="min-w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Health Alerts</dt>
-                  <dd class="text-2xl font-semibold text-gray-900">{{ healthAlertsCount }}</dd>
+                  <dt class="text-xs font-medium text-gray-500 truncate">Health Alerts</dt>
+                  <dd class="text-xl font-semibold text-gray-900">{{ healthAlertsCount }}</dd>
                 </dl>
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-5 py-3 rounded-b-xl">
-            <div class="text-sm">
+          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg">
+            <div class="text-xs">
               <NuxtLink to="/health-records" class="font-medium text-gray-700 hover:text-gray-900">View alerts →</NuxtLink>
             </div>
           </div>
         </div>
 
-        <div class="bg-white overflow-hidden shadow-sm rounded-xl relative">
-          <div class="p-6">
-            <div class="flex items-center">
+        <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+          <div class="p-3 sm:p-4">
+            <div class="flex items-center gap-2 sm:gap-3">
               <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-5 sm:h-6 w-5 sm:w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <div class="ml-5 w-0 flex-1">
+              <div class="min-w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Milk Production</dt>
-                  <dd class="text-2xl font-semibold text-gray-900">{{ totalMilkProduction }}L</dd>
+                  <dt class="text-xs font-medium text-gray-500 truncate">Milk Production</dt>
+                  <dd class="text-xl font-semibold text-gray-900">{{ totalMilkProduction }}L</dd>
                 </dl>
               </div>
             </div>
           </div>
-          <div class="bg-gray-50 px-5 py-3 rounded-b-xl">
-            <div class="text-sm">
+          <div class="bg-gray-50 px-3 sm:px-4 py-2 rounded-b-lg">
+            <div class="text-xs">
               <NuxtLink to="/milk-production" class="font-medium text-gray-700 hover:text-gray-900">View details →</NuxtLink>
             </div>
           </div>
@@ -110,54 +111,54 @@
       </div>
 
       <!-- Quick Actions -->
-      <div class="grid grid-cols-1 gap-5 lg:grid-cols-2 mb-8">
-        <div class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 mb-8">
+        <div class="bg-white shadow-sm rounded-lg">
+          <div class="px-3 sm:px-4 py-3 border-b border-gray-200">
+            <h3 class="text-sm sm:text-base font-medium text-gray-900">Quick Actions</h3>
           </div>
-          <div class="p-5">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div class="p-3 sm:p-4">
+            <div class="grid grid-cols-1 gap-2 sm:gap-3 sm:grid-cols-2">
               <NuxtLink
                 to="/add-cow"
-                class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                class="flex items-center justify-center px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100"
               >
-                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
                 Add Cow
               </NuxtLink>
               <NuxtLink
                 to="/cows"
-                class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                class="flex items-center justify-center px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100"
               >
-                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 Search Cows
               </NuxtLink>
               <NuxtLink
                 to="/milk-production"
-                class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                class="flex items-center justify-center px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100"
               >
-                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
                 Milk Production
               </NuxtLink>
               <NuxtLink
                 to="/health-records"
-                class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                class="flex items-center justify-center px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100"
               >
-                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Health Records
               </NuxtLink>
               <NuxtLink
                 to="/breeding"
-                class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                class="flex items-center justify-center px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md shadow-sm text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100"
               >
-                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 Breeding
@@ -167,12 +168,12 @@
         </div>
 
         <!-- Today's Herd Production Summary -->
-        <div class="bg-white shadow rounded-lg">
-          <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900">Today's Herd Production</h3>
+        <div class="bg-white shadow-sm rounded-lg">
+          <div class="px-3 sm:px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-sm sm:text-base font-medium text-gray-900">Today's Herd Production</h3>
             <span class="text-xs text-gray-500">Auto-updated</span>
           </div>
-          <div class="p-5">
+          <div class="p-3 sm:p-4">
             <LoadingState v-if="loadingProduction" :boxed="false" text="Loading production data..." size="sm" :use-icon="false" />
             <EmptyState
               v-else-if="todayProduction.totalCows === 0"
@@ -187,21 +188,21 @@
                 </UButton>
               </template>
             </EmptyState>
-            <div v-else class="space-y-4">
+            <div v-else class="space-y-3">
               <!-- Summary Stats -->
-              <div class="grid grid-cols-2 gap-4">
-                <div class="bg-green-50 rounded-lg p-3 text-center">
-                  <p class="text-2xl font-bold text-green-700">{{ todayProduction.totalYield }}L</p>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="bg-green-50 rounded p-2 text-center">
+                  <p class="text-lg font-bold text-green-700">{{ todayProduction.totalYield }}L</p>
                   <p class="text-xs text-green-600">Total Yield</p>
                 </div>
-                <div class="bg-blue-50 rounded-lg p-3 text-center">
-                  <p class="text-2xl font-bold text-blue-700">{{ todayProduction.totalCows }} / {{ activeCowsCount }}</p>
+                <div class="bg-blue-50 rounded p-2 text-center">
+                  <p class="text-lg font-bold text-blue-700">{{ todayProduction.totalCows }} / {{ activeCowsCount }}</p>
                   <p class="text-xs text-blue-600">Cows Milked</p>
                 </div>
               </div>
               
               <!-- Session Breakdown -->
-              <div class="border-t border-gray-100 pt-3">
+              <div class="border-t border-gray-100 pt-2">
                 <p class="text-xs font-medium text-gray-500 uppercase mb-2">By Session</p>
                 <div class="grid grid-cols-1 gap-2 text-center sm:grid-cols-3">
                   <div class="bg-amber-50 rounded p-2">
@@ -220,14 +221,14 @@
               </div>
               
               <!-- Average -->
-              <div class="border-t border-gray-100 pt-3 flex items-center justify-between">
-                <span class="text-sm text-gray-600">Avg per cow:</span>
+              <div class="border-t border-gray-100 pt-2 flex items-center justify-between">
+                <span class="text-xs text-gray-600">Avg per cow:</span>
                 <span class="text-sm font-semibold text-gray-900">{{ todayProduction.avgPerCow }}L</span>
               </div>
               
               <NuxtLink
                 to="/milk-production"
-                class="block w-full text-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                class="block w-full text-center px-3 py-2 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50"
               >
                 View Full Details →
               </NuxtLink>
@@ -237,46 +238,44 @@
       </div>
 
       <!-- Upcoming Events -->
-      <div class="bg-white shadow rounded-lg">
-        <div class="px-5 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Upcoming Events & Alerts</h3>
+      <div class="bg-white shadow-sm rounded-lg">
+        <div class="px-3 sm:px-4 py-3 border-b border-gray-200">
+          <h3 class="text-sm sm:text-base font-medium text-gray-900">Upcoming Events & Alerts</h3>
         </div>
-        <div class="p-5">
-          <div v-if="upcomingEvents.length === 0" class="text-center py-8">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="p-3 sm:p-4">
+          <div v-if="upcomingEvents.length === 0" class="text-center py-6">
+            <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p class="mt-2 text-sm text-gray-500">No upcoming events</p>
+            <p class="mt-2 text-xs text-gray-500">No upcoming events</p>
           </div>
           <ul v-else class="divide-y divide-gray-200">
             <li v-for="event in upcomingEvents" :key="event.id">
               <NuxtLink 
                 :to="getAlertNavigationUrl(event)" 
-                class="py-3 flex items-center hover:bg-gray-50 transition-colors duration-150 cursor-pointer group"
+                class="py-2 px-2 sm:px-3 flex items-center gap-2 hover:bg-gray-50 transition-colors duration-150 cursor-pointer group rounded text-sm"
               >
                 <div class="flex-shrink-0">
-                  <div :class="getEventIconClass(event.type)" class="h-8 w-8 rounded-full flex items-center justify-center">
-                    <svg class="h-5 w-5" :class="getEventIconColor(event.type)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div :class="getEventIconClass(event.type)" class="h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="h-4 w-4" :class="getEventIconColor(event.type)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                 </div>
-                <div class="ml-4 flex-1">
-                  <p class="text-sm font-medium text-gray-900 group-hover:text-green-600 transition-colors">{{ event.title }}</p>
-                  <p class="text-sm text-gray-500">{{ event.description }}</p>
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs sm:text-sm font-medium text-gray-900 group-hover:text-green-600 transition-colors truncate">{{ event.title }}</p>
+                  <p class="text-xs text-gray-500 truncate">{{ event.description }}</p>
                 </div>
-                <div class="flex items-center gap-3">
-                  <span class="text-sm text-gray-500">{{ formatDate(event.date) }}</span>
-                  <Icon name="lucide:arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-green-600 transition-colors" />
+                <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                  <span class="text-xs text-gray-500 whitespace-nowrap hidden sm:inline">{{ formatDate(event.date) }}</span>
                   <button
-                    class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 flex-shrink-0"
                     title="Mark as completed"
                     @click.prevent="markEventComplete(event)"
                   >
-                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    Done
                   </button>
                 </div>
               </NuxtLink>
@@ -284,6 +283,7 @@
           </ul>
         </div>
       </div>
+    </div>
   </PageContainer>
 </template>
 
@@ -353,22 +353,10 @@ async function markEventComplete(event) {
   // Extract the actual record ID (remove the suffix like '-due-overdue', '-checkup-today', etc.)
   const recordId = event.id.replace(/-due-.*$/, '').replace(/-checkup-.*$/, '')
   
-  // Determine which date field to clear based on event ID
-  const isCheckup = event.id.includes('-checkup-')
-  
-  // Record completion timestamp and clear the due date
-  const completedAt = new Date().toISOString()
-  const updateData = isCheckup 
-    ? { 
-        next_checkup_date: null,
-        is_completed: true,
-        completed_at: completedAt
-      }
-    : { 
-        next_due_date: null,
-        is_completed: true,
-        completed_at: completedAt
-      }
+  // Clear the due date to remove from alerts
+  const updateData = {
+    next_due_date: null
+  }
   
   const success = await updateHealthRecord(recordId, updateData)
   
