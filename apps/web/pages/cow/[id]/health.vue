@@ -107,14 +107,7 @@
                     >
                       <Icon name="lucide:edit" class="h-4 w-4" />
                     </button>
-                    <button
-                      type="button"
-                      class="inline-flex rounded-xl p-2 text-red-600 transition hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                      title="Delete"
-                      @click="confirmDelete(record)"
-                    >
-                      <Icon name="lucide:trash-2" class="h-4 w-4" />
-                    </button>
+<UButton size="xs" color="error" icon="lucide:trash-2" @click="confirmDelete(record)" />
                   </div>
                 </div>
               </div>

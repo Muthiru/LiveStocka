@@ -20,15 +20,7 @@
           <div class="mt-2 space-y-3 sm:mt-4">
             <!-- Delete button section -->
             <div class="flex justify-start">
-              <button
-                type="button"
-                class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                :disabled="saving || deleting"
-                @click="showDeleteModal = true"
-              >
-                <Icon name="lucide:trash-2" class="h-4 w-4" />
-                Delete cow
-              </button>
+<UButton size="xs" color="error" icon="lucide:trash-2" @click="showDeleteModal = true" />
             </div>
 
             <!-- Action buttons -->
