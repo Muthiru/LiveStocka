@@ -211,7 +211,7 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right">
                   <div class="flex justify-end gap-2">
                     <UButton size="xs" color="neutral" variant="ghost" icon="i-lucide-pencil" @click="editRecord(record)" />
-                    <UButton size="xs" color="error" variant="ghost" icon="i-lucide-trash-2" @click="promptDelete(record)" />
+                    <UButton size="xs" color="error" icon="lucide:trash-2" @click="promptDelete(record)" />
                   </div>
                 </td>
               </tr>
@@ -443,3 +443,11 @@ onMounted(async () => {
   }
 })
 </script>
+<style scoped>
+/* Hide any horizontal separator in ConfirmModal */
+.confirm-modal-content > .border-t,
+.confirm-modal-content > .border-b {
+  display: none !important;
+}
+</style>
+
